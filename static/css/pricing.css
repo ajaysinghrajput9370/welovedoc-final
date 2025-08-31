@@ -1,0 +1,63 @@
+.pricing-card {
+    border-radius: 12px;
+    width: 260px;
+    padding: 25px 20px;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+}
+
+/* Card Headers */
+.pricing-card .card-header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.pricing-card .btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+/* Specific Plan Colors */
+.pricing-card.basic {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+.pricing-card.standard {
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+}
+
+.pricing-card.premium {
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #333;
+}
+
+.pricing-card .btn.subscribe-btn {
+    background: rgba(255,255,255,0.85);
+    color: #333;
+    font-weight: bold;
+}
+
+.pricing-card .btn.subscribe-btn:hover {
+    background: #fff;
+    color: inherit;
+}
+
+/* Popular Plan Highlight */
+.pricing-card.popular {
+    border: 3px solid #fff;
+    transform: scale(1.05);
+}
