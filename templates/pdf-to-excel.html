@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>We ❤️ Doc — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #ef4444; /* heart red */
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px 28px;
+      text-align: center;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      letter-spacing: .2px;
+    }
+    .brand .heart { color: var(--accent); }
+    h1 {
+      margin: 10px 0 6px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+    p { margin: 8px 0 26px; color: var(--muted); }
+    .actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    a.button {
+      text-decoration: none;
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .2s ease;
+      font-weight: 600;
+    }
+    a.primary { background: var(--accent); color: white; }
+    a.secondary { background: #111827; color: white; }
+    a.button:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <div class="brand" aria-label="We Love Doc">
+      We <span class="heart" aria-hidden="true">❤️</span> Doc
+    </div>
+    <h1>Tool is coming soon</h1>
+    <p>यह टूल जल्द आ रहा है ।</p>
+
+    <div class="actions">
+      <a class="button primary" href="index.html" aria-label="Back to Home">Back Home</a>
+      <a class="button secondary" href="/" aria-label="Go to Site Root">Go to /</a>
+    </div>
+
+    <div class="hint">Tip: Link the button to your actual homepage file (e.g., <code>index.html</code>).</div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word to PDF Converter</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f3f4f6; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+    .card { background:white; padding:30px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); width:420px; text-align:center; }
+    h1 { margin-bottom:15px; font-size:22px; }
+    input[type=file] { margin:20px 0; }
+    .btn { background:#ef4444; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Word → PDF Converter</h1>
+    <form action="/convert-word-to-pdf" method="post" enctype="multipart/form-data">
+      <input type="file" name="word_file" accept=".doc,.docx" required>
+      <br>
+      <button type="submit" class="btn">Convert & Download PDF</button>
+    </form>
+  </div>
+</body>
+</html>

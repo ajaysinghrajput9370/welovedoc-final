@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split PDF - Welovedoc</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .split-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .split-header h1 {
+            color: #e63946;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .split-header p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .split-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .options-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #e63946;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.3rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed #e63946;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .upload-area:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #e63946;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .option-group {
+            margin-bottom: 20px;
+        }
+        
+        .option-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .option-group input, .option-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .split-btn {
+            background: #e63946;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .split-btn:hover {
+            background: #c1121f;
+        }
+        
+        .split-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f1faee;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .file-info h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .file-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #e63946;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #3e8e41;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .secondary-btn:hover {
+            background: #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .split-content {
+                flex-direction: column;
+            }
+            
+            .split-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="split-header">
+            <h1><i class="fas fa-cut"></i> Split PDF</h1>
+            <p>Extract specific pages or split your PDF into multiple files. Simple, fast, and completely free.</p>
+        </div>
+        
+        <div class="split-content">
+            <div class="upload-section">
+                <h2 class="section-title"><i class="fas fa-file-upload"></i> Upload PDF</h2>
+                
+                <div class="upload-area" id="dropArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3>Drop your PDF here or click to browse</h3>
+                    <p>Maximum file size: 100MB</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    <h4>Selected File:</h4>
+                    <p id="fileName"></p>
+                    <div class="file-details">
+                        <span id="fileSize"></span>
+                        <span id="pageCount"></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="options-section">
+                <h2 class="section-title"><i class="fas fa-cog"></i> Split Options</h2>
+                
+                <div class="option-group">
+                    <label for="splitMethod">Split Method:</label>
+                    <select id="splitMethod">
+                        <option value="range">Extract page range</option>
+                        <option value="every">Split every page</option>
+                        <option value="evenodd">Split by odd/even pages</option>
+                        <option value="bookmarks">Split by bookmarks</option>
+                    </select>
+                </div>
+                
+                <div class="option-group" id="pageRangeGroup">
+                    <label for="pageRange">Page Range (e.g., 1-5, 8, 11-13):</label>
+                    <input type="text" id="pageRange" placeholder="1-5, 8, 11-13">
+                </div>
+                
+                <div class="option-group" id="splitEveryGroup" style="display: none;">
+                    <label for="splitEvery">Split every ___ pages:</label>
+                    <input type="number" id="splitEvery" min="1" value="1">
+                </div>
+                
+                <div class="option-group">
+                    <label for="outputFormat">Output Format:</label>
+                    <select id="outputFormat">
+                        <option value="pdf">PDF</option>
+                        <option value="images">Images (JPG)</option>
+                        <option value="text">Text</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label for="namingPattern">File Naming Pattern:</label>
+                    <input type="text" id="namingPattern" placeholder="document_{page}.pdf">
+                    <small>Use {page} for page numbers, {range} for page ranges</small>
+                </div>
+                
+                <button class="split-btn" id="splitBtn" disabled>Split PDF</button>
+            </div>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <h2 class="section-title"><i class="fas fa-check-circle"></i> Split Complete!</h2>
+            <p>Your PDF has been successfully split into <span id="resultCount">0</span> files.</p>
+            
+            <div class="action-buttons">
+                <button class="download-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> Download All Files
+                </button>
+                <button class="secondary-btn" id="splitAgainBtn">
+                    <i class="fas fa-redo"></i> Split Another PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const pageCount = document.getElementById('pageCount');
+            const progressBar = document.getElementById('progressBar');
+            const splitMethod = document.getElementById('splitMethod');
+            const pageRangeGroup = document.getElementById('pageRangeGroup');
+            const splitEveryGroup = document.getElementById('splitEveryGroup');
+            const splitBtn = document.getElementById('splitBtn');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultCount = document.getElementById('resultCount');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const splitAgainBtn = document.getElementById('splitAgainBtn');
+            
+            // Event listeners for file upload
+            dropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.style.backgroundColor = '#f1faee';
+            }
+            
+            function unhighlight() {
+                dropArea.style.backgroundColor = '';
+            }
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+            
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'application/pdf') {
+                        displayFileInfo(file);
+                        simulateUploadProgress();
+                    } else {
+                        alert('Please select a PDF file');
+                    }
+                }
+            }
+            
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                handleFiles(files);
+            }
+            
+            function displayFileInfo(file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                pageCount.textContent = 'Pages: Estimating...';
+                
+                fileInfo.style.display = 'block';
+                
+                // Simulate page count extraction (in a real app, you would use a PDF library)
+                setTimeout(() => {
+                    const randomPageCount = Math.floor(Math.random() * 50) + 10;
+                    pageCount.textContent = `Pages: ${randomPageCount}`;
+                    splitBtn.disabled = false;
+                }, 1500);
+            }
+            
+            function simulateUploadProgress() {
+                let width = 0;
+                progressBar.style.width = '0%';
+                
+                const interval = setInterval(() => {
+                    if (width >= 100) {
+                        clearInterval(interval);
+                    } else {
+                        width += 5;
+                        progressBar.style.width = width + '%';
+                    }
+                }, 100);
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Split method change handler
+            splitMethod.addEventListener('change', function() {
+                if (this.value === 'every') {
+                    pageRangeGroup.style.display = 'none';
+                    splitEveryGroup.style.display = 'block';
+                } else {
+                    pageRangeGroup.style.display = 'block';
+                    splitEveryGroup.style.display = 'none';
+                }
+            });
+            
+            // Split button handler
+            splitBtn.addEventListener('click', function() {
+                // Simulate processing
+                splitBtn.disabled = true;
+                splitBtn.textContent = 'Processing...';
+                
+                setTimeout(() => {
+                    // Show results
+                    const resultFiles = Math.floor(Math.random() * 10) + 2;
+                    resultCount.textContent = resultFiles;
+                    resultsSection.style.display = 'block';
+                    
+                    // Scroll to results
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Reset button
+                    splitBtn.disabled = false;
+                    splitBtn.textContent = 'Split PDF';
+                }, 3000);
+            });
+            
+            // Download button handler
+            downloadBtn.addEventListener('click', function() {
+                alert('In a real application, this would download your split PDF files.');
+            });
+            
+            // Split again button handler
+            splitAgainBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                resultsSection.style.display = 'none';
+                splitBtn.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html>
