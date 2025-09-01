@@ -3,16 +3,11 @@ services:
     name: welovedoc
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      apt-get update
+      apt-get install -y libfreetype6 libjpeg-turbo8 libopenjp2-7 libtiff5 libxext6 libxml2 libpng16-16 libssl3 zlib1g
+      pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4
-      - key: SECRET_KEY
-        generateValue: true
-      - key: RAZORPAY_KEY_ID
-        value: rzp_live_RBtTz04eahUWDs
-      - key: RAZORPAY_KEY_SECRET
-        value: P7zpcxxZIsYfgZnSqSz13XPc
-      - key: WEBHOOK_SECRET
-        value: Mount@Fly1920
