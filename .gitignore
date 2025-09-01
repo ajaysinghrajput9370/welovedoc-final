@@ -1,4 +1,13 @@
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .env
+instance/
+uploads/
+results/
+.DS_Store
+.env.local
+.env.production
 database.db
+users.db
