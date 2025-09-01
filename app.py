@@ -307,7 +307,7 @@ def create_order():
             days = 30
             plan_name = "Standard"
         elif plan == "premium":
-            amount = 600000  # ₹6000 in paise
+            amount = 100  # ₹1 in paise
             days = 60  # 2 months
             plan_name = "Premium"
         else:
