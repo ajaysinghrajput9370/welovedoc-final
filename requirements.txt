@@ -4,5 +4,5 @@ PyMuPDF==1.22.5
 pandas==2.0.3
 openpyxl==3.1.2
 python-dotenv==1.0.0
-razorpay==1.4.3
+razorpay==1.4.2  # Use the latest available version
 gunicorn==21.2.0
