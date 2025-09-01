@@ -8,3 +8,11 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4
+      - key: SECRET_KEY
+        generateValue: true
+      - key: RAZORPAY_KEY_ID
+        value: rzp_live_RBtTz04eahUWDs
+      - key: RAZORPAY_KEY_SECRET
+        value: P7zpcxxZIsYfgZnSqSz13XPc
+      - key: WEBHOOK_SECRET
+        value: Mount@Fly1920
