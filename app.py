@@ -216,6 +216,51 @@ def test_payment(plan):
         flash("❌ Failed to activate test subscription", "danger")
     
     return redirect(url_for("home"))
+    # ---------------- RAZORPAY WEBHOOK ----------------
+@app.route("/razorpay_webhook", methods=["POST"])
+def razorpay_webhook():
+    import hmac, hashlib
+
+    # Raw request body
+    data = request.get_data(as_text=True)
+    signature = request.headers.get("X-Razorpay-Signature")
+
+    secret = os.getenv("RAZORPAY_WEBHOOK_SECRET", "mysecret123")
+    generated_signature = hmac.new(
+        bytes(secret, "utf-8"),
+        bytes(data, "utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+    if generated_signature != signature:
+        print("❌ Invalid webhook signature")
+        return "Invalid signature", 400
+
+    payload = request.get_json()
+    event = payload.get("event")
+
+    if event == "payment.captured":
+        payment = payload["payload"]["payment"]["entity"]
+        email = payment["notes"].get("email")
+        plan = payment["notes"].get("plan")
+
+        if email and plan:
+            if plan == "premium":
+                duration = 2
+            elif plan == "standard":
+                duration = 1
+            elif plan == "basic":
+                duration = 1
+            else:
+                duration = 1
+
+            if activate_subscription(email, plan, duration):
+                print(f"✅ Subscription updated for {email}, Plan: {plan}, Duration: {duration} months")
+            else:
+                print(f"❌ Failed to update subscription for {email}")
+
+    return "success", 200
+
 
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
