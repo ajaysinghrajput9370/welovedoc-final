@@ -2,169 +2,501 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing - We ❤️ Doc</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body style="font-family:Arial, sans-serif; background:#f9fbfd; margin:0; padding:0;">
-
-<!-- Pricing Section -->
-<section id="pricing" style="padding:50px 0;">
-  <div class="container" style="text-align:center;">
-    <h2 style="margin-bottom:40px; color:#222; font-weight:900; font-size:32px;">
-      💎 Choose Your Subscription Plan
-    </h2>
-
-    <div class="pricing-cards" style="display:flex; justify-content:center; flex-wrap:wrap; gap:25px;">
-
-      <!-- Basic Plan -->
-      <div class="card pricing-card basic" style="background:linear-gradient(135deg,#e0f7fa,#80deea); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#00796b; margin-bottom:20px;">Basic</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 2</p>
-          <p><strong>Duration:</strong> 1 Month</p>
-          <p><strong>Price:</strong> ₹3000</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#004d40;">
-            <li>✔️ Unlimited PF & ESIC Highlight</li>
-            <li>✔️ Upload & Process Large Files</li>
-            <li>✔️ Instant Highlight within Seconds</li>
-            <li>✔️ Find Not-Match Data in Excel</li>
-            <li>✔️ Easy Your Compliance Work</li>
-          </ul>
-          <button onclick="payNow('basic', 3000)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#00796b; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-      <!-- Standard Plan -->
-      <div class="card pricing-card standard" style="background:linear-gradient(135deg,#fff3e0,#ffcc80); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transform:scale(1.05); transition:transform 0.3s; position:relative;">
-        <div style="position:absolute; top:-10px; right:-40px; background:#ef6c00; color:white; padding:5px 40px; transform:rotate(45deg); font-size:12px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-          Most Popular
-        </div>
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#ef6c00; margin-bottom:20px;">Standard ⭐</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 4</p>
-          <p><strong>Duration:</strong> 1 Month</p>
-          <p><strong>Price:</strong> ₹3500</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#bf360c;">
-            <li>✔️ Unlimited PF & ESIC Highlight</li>
-            <li>✔️ Upload & Process Large Files</li>
-            <li>✔️ Lightning Fast Highlight within Seconds</li>
-            <li>✔️ Advanced Not-Match Excel Finder</li>
-            <li>✔️ Smart Compliance Made Easy</li>
-            <li>✔️ Priority Email Support</li>
-          </ul>
-          <button onclick="payNow('standard', 3500)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#ef6c00; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-      <!-- Premium Plan -->
-      <div class="card pricing-card premium" style="background:linear-gradient(135deg,#e1bee7,#ba68c8); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#6a1b9a; margin-bottom:20px;">Premium</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 4</p>
-          <p><strong>Duration:</strong> 2 Months</p>
-          <p><strong>Price:</strong> ₹1</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#4a148c;">
-            <li>✔️ All Standard Features</li>
-            <li>✔️ 2X Longer Subscription Period</li>
-            <li>✔️ Process Extra-Large Files Seamlessly</li>
-            <li>✔️ Advanced Data Accuracy Checks</li>
-            <li>✔️ VIP Compliance Support</li>
-            <li>✔️ Early Access to New Tools</li>
-          </ul>
-          <button onclick="payNow('premium', 1)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#6a1b9a; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- Hover Effects -->
-<style>
-  .pricing-card:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 12px 25px rgba(0,0,0,0.2);}
-  .subscribe-btn:hover { opacity: 0.9; transform: scale(1.05);}
-</style>
-
-<!-- Razorpay Script -->
-<script>
-function payNow(plan, price) {
-  fetch("/create_order", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({plan: plan})
-  })
-  .then(res => res.json())
-  .then(order => {
-    console.log("Order created:", order);
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
     
-    var options = {
-      "key": "{{ razorpay_key_id }}",
-      "amount": order.amount,
-      "currency": "INR",
-      "name": "We ❤️ Doc",
-      "description": plan + " Subscription - ₹" + (order.amount/100),
-      "order_id": order.id,
-      "handler": function (response){
-        console.log("Payment successful:", response);
-        
-        // DIRECT form submission instead of creating form dynamically
-        var formData = new FormData();
-        formData.append('razorpay_payment_id', response.razorpay_payment_id);
-        formData.append('razorpay_order_id', response.razorpay_order_id);
-        formData.append('razorpay_signature', response.razorpay_signature);
-        formData.append('plan', plan);
-        
-        fetch('/payment_success', {
-          method: 'POST',
-          body: formData
-        })
-        .then(res => {
-          console.log("Redirecting to home...");
-          window.location.href = '/';
-        })
-        .catch(err => {
-          console.error("Error:", err);
-          alert("Payment successful but redirect failed. Please contact support.");
-        });
-      },
-      "prefill": {
-        "name": "{{ session.get('user_name', 'Customer') }}",
-        "email": "{{ session.get('email', '') }}"
-      },
-      "theme": {
-        "color": "#00796b"
+    body {
+      background: #f9fbfd;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #00796b, #004d40);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo span {
+      margin-right: 10px;
+      font-size: 28px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-email {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    .logout-btn {
+      background: white;
+      color: #00796b;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .logout-btn:hover {
+      background: #e0f2f1;
+      transform: translateY(-2px);
+    }
+    
+    .pricing-section {
+      padding: 50px 0;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #222;
+      font-weight: 900;
+      font-size: 32px;
+    }
+    
+    .pricing-cards {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 25px;
+    }
+    
+    .pricing-card {
+      border-radius: 15px;
+      padding: 25px;
+      width: 300px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    
+    .basic {
+      background: linear-gradient(135deg, #e0f7fa, #80deea);
+    }
+    
+    .standard {
+      background: linear-gradient(135deg, #fff3e0, #ffcc80);
+      transform: scale(1.05);
+    }
+    
+    .premium {
+      background: linear-gradient(135deg, #e1bee7, #ba68c8);
+    }
+    
+    .popular-badge {
+      position: absolute;
+      top: -10px;
+      right: -40px;
+      background: #ef6c00;
+      color: white;
+      padding: 5px 40px;
+      transform: rotate(45deg);
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-header {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .basic .card-header {
+      color: #00796b;
+    }
+    
+    .standard .card-header {
+      color: #ef6c00;
+    }
+    
+    .premium .card-header {
+      color: #6a1b9a;
+    }
+    
+    .card-body {
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .card-body p {
+      margin-bottom: 10px;
+    }
+    
+    .card-body hr {
+      margin: 15px 0;
+      border: 0;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-body ul {
+      text-align: left;
+      list-style: none;
+      padding: 0;
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .basic ul {
+      color: #004d40;
+    }
+    
+    .standard ul {
+      color: #bf360c;
+    }
+    
+    .premium ul {
+      color: #4a148c;
+    }
+    
+    .card-body li {
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .card-body li:before {
+      content: "✔️";
+      position: absolute;
+      left: 0;
+    }
+    
+    .subscribe-btn {
+      margin-top: 20px;
+      color: white;
+      padding: 14px 35px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    
+    .basic .subscribe-btn {
+      background: #00796b;
+    }
+    
+    .standard .subscribe-btn {
+      background: #ef6c00;
+    }
+    
+    .premium .subscribe-btn {
+      background: #6a1b9a;
+    }
+    
+    .subscribe-btn:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .standard:hover {
+      transform: translateY(-10px) scale(1.1);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      color: #666;
+      font-size: 14px;
+      border-top: 1px solid #eee;
+    }
+    
+    .alert {
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+      text-align: center;
+      display: none;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    @media (max-width: 768px) {
+      .pricing-cards {
+        flex-direction: column;
+        align-items: center;
       }
-    };
-    
-    var rzp1 = new Razorpay(options);
-    rzp1.open();
-    
-    rzp1.on('payment.failed', function (response){
-      console.error("Payment failed:", response.error);
-      alert("Payment failed: " + response.error.description);
-    });
-  })
-  .catch(error => {
-    console.error("Error creating order:", error);
-    alert("Error creating payment order. Please try again.");
-  });
-}
-</script>
+      
+      .standard {
+        transform: scale(1);
+      }
+      
+      .standard:hover {
+        transform: translateY(-10px) scale(1.05);
+      }
+      
+      .popular-badge {
+        right: -20px;
+        padding: 5px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <div class="logo">
+        <span>❤️</span> WeLoveDoc
+      </div>
+      <div class="user-info">
+        <div class="user-email" id="userEmail">ajaysinghrajput9370@gmail.com</div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
 
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Alert Messages -->
+    <div id="alertBox" class="alert"></div>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+      <h2 class="section-title">💎 Choose Your Subscription Plan</h2>
+
+      <div class="pricing-cards">
+        <!-- Basic Plan -->
+        <div class="pricing-card basic">
+          <div class="card-header">Basic</div>
+          <div class="card-body">
+            <p><strong>Devices:</strong> 2</p>
+            <p><strong>Duration:</strong> 1 Month</p>
+            <p><strong>Price:</strong> ₹3000</p>
+            <hr>
+            <ul>
+              <li>Unlimited PF & ESIC Highlight</li>
+              <li>Upload & Process Large Files</li>
+              <li>Instant Highlight within Seconds</li>
+              <li>Find Not-Match Data in Excel</li>
+              <li>Easy Your Compliance Work</li>
+            </ul>
+            <button onclick="payNow('basic', 300000)" class="subscribe-btn">
+              Subscribe
+            </button>
+          </div>
+        </div>
+
+        <!-- Standard Plan -->
+        <div class="pricing-card standard">
+          <div class="popular-badge">Most Popular</div>
+          <div class="card-header">Standard ⭐</div>
+          <div class="card-body">
+            <p><strong>Devices:</strong> 4</p>
+            <p><strong>Duration:</strong> 1 Month</p>
+            <p><strong>Price:</strong> ₹3500</p>
+            <hr>
+            <ul>
+              <li>Unlimited PF & ESIC Highlight</li>
+              <li>Upload & Process Large Files</li>
+              <li>Lightning Fast Highlight within Seconds</li>
+              <li>Advanced Not-Match Excel Finder</li>
+              <li>Smart Compliance Made Easy</li>
+              <li>Priority Email Support</li>
+            </ul>
+            <button onclick="payNow('standard', 350000)" class="subscribe-btn">
+              Subscribe
+            </button>
+          </div>
+        </div>
+
+        <!-- Premium Plan -->
+        <div class="pricing-card premium">
+          <div class="card-header">Premium</div>
+          <div class="card-body">
+            <p><strong>Devices:</strong> 4</p>
+            <p><strong>Duration:</strong> 2 Months</p>
+            <p><strong>Price:</strong> ₹1</p>
+            <hr>
+            <ul>
+              <li>All Standard Features</li>
+              <li>2X Longer Subscription Period</li>
+              <li>Process Extra-Large Files Seamlessly</li>
+              <li>Advanced Data Accuracy Checks</li>
+              <li>VIP Compliance Support</li>
+              <li>Early Access to New Tools</li>
+            </ul>
+            <button onclick="payNow('premium', 100)" class="subscribe-btn">
+              Subscribe
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>© 2025 WeLoveDoc. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // User data (in a real app, this would come from the server)
+    const userData = {
+      name: "Ajay Singh",
+      email: "ajaysinghrajput9370@gmail.com"
+    };
+
+    // Display user email
+    document.getElementById('userEmail').textContent = userData.email;
+
+    // Show alert function
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+      
+      // Hide alert after 5 seconds
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 5000);
+    }
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        // In a real app, this would call the server to logout
+        showAlert('You have been logged out successfully.', 'success');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+      }
+    }
+
+    // Payment function
+    function payNow(plan, amount) {
+      // Show loading state
+      const buttons = document.querySelectorAll('.subscribe-btn');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      // In a real app, this would call your backend to create an order
+      // For demo purposes, we'll simulate the order creation
+      setTimeout(() => {
+        // Simulate order creation response
+        const order = {
+          id: 'order_' + Math.random().toString(36).substr(2, 9),
+          amount: amount
+        };
+        
+        console.log("Order created:", order);
+        
+        // Razorpay options
+        var options = {
+          "key": "rzp_test_1DP5mmOlF5G5ag", // Test key - replace with your actual key
+          "amount": order.amount,
+          "currency": "INR",
+          "name": "We ❤️ Doc",
+          "description": plan + " Subscription - ₹" + (order.amount/100),
+          "order_id": order.id,
+          "handler": function (response){
+            console.log("Payment successful:", response);
+            
+            // Show success message
+            showAlert('Payment successful! Activating your subscription...', 'success');
+            
+            // In a real app, this would verify the payment with your backend
+            setTimeout(() => {
+              // Simulate payment verification and activation
+              const formData = new FormData();
+              formData.append('razorpay_payment_id', response.razorpay_payment_id);
+              formData.append('razorpay_order_id', response.razorpay_order_id);
+              formData.append('razorpay_signature', response.razorpay_signature);
+              formData.append('plan', plan);
+              
+              // This would be a fetch call to your backend in a real app
+              console.log("Form data:", {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                plan: plan
+              });
+              
+              // Show activation message
+              showAlert(`Premium ${plan} plan activated successfully!`, 'success');
+              
+              // Re-enable buttons
+              buttons.forEach(btn => btn.disabled = false);
+            }, 2000);
+          },
+          "prefill": {
+            "name": userData.name,
+            "email": userData.email
+          },
+          "theme": {
+            "color": "#00796b"
+          }
+        };
+        
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        
+        rzp1.on('payment.failed', function (response){
+          console.error("Payment failed:", response.error);
+          showAlert("Payment failed: " + response.error.description, 'error');
+          
+          // Re-enable buttons
+          buttons.forEach(btn => btn.disabled = false);
+        });
+      }, 1000);
+    }
+  </script>
 </body>
 </html>
