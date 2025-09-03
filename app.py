@@ -3,9 +3,10 @@ import os
 import uuid
 import sqlite3
 import razorpay
+import hmac, hashlib
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta, datetime
+from datetime import timedelta
 from pf_highlight import highlight_pf
 from esic_highlight import highlight_esic
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ from file_manager import check_subscription, activate_subscription, login_user
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['RESULT_FOLDER'] = 'results'
-app.secret_key = "supersecretkey"   #⚠️ production में strong key रखो
+app.secret_key = "supersecretkey"   # ⚠️ Production me strong secret key rakho
 app.permanent_session_lifetime = timedelta(days=30)
 
 # Ensure folders exist
@@ -124,43 +125,44 @@ def create_order():
     data = request.get_json()
     plan = data.get("plan")
 
-    # Updated to match pricing.html amounts
     if plan == "basic":
-        amount = 3000  # ₹3000 for Basic plan
-        subscription_duration = 1  # 1 month
+        amount = 3000
+        subscription_duration = 1
     elif plan == "standard":
-        amount = 3500  # ₹3500 for Standard plan
-        subscription_duration = 1  # 1 month
+        amount = 3500
+        subscription_duration = 1
     elif plan == "premium":
-        amount = 1     # ₹1 for Premium plan (test amount)
-        subscription_duration = 2  # 2 months
+        amount = 1   # test ₹1
+        subscription_duration = 2
     else:
         return jsonify({"error": "Invalid plan"}), 400
 
-    # Store plan info in session BEFORE creating order
+    # Store plan info in session
     session["selected_plan"] = plan
     session["selected_duration"] = subscription_duration
     session.modified = True
 
+    # Pass email + plan in "notes" so webhook can use it
     order = razorpay_client.order.create({
         "amount": amount * 100,
-        "currency": "INR", 
-        "payment_capture": "1"
+        "currency": "INR",
+        "payment_capture": "1",
+        "notes": {
+            "email": session["email"],
+            "plan": plan
+        }
     })
-    
+
     return jsonify(order)
 
 
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     try:
-        print("Payment success endpoint called!")
-        print("Form data received:", request.form)
-        
         if "email" not in session:
             flash("Please login first", "danger")
             return redirect(url_for("login"))
-            
+
         if "selected_plan" not in session:
             flash("Invalid payment session", "danger")
             return redirect(url_for("pricing"))
@@ -168,38 +170,32 @@ def payment_success():
         plan = session["selected_plan"]
         duration = session.get("selected_duration", 1)
         email = session["email"]
-        
-        print(f"Activating {plan} plan for {email} with {duration} months duration")
-        
-        # Manual subscription activation (bypass Razorpay verification for testing)
+
         if activate_subscription(email, plan, duration):
             flash("✅ Subscription Activated Successfully!", "success")
-            print("Subscription activated in database")
+            print(f"✅ Subscription activated for {email}, Plan: {plan}, Duration: {duration} months")
         else:
             flash("❌ Database error activating subscription", "danger")
-            print("Failed to activate subscription in database")
-            
-        # Clear session data
+
         session.pop("selected_plan", None)
         session.pop("selected_duration", None)
-        
+
         return redirect(url_for("home"))
-        
+
     except Exception as e:
         print("Error in payment_success:", str(e))
         flash("Payment processing error occurred", "danger")
         return redirect(url_for("pricing"))
 
 
-# Add this TEST route for immediate testing
 @app.route("/test_payment/<plan>")
 def test_payment(plan):
     if "email" not in session:
         flash("Please login first", "warning")
         return redirect(url_for("login"))
-    
+
     email = session["email"]
-    
+
     if plan == "basic":
         duration = 1
     elif plan == "standard":
@@ -209,19 +205,17 @@ def test_payment(plan):
     else:
         flash("Invalid plan", "danger")
         return redirect(url_for("pricing"))
-    
+
     if activate_subscription(email, plan, duration):
         flash(f"✅ {plan.capitalize()} Subscription Activated for Testing!", "success")
     else:
         flash("❌ Failed to activate test subscription", "danger")
-    
+
     return redirect(url_for("home"))
-    # ---------------- RAZORPAY WEBHOOK ----------------
+
+# ---------------- RAZORPAY WEBHOOK ----------------
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
-    import hmac, hashlib
-
-    # Raw request body
     data = request.get_data(as_text=True)
     signature = request.headers.get("X-Razorpay-Signature")
 
@@ -260,7 +254,6 @@ def razorpay_webhook():
                 print(f"❌ Failed to update subscription for {email}")
 
     return "success", 200
-
 
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
