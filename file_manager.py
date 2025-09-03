@@ -1,85 +1,100 @@
 import os
+import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, User   # db aur User model app.py se import
+from datetime import datetime, timedelta
+
+DB_NAME = "users.db"
 
 # ---------------- User Management ----------------
-
 def signup_user(email, password, subscription="free"):
-    """
-    Register a new user.
-    Default subscription = "free" until payment.
-    """
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
-        return False  # already exists
-
-    hashed_password = generate_password_hash(password)
-    new_user = User(email=email, password=hashed_password, subscription=subscription)
-    db.session.add(new_user)
-    db.session.commit()
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+    existing = cursor.fetchone()
+    if existing:
+        conn.close()
+        return False
+    
+    hashed_pw = generate_password_hash(password)
+    cursor.execute("INSERT INTO users (name, email, password, subscription, subscription_expiry) VALUES (?, ?, ?, ?, ?)", 
+                   ("", email, hashed_pw, subscription, None))
+    conn.commit()
+    conn.close()
     return True
 
-
-def login_user(email, password):
-    """
-    Validate login credentials.
-    """
-    user = User.query.filter_by(email=email).first()
+def login_user(email, password, device_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, password, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
+    user = cursor.fetchone()
+    
     if not user:
+        conn.close()
         return False
-    return check_password_hash(user.password, password)
-
-
-def check_subscription(user):
-    """
-    Check if user has an active subscription.
-    """
-    if not user:
+    
+    user_id, hashed_pw, sub_type, expiry, devices = user
+    if not check_password_hash(hashed_pw, password):
+        conn.close()
         return False
-    return user.subscription == "active"
 
+    # Device check
+    devices_list = devices.split(",") if devices else []
+    if device_id not in devices_list:
+        if len(devices_list) >= get_device_limit(sub_type):
+            conn.close()
+            return "device_limit"
+        devices_list.append(device_id)
+        cursor.execute("UPDATE users SET devices=? WHERE id=?", (",".join(devices_list), user_id))
+        conn.commit()
+    
+    conn.close()
+    return True
 
-def activate_subscription(email):
-    """
-    Activate subscription for a user (e.g., after payment).
-    """
-    user = User.query.filter_by(email=email).first()
-    if user:
-        user.subscription = "active"
-        db.session.commit()
+def get_device_limit(subscription):
+    if subscription == "basic":
+        return 2
+    elif subscription == "standard" or subscription == "premium":
+        return 4
+    return 1
+
+def check_subscription(email):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if not row:
+        return False
+    sub_type, expiry = row
+    
+    # Check if subscription is active
+    if expiry and datetime.strptime(expiry, "%Y-%m-%d") >= datetime.today():
         return True
     return False
 
-
-def deactivate_subscription(email):
-    """
-    Cancel or deactivate subscription.
-    """
-    user = User.query.filter_by(email=email).first()
-    if user:
-        user.subscription = "free"
-        db.session.commit()
+def activate_subscription(email, plan, duration_months=1):
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # Calculate expiry date
+        expiry_date = datetime.now() + timedelta(days=30 * duration_months)
+        
+        cursor.execute(
+            "UPDATE users SET subscription=?, subscription_expiry=? WHERE email=?",
+            (plan, expiry_date.strftime("%Y-%m-%d"), email)
+        )
+        conn.commit()
+        
+        # Verify update
+        cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
+        result = cursor.fetchone()
+        print(f"Subscription updated: {result}")
+        
+        conn.close()
         return True
-    return False
-
-
-def get_user_by_email(email):
-    """
-    Fetch user by email.
-    """
-    return User.query.filter_by(email=email).first()
-
-
-# ---------------- File Utility ----------------
-def get_unique_filename(filename, folder, prefix="file"):
-    """
-    Generate a unique filename in the folder by appending numbers if needed.
-    Example: file.pdf -> file1.pdf, file2.pdf, etc.
-    """
-    base, ext = os.path.splitext(filename)
-    new_name = f"{prefix}_{base}{ext}"
-    counter = 1
-    while os.path.exists(os.path.join(folder, new_name)):
-        new_name = f"{prefix}_{base}_{counter}{ext}"
-        counter += 1
-    return os.path.join(folder, new_name)
+        
+    except Exception as e:
+        print("Error in activate_subscription:", str(e))
+        return False
