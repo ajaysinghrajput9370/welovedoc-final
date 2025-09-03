@@ -5,9 +5,13 @@ from datetime import datetime, timedelta
 
 DB_NAME = "users.db"
 
+# ---------------- Database Connection ----------------
+def get_connection():
+    return sqlite3.connect(DB_NAME, timeout=10, check_same_thread=False)
+
 # ---------------- User Management ----------------
 def signup_user(email, password, subscription="free"):
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE email=?", (email,))
     existing = cursor.fetchone()
@@ -17,8 +21,8 @@ def signup_user(email, password, subscription="free"):
     
     hashed_pw = generate_password_hash(password)
     cursor.execute(
-        "INSERT INTO users (name, email, password, subscription, subscription_expiry) VALUES (?, ?, ?, ?, ?)", 
-        ("", email, hashed_pw, subscription, None)
+        "INSERT INTO users (name, email, password, subscription, subscription_expiry, devices) VALUES (?, ?, ?, ?, ?, ?)", 
+        ("", email, hashed_pw, subscription, None, "")
     )
     conn.commit()
     conn.close()
@@ -26,7 +30,7 @@ def signup_user(email, password, subscription="free"):
 
 
 def login_user(email, password, device_id):
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, password, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
     user = cursor.fetchone()
@@ -63,7 +67,7 @@ def get_device_limit(subscription):
 
 
 def check_subscription(email):
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
     row = cursor.fetchone()
@@ -85,7 +89,7 @@ def check_subscription(email):
 
 def activate_subscription(email, plan, duration_months=1):
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
         
         # Expiry = end of day after duration
