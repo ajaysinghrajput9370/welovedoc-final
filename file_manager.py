@@ -16,8 +16,10 @@ def signup_user(email, password, subscription="free"):
         return False
     
     hashed_pw = generate_password_hash(password)
-    cursor.execute("INSERT INTO users (name, email, password, subscription, subscription_expiry) VALUES (?, ?, ?, ?, ?)", 
-                   ("", email, hashed_pw, subscription, None))
+    cursor.execute(
+        "INSERT INTO users (name, email, password, subscription, subscription_expiry) VALUES (?, ?, ?, ?, ?)", 
+        ("", email, hashed_pw, subscription, None)
+    )
     conn.commit()
     conn.close()
     return True
@@ -53,10 +55,11 @@ def login_user(email, password, device_id):
 def get_device_limit(subscription):
     if subscription == "basic":
         return 2
-    elif subscription == "standard" or subscription == "premium":
+    elif subscription in ["standard", "premium"]:
         return 4
     return 1
 
+# ---------------- Subscription Management ----------------
 def check_subscription(email):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -66,11 +69,26 @@ def check_subscription(email):
     
     if not row:
         return False
+
     sub_type, expiry = row
     
-    # Check if subscription is active
-    if expiry and datetime.strptime(expiry, "%Y-%m-%d") >= datetime.today():
-        return True
+    # Free plan or no expiry → no access
+    if sub_type == "free" or not expiry:
+        return False
+
+    try:
+        # Try parsing datetime with time
+        try:
+            expiry_date = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            expiry_date = datetime.strptime(expiry, "%Y-%m-%d")
+
+        if expiry_date >= datetime.now():
+            return True
+    except Exception as e:
+        print("⚠️ Date parse error in check_subscription:", e)
+        return False
+    
     return False
 
 def activate_subscription(email, plan, duration_months=1):
@@ -78,23 +96,23 @@ def activate_subscription(email, plan, duration_months=1):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         
-        # Calculate expiry date
+        # Calculate expiry date (with time)
         expiry_date = datetime.now() + timedelta(days=30 * duration_months)
         
         cursor.execute(
             "UPDATE users SET subscription=?, subscription_expiry=? WHERE email=?",
-            (plan, expiry_date.strftime("%Y-%m-%d"), email)
+            (plan, expiry_date.strftime("%Y-%m-%d %H:%M:%S"), email)
         )
         conn.commit()
         
         # Verify update
         cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
         result = cursor.fetchone()
-        print(f"Subscription updated: {result}")
+        print(f"✅ Subscription updated for {email}: {result}")
         
         conn.close()
         return True
         
     except Exception as e:
-        print("Error in activate_subscription:", str(e))
+        print("❌ Error in activate_subscription:", str(e))
         return False
