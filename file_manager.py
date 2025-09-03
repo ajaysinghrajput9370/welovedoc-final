@@ -103,7 +103,7 @@ def activate_subscription(email, plan, duration_months=1):
         
         cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
         result = cursor.fetchone()
-        print(f"✅ Subscription updated in DB: {result}")
+        print(f"✅ Subscription updated in DB for {email}: {result}")
         
         conn.close()
         return True
