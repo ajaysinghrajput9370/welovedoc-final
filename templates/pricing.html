@@ -1,261 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing - WeLoveDoc</title>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9fbfd;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .pricing-cards {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 25px;
-            margin: 50px 0;
-        }
-        .pricing-card {
-            border-radius: 15px;
-            padding: 25px;
-            width: 300px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            position: relative;
-        }
-        .basic {
-            background: linear-gradient(135deg,#e0f7fa,#80deea);
-        }
-        .standard {
-            background: linear-gradient(135deg,#fff3e0,#ffcc80);
-            transform: scale(1.05);
-        }
-        .premium {
-            background: linear-gradient(135deg,#e1bee7,#ba68c8);
-        }
-        .card-header {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .basic .card-header {
-            color: #00796b;
-        }
-        .standard .card-header {
-            color: #ef6c00;
-        }
-        .premium .card-header {
-            color: #6a1b9a;
-        }
-        .subscribe-btn {
-            display: inline-block;
-            margin-top: 20px;
-            color: white;
-            padding: 14px 35px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .basic .subscribe-btn {
-            background: #00796b;
-        }
-        .standard .subscribe-btn {
-            background: #ef6c00;
-        }
-        .premium .subscribe-btn {
-            background: #6a1b9a;
-        }
-        .pricing-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-        }
-        .subscribe-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-        .ribbon {
-            position: absolute;
-            top: -10px;
-            right: -40px;
-            background: #ef6c00;
-            color: white;
-            padding: 5px 40px;
-            transform: rotate(45deg);
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Pricing - We ❤️ Doc</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
-<body>
-    <!-- Pricing Section -->
-    <section id="pricing">
-        <div class="container" style="text-align:center;">
-            <h2 style="margin-bottom:40px; color:#222; font-weight:900; font-size:32px;">💎 Choose Your Subscription Plan</h2>
-            <div class="pricing-cards">
-                <!-- Basic Plan -->
-                <div class="card pricing-card basic">
-                    <div class="card-header">Basic</div>
-                    <div class="card-body" style="color:#333; font-size:16px;">
-                        <p><strong>Devices:</strong> 2</p>
-                        <p><strong>Duration:</strong> 1 Month</p>
-                        <p><strong>Price:</strong> ₹3000</p>
-                        <hr style="margin:15px 0;">
-                        <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#004d40;">
-                            <li>✔️ Unlimited PF & ESIC Highlight</li>
-                            <li>✔️ Upload & Process Large Files</li>
-                            <li>✔️ Instant Highlight within Seconds</li>
-                            <li>✔️ Find Not-Match Data in Excel</li>
-                            <li>✔️ Easy Your Compliance Work</li>
-                        </ul>
-                        <button class="subscribe-btn" onclick="subscribe('basic')">Subscribe</button>
-                    </div>
-                </div>
-                
-                <!-- Standard Plan -->
-                <div class="card pricing-card standard">
-                    <div class="ribbon">Most Popular</div>
-                    <div class="card-header">Standard ⭐</div>
-                    <div class="card-body" style="color:#333; font-size:16px;">
-                        <p><strong>Devices:</strong> 4</p>
-                        <p><strong>Duration:</strong> 1 Month</p>
-                        <p><strong>Price:</strong> ₹3500</p>
-                        <hr style="margin:15px 0;">
-                        <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#bf360c;">
-                            <li>✔️ Unlimited PF & ESIC Highlight</li>
-                            <li>✔️ Upload & Process Large Files</li>
-                            <li>✔️ Lightning Fast Highlight within Seconds</li>
-                            <li>✔️ Advanced Not-Match Excel Finder</li>
-                            <li>✔️ Smart Compliance Made Easy</li>
-                            <li>✔️ Priority Email Support</li>
-                        </ul>
-                        <button class="subscribe-btn" onclick="subscribe('standard')">Subscribe</button>
-                    </div>
-                </div>
-                
-                <!-- Premium Plan -->
-                <div class="card pricing-card premium">
-                    <div class="card-header">Premium</div>
-                    <div class="card-body" style="color:#333; font-size:16px;">
-                        <p><strong>Devices:</strong> 4</p>
-                        <p><strong>Duration:</strong> 2 Months</p>
-                        <p><strong>Price:</strong> ₹1</p>
-                        <hr style="margin:15px 0;">
-                        <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#4a148c;">
-                            <li>✔️ All Standard Features</li>
-                            <li>✔️ 2X Longer Subscription Period</li>
-                            <li>✔️ Process Extra-Large Files Seamlessly</li>
-                            <li>✔️ Advanced Data Accuracy Checks</li>
-                            <li>✔️ VIP Compliance Support</li>
-                            <li>✔️ Early Access to New Tools</li>
-                        </ul>
-                        <button class="subscribe-btn" onclick="subscribe('premium')">Subscribe</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<body style="font-family:Arial, sans-serif; background:#f9fbfd; margin:0; padding:0;">
 
-    <script>
-        // ✅ Live Razorpay Key ID
-        const RAZORPAY_KEY_ID = "rzp_live_RBtTz04eahUWDs";
+<!-- Pricing Section -->
+<section id="pricing" style="padding:50px 0;">
+  <div class="container" style="text-align:center;">
+    <h2 style="margin-bottom:40px; color:#222; font-weight:900; font-size:32px;">
+      💎 Choose Your Subscription Plan
+    </h2>
+
+    <div class="pricing-cards" style="display:flex; justify-content:center; flex-wrap:wrap; gap:25px;">
+
+      <!-- Basic Plan -->
+      <div class="card pricing-card basic" style="background:linear-gradient(135deg,#e0f7fa,#80deea); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
+        <div class="card-header" style="font-size:22px; font-weight:700; color:#00796b; margin-bottom:20px;">Basic</div>
+        <div class="card-body" style="color:#333; font-size:16px;">
+          <p><strong>Devices:</strong> 2</p>
+          <p><strong>Duration:</strong> 1 Month</p>
+          <p><strong>Price:</strong> ₹3000</p>
+          <hr style="margin:15px 0;">
+          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#004d40;">
+            <li>✔️ Unlimited PF & ESIC Highlight</li>
+            <li>✔️ Upload & Process Large Files</li>
+            <li>✔️ Instant Highlight within Seconds</li>
+            <li>✔️ Find Not-Match Data in Excel</li>
+            <li>✔️ Easy Your Compliance Work</li>
+          </ul>
+          <button onclick="payNow('basic', 3000)" 
+                  class="btn subscribe-btn" 
+                  style="margin-top:20px; background:#00796b; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+      <!-- Standard Plan -->
+      <div class="card pricing-card standard" style="background:linear-gradient(135deg,#fff3e0,#ffcc80); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transform:scale(1.05); transition:transform 0.3s; position:relative;">
+        <div style="position:absolute; top:-10px; right:-40px; background:#ef6c00; color:white; padding:5px 40px; transform:rotate(45deg); font-size:12px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+          Most Popular
+        </div>
+        <div class="card-header" style="font-size:22px; font-weight:700; color:#ef6c00; margin-bottom:20px;">Standard ⭐</div>
+        <div class="card-body" style="color:#333; font-size:16px;">
+          <p><strong>Devices:</strong> 4</p>
+          <p><strong>Duration:</strong> 1 Month</p>
+          <p><strong>Price:</strong> ₹3500</p>
+          <hr style="margin:15px 0;">
+          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#bf360c;">
+            <li>✔️ Unlimited PF & ESIC Highlight</li>
+            <li>✔️ Upload & Process Large Files</li>
+            <li>✔️ Lightning Fast Highlight within Seconds</li>
+            <li>✔️ Advanced Not-Match Excel Finder</li>
+            <li>✔️ Smart Compliance Made Easy</li>
+            <li>✔️ Priority Email Support</li>
+          </ul>
+          <button onclick="payNow('standard', 3500)" 
+                  class="btn subscribe-btn" 
+                  style="margin-top:20px; background:#ef6c00; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+      <!-- Premium Plan -->
+      <div class="card pricing-card premium" style="background:linear-gradient(135deg,#e1bee7,#ba68c8); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
+        <div class="card-header" style="font-size:22px; font-weight:700; color:#6a1b9a; margin-bottom:20px;">Premium</div>
+        <div class="card-body" style="color:#333; font-size:16px;">
+          <p><strong>Devices:</strong> 4</p>
+          <p><strong>Duration:</strong> 2 Months</p>
+          <p><strong>Price:</strong> ₹1</p>
+          <hr style="margin:15px 0;">
+          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#4a148c;">
+            <li>✔️ All Standard Features</li>
+            <li>✔️ 2X Longer Subscription Period</li>
+            <li>✔️ Process Extra-Large Files Seamlessly</li>
+            <li>✔️ Advanced Data Accuracy Checks</li>
+            <li>✔️ VIP Compliance Support</li>
+            <li>✔️ Early Access to New Tools</li>
+          </ul>
+          <button onclick="payNow('premium', 1)" 
+                  class="btn subscribe-btn" 
+                  style="margin-top:20px; background:#6a1b9a; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Hover Effects -->
+<style>
+  .pricing-card:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 12px 25px rgba(0,0,0,0.2);}
+  .subscribe-btn:hover { opacity: 0.9; transform: scale(1.05);}
+</style>
+
+<!-- Razorpay Script -->
+<script>
+function payNow(plan, price) {
+  fetch("/create_order", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({plan: plan})
+  })
+  .then(res => res.json())
+  .then(order => {
+    console.log("Order created:", order);
+    
+    var options = {
+      "key": "{{ razorpay_key_id }}",
+      "amount": order.amount,
+      "currency": "INR",
+      "name": "We ❤️ Doc",
+      "description": plan + " Subscription - ₹" + (order.amount/100),
+      "order_id": order.id,
+      "handler": function (response){
+        console.log("Payment successful:", response);
         
-        function subscribe(plan) {
-            // Check if user is logged in
-            fetch('/check_session')
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.logged_in) {
-                        alert('Please login first to subscribe');
-                        window.location.href = '/login';
-                        return;
-                    }
-                    
-                    // Create order
-                    fetch('/create_order', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({plan: plan})
-                    })
-                    .then(response => response.json())
-                    .then(order => {
-                        if (order.error) {
-                            alert(order.error);
-                            return;
-                        }
-                        
-                        // Razorpay options with LIVE key
-                        var options = {
-                            "key": RAZORPAY_KEY_ID, // ✅ Live key
-                            "amount": order.amount,
-                            "currency": order.currency,
-                            "name": "WeLoveDoc",
-                            "description": "Subscription Plan",
-                            "order_id": order.id,
-                            "handler": function (response) {
-                                verifyPayment(response, plan);
-                            },
-                            "prefill": {
-                                "email": data.email || 'user@example.com',
-                                "name": data.name || 'Customer'
-                            },
-                            "theme": {
-                                "color": "#3399cc"
-                            }
-                        };
-                        
-                        var rzp = new Razorpay(options);
-                        rzp.open();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error creating order. Please try again.');
-                    });
-                });
-        }
+        // DIRECT form submission instead of creating form dynamically
+        var formData = new FormData();
+        formData.append('razorpay_payment_id', response.razorpay_payment_id);
+        formData.append('razorpay_order_id', response.razorpay_order_id);
+        formData.append('razorpay_signature', response.razorpay_signature);
+        formData.append('plan', plan);
         
-        function verifyPayment(response, plan) {
-            fetch('/verify_payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature,
-                    plan: plan
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Payment successful! Your subscription has been activated.');
-                    window.location.href = data.redirect;
-                } else {
-                    alert('Payment verification failed: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error verifying payment. Please contact support.');
-            });
-        }
-    </script>
+        fetch('/payment_success', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => {
+          console.log("Redirecting to home...");
+          window.location.href = '/';
+        })
+        .catch(err => {
+          console.error("Error:", err);
+          alert("Payment successful but redirect failed. Please contact support.");
+        });
+      },
+      "prefill": {
+        "name": "{{ session.get('user_name', 'Customer') }}",
+        "email": "{{ session.get('email', '') }}"
+      },
+      "theme": {
+        "color": "#00796b"
+      }
+    };
+    
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
+    
+    rzp1.on('payment.failed', function (response){
+      console.error("Payment failed:", response.error);
+      alert("Payment failed: " + response.error.description);
+    });
+  })
+  .catch(error => {
+    console.error("Error creating order:", error);
+    alert("Error creating payment order. Please try again.");
+  });
+}
+</script>
+
 </body>
 </html>
