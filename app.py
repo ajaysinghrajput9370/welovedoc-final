@@ -77,7 +77,32 @@ def signup():
 
     return render_template("signup.html")
 
+@app.route("/profile")
+def profile():
+    if "email" not in session:
+        flash("Please login first", "warning")
+        return redirect(url_for("login"))
 
+    email = session["email"]
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, email, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for("home"))
+
+    user_data = {
+        "name": user[0],
+        "email": user[1],
+        "subscription": user[2],
+        "expiry": user[3],
+        "devices": user[4].split(",") if user[4] else []
+    }
+
+    return render_template("profile.html", user=user_data)
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -109,7 +134,32 @@ def login():
 
     return render_template("login.html")
 
+@app.route("/profile")
+def profile():
+    if "email" not in session:
+        flash("Please login first", "warning")
+        return redirect(url_for("login"))
 
+    email = session["email"]
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, email, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for("home"))
+
+    user_data = {
+        "name": user[0],
+        "email": user[1],
+        "subscription": user[2],
+        "expiry": user[3],
+        "devices": user[4].split(",") if user[4] else []
+    }
+
+    return render_template("profile.html", user=user_data)
 @app.route("/logout")
 def logout():
     session.clear()
