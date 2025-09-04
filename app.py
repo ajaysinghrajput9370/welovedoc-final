@@ -179,7 +179,6 @@ def logout():
     flash("Logged out", "info")
     return redirect(url_for("home"))
 
-
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
