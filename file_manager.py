@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone  # <- timezone imported
 
 DB_NAME = "users.db"
 DB_PATH = DB_NAME  # change if storing elsewhere
@@ -140,11 +140,11 @@ def parse_datetime_safe(s):
         return None
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
         try:
-            return datetime.strptime(s, fmt)
+            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
         except Exception:
             continue
     try:
-        return datetime.fromisoformat(s)
+        return datetime.fromisoformat(s).replace(tzinfo=timezone.utc)
     except Exception:
         return None
 
@@ -158,21 +158,24 @@ def check_subscription(email):
         return False
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
-        return expiry_dt >= datetime.now()
-    return True  # subscription set but no expiry
+        # UTC now
+        now_utc = datetime.now(timezone.utc)
+        return now_utc <= expiry_dt  # True if still active
+    return True  # subscription set but no expiry, treat as active
 
 def get_subscription_details(email):
     u = get_user_by_email(email)
     if not u:
         return None
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
+    expiry_local = expiry_dt.astimezone() if expiry_dt else None
     return {
         "subscription": u.get("subscription") or "free",
-        "subscription_expiry": expiry_dt
+        "subscription_expiry": expiry_local
     }
 
 def activate_subscription(email, plan, duration_months=1):
-    """Activate or extend subscription for `email`."""
+    """Activate or extend subscription for `email` with UTC-safe expiry."""
     email = (email or "").strip().lower()
     try:
         conn = get_conn()
@@ -180,15 +183,15 @@ def activate_subscription(email, plan, duration_months=1):
 
         cursor.execute("SELECT subscription_expiry FROM users WHERE email=?", (email,))
         row = cursor.fetchone()
-        now = datetime.now()
+        now_utc = datetime.now(timezone.utc)
         if row and row[0]:
             existing = parse_datetime_safe(row[0])
-            base = existing if existing and existing > now else now
+            base = existing if existing and existing > now_utc else now_utc
         else:
-            base = now
+            base = now_utc
 
         new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
-        expiry_str = new_expiry.strftime("%Y-%m-%d %H:%M:%S")
+        expiry_str = new_expiry.isoformat()  # ISO format in UTC
 
         cursor.execute("""
             UPDATE users
