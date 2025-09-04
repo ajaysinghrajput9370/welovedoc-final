@@ -1,30 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>My Profile - WeLoveDoc</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - We ❤️ Doc</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: Arial, sans-serif;
+    }
+    .profile-card {
+      max-width: 500px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+    }
+    .profile-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .profile-header h2 {
+      font-weight: bold;
+    }
+    .detail {
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    .btn-logout, .btn-home {
+      display: block;
+      margin: 15px auto 0;
+      width: 100%;
+    }
+    .countdown {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .active-plan {
+      background-color: #d1f7d6;
+      color: #2d6a4f;
+    }
+    .expired-plan {
+      background-color: #ffd6d6;
+      color: #b02a37;
+    }
+  </style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="card shadow-lg p-4">
-            <h2 class="mb-3">👤 My Profile</h2>
-            <hr>
-            <p><b>Name:</b> {{ user.name }}</p>
-            <p><b>Email:</b> {{ user.email }}</p>
-            <p><b>Subscription Plan:</b> {{ user.subscription|capitalize }}</p>
-            <p><b>Expiry Date:</b> 
-                {% if user.expiry %} {{ user.expiry }} {% else %} No active plan {% endif %}
-            </p>
-            <p><b>Devices Used:</b> 
-                {% if user.devices %} {{ user.devices|join(', ') }} {% else %} No devices registered {% endif %}
-            </p>
+<body>
 
-            <div class="mt-4">
-                <a href="{{ url_for('pricing') }}" class="btn btn-success">Upgrade Plan</a>
-                <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
-            </div>
-        </div>
+  <div class="profile-card">
+    <div class="profile-header">
+      <h2>👤 My Profile</h2>
     </div>
+
+    <div class="detail"><b>Name:</b> {{ user.name }}</div>
+    <div class="detail"><b>Email:</b> {{ user.email }}</div>
+    <div class="detail"><b>Subscription Plan:</b> {{ user.subscription }}</div>
+
+    {% if user.subscription != "free" %}
+      <div class="detail"><b>Valid Till:</b> {{ user.subscription_expiry }}</div>
+      {% if days_left > 0 %}
+        <div class="countdown active-plan">
+          ✅ Days Left: {{ days_left }} 
+        </div>
+      {% else %}
+        <div class="countdown expired-plan">
+          ❌ Subscription Expired
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <a href="{{ url_for('home') }}" class="btn btn-primary btn-home">⬅ Back to Home</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-logout">Logout</a>
+  </div>
+
 </body>
 </html>
