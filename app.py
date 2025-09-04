@@ -1,102 +1,65 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash
+# app.py — Part 1
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash, abort
 import os
 import uuid
-import sqlite3
 import razorpay
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
-from pf_highlight import highlight_pf
-from esic_highlight import highlight_esic
 from dotenv import load_dotenv
-from file_manager import check_subscription, activate_subscription, login_user  # keep using your existing functions
 import hmac
 import hashlib
 import json
 
+# Import functions from file_manager.py (make sure file_manager.py is the fixed version)
+from file_manager import (
+    ensure_schema, init_db as fm_init_db,
+    signup_user, login_user, check_subscription,
+    activate_subscription, get_user_by_email,
+    get_subscription_details, list_users
+)
+
 # ---------------- App Config ----------------
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['RESULT_FOLDER'] = 'results'
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")  # use env if available
+load_dotenv()
+app = Flask(__name__, static_folder="static", template_folder="templates")
+app.config['UPLOAD_FOLDER'] = os.getenv("UPLOAD_FOLDER", "uploads")
+app.config['RESULT_FOLDER'] = os.getenv("RESULT_FOLDER", "results")
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
 app.permanent_session_lifetime = timedelta(days=30)
 
 # Ensure folders exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
-# ---------------- Load ENV ----------------
-load_dotenv()
-
+# ---------------- Razorpay / Env ----------------
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
-RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")  # must be set in Render env
+RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+ADMIN_VIEW_SECRET = os.getenv("ADMIN_VIEW_SECRET", "changeme_admin_secret")
 
 if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
     print("⚠️  Missing Razorpay keys in environment. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.")
 
-razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if (RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET) else None
+razorpay_client = None
+try:
+    if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+        razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+except Exception as e:
+    print("⚠️ Razorpay client init failed:", e)
 
-# ---------------- DB Setup ----------------
-DB_PATH = "users.db"
+# ---------------- Ensure DB schema ----------------
+# file_manager exposes ensure_schema and init_db — call them to be safe
+ensure_schema()
+fm_init_db()
 
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            subscription TEXT DEFAULT 'free',
-            subscription_expiry TEXT,
-            devices TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# ---------------- DB Helpers ----------------
-def get_user_by_email(email: str):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, password, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return None
-    return {
-        "id": row[0],
-        "name": row[1],
-        "email": row[2],
-        "password": row[3],
-        "subscription": row[4],
-        "subscription_expiry": row[5],
-        "devices": row[6]
-    }
-
+# ---------------- Helper: check active subscription ----------------
 def has_active_subscription(email: str) -> bool:
-    """Authoritative check from DB (avoid relying on session)."""
-    user = get_user_by_email(email)
-    if not user:
+    """Wrapper using file_manager.check_subscription for clarity."""
+    try:
+        return check_subscription(email)
+    except Exception as e:
+        print("Error checking subscription:", e)
         return False
-    sub = (user.get("subscription") or "free").lower()
-    expiry_str = user.get("subscription_expiry")
-    if sub == "premium" or sub == "standard" or sub == "basic" or sub == "paid":
-        # Check expiry if present
-        if expiry_str:
-            try:
-                expiry_dt = datetime.fromisoformat(expiry_str)
-                return datetime.utcnow() <= expiry_dt
-            except Exception:
-                # If malformed expiry, treat as active for now (or change to False if you prefer strict)
-                return True
-        # No expiry set → treat as active
-        return True
-    return False
 
 # ---------------- AUTH ROUTES ----------------
 @app.route("/signup", methods=["GET", "POST"])
@@ -110,20 +73,14 @@ def signup():
             flash("Please fill all fields", "warning")
             return redirect(url_for("signup"))
 
-        hashed_pw = generate_password_hash(password)
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_pw))
-            conn.commit()
-            conn.close()
-
+        ok = signup_user(name, email, password, subscription="free")
+        if ok:
             session.permanent = True
             session["user_name"] = name
             session["email"] = email
             flash("Signup successful!", "success")
             return redirect(url_for("home"))
-        except sqlite3.IntegrityError:
+        else:
             flash("Email already registered!", "danger")
             return redirect(url_for("signup"))
 
@@ -135,7 +92,7 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        device_id = request.headers.get("X-Device-Id") or request.remote_addr  # prefer a stable device id if you add one
+        device_id = request.headers.get("X-Device-Id") or request.remote_addr
 
         result = login_user(email, password, device_id)
         if result is True:
@@ -166,6 +123,7 @@ def logout():
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for("home"))
+# app.py — Part 2 (continue)
 # ---------------- PAYMENT ROUTES ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -178,7 +136,6 @@ def create_order():
     data = request.get_json(silent=True) or {}
     plan = (data.get("plan") or "").lower().strip()
 
-    # Define your plan pricing (INR)
     PLAN_MAP = {
         "basic":     {"amount": 3000, "duration_months": 1},
         "standard":  {"amount": 3500, "duration_months": 1},
@@ -195,17 +152,19 @@ def create_order():
     session["selected_duration"] = duration
     session.modified = True
 
-    # Razorpay receipt must be <= 40 chars
     receipt = f"wld_{plan}_{uuid.uuid4().hex[:16]}"
 
-    order = razorpay_client.order.create({
-        "amount": amount * 100,
-        "currency": "INR",
-        "receipt": receipt,
-        "payment_capture": 1
-    })
+    try:
+        order = razorpay_client.order.create({
+            "amount": amount * 100,
+            "currency": "INR",
+            "receipt": receipt,
+            "payment_capture": 1
+        })
+    except Exception as e:
+        print("Razorpay order create error:", e)
+        return jsonify({"error": "payment gateway error"}), 500
 
-    # Save order_id for signature verification during payment_success
     session["razorpay_order_id"] = order.get("id")
     session.modified = True
 
@@ -226,7 +185,6 @@ def payment_success():
             flash("Invalid or expired payment session. Please try again.", "danger")
             return redirect(url_for("pricing"))
 
-        # ——— Verify Razorpay signature (very important) ———
         if not razorpay_client:
             flash("Payment gateway not configured", "danger")
             return redirect(url_for("pricing"))
@@ -246,14 +204,11 @@ def payment_success():
             flash("Payment verification failed. Please contact support.", "danger")
             return redirect(url_for("pricing"))
 
-        # ——— Activate subscription ———
         plan = session["selected_plan"]
         duration = session.get("selected_duration", 1)
         email = session["email"]
 
         print(f"Activating {plan} plan for {email} with {duration} months duration")
-
-        # Use your existing file_manager implementation
         ok = activate_subscription(email, plan, duration)
         if ok:
             flash("✅ Subscription Activated Successfully!", "success")
@@ -262,15 +217,14 @@ def payment_success():
             flash("❌ Database error activating subscription", "danger")
             print("Failed to activate subscription in database")
 
-        # Clear ephemeral payment session data
         session.pop("selected_plan", None)
         session.pop("selected_duration", None)
         session.pop("razorpay_order_id", None)
 
-        # Optional: refresh user info in session (not used for access control, we check DB)
+        # Refresh session display name
         user = get_user_by_email(email)
         if user:
-            session["user_name"] = user["name"]
+            session["user_name"] = user.get("name")
 
         return redirect(url_for("home"))
 
@@ -282,14 +236,12 @@ def payment_success():
 
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
-    # Verify webhook signature
     payload = request.data
     signature = request.headers.get('X-Razorpay-Signature')
 
     try:
         if not RAZORPAY_WEBHOOK_SECRET:
             print("⚠️  No RAZORPAY_WEBHOOK_SECRET set; skipping verification (not recommended)")
-            # Still parse payload to log
             data = json.loads(payload or "{}")
             print("📦 Webhook received (UNVERIFIED):", data)
             return "", 200
@@ -301,7 +253,32 @@ def razorpay_webhook():
 
         data = json.loads(payload or "{}")
         print("📦 Webhook received:", data)
-        # (Optional) You can reconcile payment status here if needed
+
+        # Optional: automatically activate subscription on payment.captured webhook
+        try:
+            event = data.get("event")
+            if event == "payment.captured":
+                payment = data.get("payload", {}).get("payment", {}).get("entity", {})
+                email = payment.get("email")
+                description = payment.get("description", "") or ""
+                # Expect plan in description or pass data via notes in order creation
+                # Example: description 'premium Subscription - ₹1' -> parse plan
+                plan = None
+                if "premium" in description.lower():
+                    plan = "premium"
+                elif "standard" in description.lower():
+                    plan = "standard"
+                elif "basic" in description.lower():
+                    plan = "basic"
+
+                if email and plan:
+                    # Default duration mapping (same as create_order)
+                    duration_map = {"basic": 1, "standard": 1, "premium": 2}
+                    duration = duration_map.get(plan, 1)
+                    activate_subscription(email, plan, duration)
+        except Exception as e:
+            print("Webhook auto-activate error:", e)
+
         return "", 200
 
     except Exception as e:
@@ -326,7 +303,6 @@ def test_payment(plan):
         flash("Invalid plan", "danger")
         return redirect(url_for("pricing"))
 
-    # Use your existing activation logic
     if activate_subscription(session["email"], plan, duration):
         flash(f"✅ {plan.capitalize()} Subscription Activated for Testing!", "success")
     else:
@@ -334,14 +310,17 @@ def test_payment(plan):
 
     return redirect(url_for("home"))
 
+
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
     return render_template("welovedoc.html")
 
+
 @app.route("/pricing")
 def pricing():
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
+
 
 # ---------------- PROTECTED TOOL ROUTES ----------------
 def _require_login():
@@ -350,12 +329,12 @@ def _require_login():
         return False
     return True
 
+
 @app.route("/esic-highlight")
 def esic_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
 
-    # Authoritative DB check (fixes your redirect loop)
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
@@ -374,10 +353,14 @@ def pf_highlight_page():
 
     return render_template("pf-highlight.html")
 
+
 # ---------------- PROCESS API ----------------
+# Note: highlight_pf and highlight_esic must return (output_pdf_path, not_found_excel_path)
+from pf_highlight import highlight_pf
+from esic_highlight import highlight_esic
+
 @app.route("/process", methods=["POST"])
 def process():
-    # Block unauth users or inactive subs
     if "email" not in session or not has_active_subscription(session["email"]):
         return jsonify({"error": "Subscription required"}), 403
 
@@ -412,6 +395,7 @@ def process():
         return jsonify(response), 200
 
     except Exception as e:
+        print("Process error:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -419,9 +403,19 @@ def process():
 def download_file(filename):
     return send_from_directory(app.config['RESULT_FOLDER'], filename, as_attachment=True)
 
+
+# ---------------- Admin / Debug ----------------
+@app.route("/admin/users")
+def admin_users():
+    token = request.args.get("token")
+    if not token or token != ADMIN_VIEW_SECRET:
+        abort(403)
+    users = list_users(200)
+    return render_template("admin_users.html", users=users)
+
+
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
-    # Use Render's PORT if present
     port = int(os.getenv("PORT", "10000"))
     debug = os.getenv("FLASK_DEBUG", "0") == "1"
     app.run(debug=debug, host="0.0.0.0", port=port)
