@@ -74,6 +74,10 @@
     .active-plan {
       background: linear-gradient(90deg, #56ab2f, #a8e063);
     }
+    .expired-plan {
+      background: #ccc;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -85,12 +89,18 @@
 
     <div class="detail"><b>Name:</b> {{ user.name }}</div>
     <div class="detail"><b>Email:</b> {{ user.email }}</div>
-    <div class="detail"><b>Subscription Plan:</b> {{ user.subscription|capitalize }}</div>
+    <div class="detail"><b>Subscription Plan:</b> {{ user.subscription|default('Free')|capitalize }}</div>
 
-    {% if user.subscription != "free" and days_left > 0 %}
-      <div class="countdown active-plan">
-        ✅ Days Left: {{ days_left }}
-      </div>
+    {% if user.subscription != "free" %}
+      {% if days_left > 0 %}
+        <div class="countdown active-plan">
+          ✅ Days Left: {{ days_left }}
+        </div>
+      {% else %}
+        <div class="countdown expired-plan">
+          ❌ Subscription Expired
+        </div>
+      {% endif %}
     {% endif %}
  
     <a href="{{ url_for('home') }}" class="btn btn-home">⬅ Back to Home</a>
