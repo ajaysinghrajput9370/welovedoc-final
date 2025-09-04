@@ -4,14 +4,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 
 DB_NAME = "users.db"
-DB_PATH = DB_NAME  # change if you store elsewhere
+DB_PATH = DB_NAME  # change if storing elsewhere
 
-# ---------------- DB helpers & init/migration ----------------
+# ---------------- DB helpers & init ----------------
 def get_conn():
     return sqlite3.connect(DB_PATH)
 
 def init_db():
-    """Create users table if not exists (with correct columns). Safe to call repeatedly."""
+    """Create users table if not exists"""
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("""
@@ -45,13 +45,12 @@ def ensure_schema():
     conn.commit()
     conn.close()
 
-# initialize on import
+# initialize DB on import
 ensure_schema()
 init_db()
 
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
-    """Register new user. Returns True on success, False if email exists."""
     email = (email or "").strip().lower()
     if not email or not password:
         return False
@@ -73,13 +72,13 @@ def signup_user(name, email, password, subscription="free"):
     return True
 
 def get_user_by_email(email):
-    """Fetch user dict with safe defaults (never returns None values)."""
     email = (email or "").strip().lower()
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, name, email, password, subscription, subscription_expiry, devices FROM users WHERE email=?",
-        (email,))
+    cursor.execute("""
+        SELECT id, name, email, password, subscription, subscription_expiry, devices
+        FROM users WHERE email=?
+    """, (email,))
     row = cursor.fetchone()
     conn.close()
     if not row:
@@ -98,12 +97,12 @@ def get_user_by_email(email):
 def get_device_limit(subscription):
     s = (subscription or "").lower()
     if s == "basic":
-        return 1
-    elif s == "standard":
         return 2
+    elif s == "standard":
+        return 4
     elif s == "premium":
-        return 3
-    return 1  # default for free
+        return 4
+    return 1  # free default
 
 def login_user(email, password, device_id):
     """Authenticate user and enforce device limit."""
@@ -135,7 +134,6 @@ def login_user(email, password, device_id):
 
     conn.close()
     return True
-
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
     if not s:
@@ -161,7 +159,7 @@ def check_subscription(email):
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
         return expiry_dt >= datetime.now()
-    return True  # if subscription set but no expiry
+    return True  # subscription set but no expiry
 
 def get_subscription_details(email):
     u = get_user_by_email(email)
@@ -174,7 +172,7 @@ def get_subscription_details(email):
     }
 
 def activate_subscription(email, plan, duration_months=1):
-    """Activate/extend subscription for `email`."""
+    """Activate or extend subscription for `email`."""
     email = (email or "").strip().lower()
     try:
         conn = get_conn()
@@ -209,7 +207,10 @@ def activate_subscription(email, plan, duration_months=1):
 def list_users(limit=100):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, subscription, subscription_expiry, devices FROM users LIMIT ?", (limit,))
+    cursor.execute("""
+        SELECT id, name, email, subscription, subscription_expiry, devices
+        FROM users LIMIT ?
+    """, (limit,))
     rows = cursor.fetchall()
     conn.close()
     return [{
