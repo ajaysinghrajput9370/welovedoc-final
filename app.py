@@ -206,9 +206,9 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 3000, "duration_months": 1},
+        "basic":     {"amount": 1, "duration_months": 1},
         "standard":  {"amount": 3500, "duration_months": 1},
-        "premium":   {"amount": 1,    "duration_months": 2},  # test ₹1
+        "premium":   {"amount": 6000,    "duration_months": 2},  # test ₹1
     }
 
     if plan not in PLAN_MAP:
@@ -225,10 +225,10 @@ def create_order():
 
     try:
         order = razorpay_client.order.create({
-            "amount": amount * 100,
+            "amount": amount * 600000,
             "currency": "INR",
             "receipt": receipt,
-            "payment_capture": 1,
+            "payment_capture": 6000,
             "notes": {"plan": plan}
         })
     except Exception as e:
