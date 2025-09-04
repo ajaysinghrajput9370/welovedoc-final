@@ -62,6 +62,11 @@ def has_active_subscription(email: str) -> bool:
         return False
 
 # ---------------- AUTH ROUTES ----------------
+@app.route("/profile")
+def profile():
+    if "user" not in session:   # agar user login nahi hai to login page bhejo
+        return redirect(url_for("login"))
+    return render_template("profile.html")
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
