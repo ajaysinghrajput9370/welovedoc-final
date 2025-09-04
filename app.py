@@ -70,7 +70,6 @@ def has_active_subscription(email: str) -> bool:
                         return True
                 else:
                     return True
-        # fallback to session
         sess_sub = (session.get("subscription") or "").lower()
         sess_exp = session.get("subscription_expiry")
         if sess_sub and sess_sub != "free":
@@ -179,7 +178,9 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
-# ---------------- PAYMENT ROUTES ----------------
+
+
+# ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
     if "email" not in session:
@@ -191,16 +192,19 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 100, "duration_months": 1},
-        "standard":  {"amount": 350000, "duration_months": 1},
-        "premium":   {"amount": 600000, "duration_months": 2},  # updated ₹6000
+        "basic":     {"amount": 1, "duration_months": 1},
+        "standard":  {"amount": 3500, "duration_months": 1},
+        "premium":   {"amount": 6000, "duration_months": 2},
     }
 
     if plan not in PLAN_MAP:
         return jsonify({"error": "Invalid plan"}), 400
 
-    amount = PLAN_MAP[plan]["amount"]
+    amount_inr = PLAN_MAP[plan]["amount"]
     duration = PLAN_MAP[plan]["duration_months"]
+
+    # Razorpay requires amount in paise
+    amount_paise = amount_inr * 100
 
     session["selected_plan"] = plan
     session["selected_duration"] = duration
@@ -210,7 +214,7 @@ def create_order():
 
     try:
         order = razorpay_client.order.create({
-            "amount": amount * 100,
+            "amount": amount_paise,
             "currency": "INR",
             "receipt": receipt,
             "payment_capture": 1,
@@ -223,8 +227,7 @@ def create_order():
     session["razorpay_order_id"] = order.get("id")
     session.modified = True
     return jsonify(order)
-
-
+# ---------------- PAYMENT SUCCESS ----------------
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     try:
@@ -287,6 +290,7 @@ def payment_success():
         return redirect(url_for("pricing"))
 
 
+# ---------------- RAZORPAY WEBHOOK ----------------
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
     payload = request.data
@@ -320,6 +324,7 @@ def razorpay_webhook():
         return "Error processing webhook", 400
 
 
+# ---------------- TEST PAYMENT (FOR DEBUG) ----------------
 @app.route("/test_payment/<plan>")
 def test_payment(plan):
     if "email" not in session:
@@ -429,6 +434,7 @@ def process():
         return jsonify({"error": str(e)}), 500
 
 
+# ---------------- DOWNLOAD ----------------
 @app.route("/download/<filename>")
 def download_file(filename):
     return send_from_directory(app.config['RESULT_FOLDER'], filename, as_attachment=True)
