@@ -65,7 +65,7 @@
 
     {% if user.subscription != "free" %}
       <div class="detail"><b>Valid Till:</b> {{ user.subscription_expiry }}</div>
-      {% if days_left > 0 %}
+     {% if days_left and days_left > 0 %}
         <div class="countdown active-plan">
           ✅ Days Left: {{ days_left }} 
         </div>
