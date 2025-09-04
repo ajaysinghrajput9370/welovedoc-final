@@ -1,4 +1,3 @@
-# app.py — Part 1
 from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash, abort
 import os
 import uuid
@@ -133,7 +132,6 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
-# app.py — Part 2
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
@@ -150,19 +148,34 @@ def profile():
     if sub_details.get("subscription") and sub_details["subscription"] != "free" and expiry:
         try:
             if isinstance(expiry, str):
-                expiry_date = datetime.fromisoformat(expiry).date()
+                # try iso first
+                try:
+                    expiry_dt = datetime.fromisoformat(expiry)
+                except Exception:
+                    # fallback to known formats
+                    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+                        try:
+                            expiry_dt = datetime.strptime(expiry, fmt)
+                            break
+                        except Exception:
+                            expiry_dt = None
             elif isinstance(expiry, datetime):
-                expiry_date = expiry.date()
+                expiry_dt = expiry
             else:
-                expiry_date = None
+                expiry_dt = None
 
-            if expiry_date:
+            if expiry_dt:
+                # compare dates in UTC
                 today = datetime.utcnow().date()
-                days_left = (expiry_date - today).days
+                days_left = (expiry_dt.date() - today).days
                 if days_left < 0:
                     days_left = 0
         except Exception as e:
             print("days_left calculation error:", e)
+
+    # IMPORTANT FIX: Ensure days_left is never None to prevent template TypeError
+    if days_left is None:
+        days_left = 0
 
     return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
 
@@ -230,7 +243,8 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
-# app.py — Part 3
+
+
 # ---------------- PAYMENT ROUTES ----------------
 # (⚡ Same as your code — no change made)
 # ... keep your payment, webhook, and protected routes code exactly as it is ...
