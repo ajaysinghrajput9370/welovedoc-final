@@ -64,10 +64,11 @@
     <div class="detail"><b>Subscription Plan:</b> {{ user.subscription }}</div>
 
     {% if user.subscription != "free" %}
-      <div class="detail"><b>Valid Till:</b> {{ user.subscription_expiry }}</div>
-     {% if days_left and days_left > 0 %}
+      <div class="detail"><b>Valid Till:</b> {{ user.subscription_expiry.strftime("%d %b %Y, %H:%M UTC") if user.subscription_expiry else "N/A" }}</div>
+      
+      {% if days_left and days_left > 0 %}
         <div class="countdown active-plan">
-          ✅ Days Left: {{ days_left }} 
+          ✅ Days Left: {{ days_left }}
         </div>
       {% else %}
         <div class="countdown expired-plan">
