@@ -48,33 +48,28 @@ fm_init_db()
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
-    """Check subscription DB-first, fallback to session."""
     try:
-        details = get_subscription_details(email) or {}
-        sub = (details.get("subscription") or "").lower()
-        expiry = details.get("subscription_expiry")
-
-        if sub and sub != "free":
-            expiry_dt = None
-            if expiry:
-                if isinstance(expiry, datetime):
-                    expiry_dt = expiry
-                elif isinstance(expiry, str):
-                    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
-                        try:
-                            expiry_dt = datetime.strptime(expiry, fmt)
-                            break
-                        except Exception:
-                            continue
-                    if expiry_dt is None:
+        details = get_subscription_details(email)
+        if details:
+            sub = (details.get("subscription") or "").lower()
+            expiry = details.get("subscription_expiry")
+            if sub and sub != "free":
+                if expiry:
+                    if isinstance(expiry, str):
                         try:
                             expiry_dt = datetime.fromisoformat(expiry)
                         except Exception:
                             expiry_dt = None
-            if expiry_dt:
-                return datetime.utcnow() <= expiry_dt
-            return True
-
+                    elif isinstance(expiry, datetime):
+                        expiry_dt = expiry
+                    else:
+                        expiry_dt = None
+                    if expiry_dt:
+                        return datetime.utcnow() <= expiry_dt
+                    else:
+                        return True
+                else:
+                    return True
         # fallback to session
         sess_sub = (session.get("subscription") or "").lower()
         sess_exp = session.get("subscription_expiry")
@@ -86,35 +81,36 @@ def has_active_subscription(email: str) -> bool:
                 except Exception:
                     return True
             return True
-
     except Exception as e:
-        print("has_active_subscription error:", e)
-
-    # fallback legacy check
+        print("has_active_subscription unexpected error:", e)
     try:
         return bool(check_subscription(email))
     except Exception:
         return False
 
-
 def _apply_session_subscription_from_db(email):
-    """Refresh session subscription info from DB."""
     try:
-        details = get_subscription_details(email) or {}
+        details = get_subscription_details(email)
+    except Exception as e:
+        print("Warning: get_subscription_details failed:", e)
+        details = None
+
+    if not details:
+        session["subscription"] = session.get("subscription", "free")
+        session["subscription_expiry"] = session.get("subscription_expiry", None)
+    else:
         session["subscription"] = details.get("subscription") or "free"
         expiry = details.get("subscription_expiry")
         if isinstance(expiry, datetime):
             session["subscription_expiry"] = expiry.isoformat()
         elif expiry:
-            session["subscription_expiry"] = str(expiry)
+            try:
+                session["subscription_expiry"] = expiry if isinstance(expiry, str) else str(expiry)
+            except Exception:
+                session["subscription_expiry"] = None
         else:
             session["subscription_expiry"] = None
-        session.modified = True
-    except Exception as e:
-        print("Session subscription refresh failed:", e)
-        session["subscription"] = session.get("subscription", "free")
-        session["subscription_expiry"] = session.get("subscription_expiry", None)
-        session.modified = True
+    session.modified = True
 
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
@@ -124,19 +120,7 @@ def profile():
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
-
-    # Calculate days left
-    days_left = 0
-    expiry = sub_details.get("subscription_expiry")
-    if sub_details.get("subscription") != "free" and expiry:
-        try:
-            expiry_dt = datetime.fromisoformat(expiry) if isinstance(expiry, str) else expiry
-            days_left = max((expiry_dt.date() - datetime.utcnow().date()).days, 0)
-        except Exception:
-            days_left = 0
-
-    return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
-
+    return render_template("profile.html", user=user, subscription=sub_details)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -144,9 +128,11 @@ def signup():
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
+
         if not name or not email or not password:
             flash("Please fill all fields", "warning")
             return redirect(url_for("signup"))
+
         ok = signup_user(name, email, password, subscription="free")
         if ok:
             session.permanent = True
@@ -160,13 +146,13 @@ def signup():
             return redirect(url_for("signup"))
     return render_template("signup.html")
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         device_id = request.headers.get("X-Device-Id") or request.remote_addr
+
         result = login_user(email, password, device_id)
         if result is True:
             user = get_user_by_email(email)
@@ -188,7 +174,6 @@ def login():
             return redirect(url_for("login"))
     return render_template("login.html")
 
-
 @app.route("/logout")
 def logout():
     session.clear()
@@ -206,9 +191,9 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 1, "duration_months": 1},
+        "basic":     {"amount": 3000, "duration_months": 1},
         "standard":  {"amount": 3500, "duration_months": 1},
-        "premium":   {"amount": 6000,    "duration_months": 2},  # test ₹1
+        "premium":   {"amount": 6000, "duration_months": 2},  # updated ₹6000
     }
 
     if plan not in PLAN_MAP:
@@ -225,10 +210,10 @@ def create_order():
 
     try:
         order = razorpay_client.order.create({
-            "amount": amount * 600000,
+            "amount": amount * 100,
             "currency": "INR",
             "receipt": receipt,
-            "payment_capture": 6000,
+            "payment_capture": 1,
             "notes": {"plan": plan}
         })
     except Exception as e:
@@ -285,13 +270,11 @@ def payment_success():
             _apply_session_subscription_from_db(email)
             flash("✅ Subscription Activated Successfully!", "success")
         else:
-            # fallback session
             session["subscription"] = plan
             session["subscription_expiry"] = (datetime.utcnow() + timedelta(days=30*duration)).isoformat()
             session.modified = True
             flash("✅ Subscription set in session (DB update may have failed)", "warning")
 
-        # Cleanup ephemeral payment session keys
         session.pop("selected_plan", None)
         session.pop("selected_duration", None)
         session.pop("razorpay_order_id", None)
@@ -331,9 +314,7 @@ def razorpay_webhook():
                     print(f"Webhook: activated {plan} for {email}")
                 except Exception as e:
                     print("Webhook activation error:", e)
-
         return "", 200
-
     except Exception as e:
         print("Webhook error:", e)
         return "Error processing webhook", 400
