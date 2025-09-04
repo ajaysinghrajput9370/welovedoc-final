@@ -162,6 +162,18 @@ def check_subscription(email):
         return now_utc <= expiry_dt  # True if still active
     return True  # subscription set but no expiry, treat as active
 
+def get_days_left(email):
+    """Return integer days left for subscription (0 if expired or free)."""
+    u = get_user_by_email(email)
+    if not u:
+        return 0
+    expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
+    if not expiry_dt:
+        return 0
+    now_utc = datetime.now(timezone.utc)
+    delta = expiry_dt - now_utc
+    return max(0, delta.days)
+
 def get_subscription_details(email):
     u = get_user_by_email(email)
     if not u:
