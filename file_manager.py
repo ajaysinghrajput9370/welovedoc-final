@@ -1,4 +1,3 @@
-# file_manager.py
 import os
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -30,32 +29,18 @@ def init_db():
     conn.close()
 
 def ensure_schema():
-    """
-    Ensure important columns exist (useful if DB was created earlier without columns).
-    Adds columns if missing. Safe to run on existing DB.
-    """
+    """Ensure important columns exist (safe on existing DB)."""
     conn = get_conn()
     cursor = conn.cursor()
-
-    # Get existing columns
     cursor.execute("PRAGMA table_info(users)")
     cols = [row[1] for row in cursor.fetchall()]
 
     if "subscription" not in cols:
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN subscription TEXT DEFAULT 'free'")
-        except Exception:
-            pass
+        cursor.execute("ALTER TABLE users ADD COLUMN subscription TEXT DEFAULT 'free'")
     if "subscription_expiry" not in cols:
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN subscription_expiry TEXT")
-        except Exception:
-            pass
+        cursor.execute("ALTER TABLE users ADD COLUMN subscription_expiry TEXT")
     if "devices" not in cols:
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN devices TEXT")
-        except Exception:
-            pass
+        cursor.execute("ALTER TABLE users ADD COLUMN devices TEXT")
 
     conn.commit()
     conn.close()
@@ -82,33 +67,35 @@ def signup_user(name, email, password, subscription="free"):
     cursor.execute("""
         INSERT INTO users (name, email, password, subscription, subscription_expiry, devices)
         VALUES (?, ?, ?, ?, ?, ?)
-    """, (name or "", email, hashed_pw, subscription, None, None))
+    """, (name or "", email, hashed_pw, subscription or "free", None, None))
     conn.commit()
     conn.close()
     return True
 
 def get_user_by_email(email):
+    """Fetch user dict with safe defaults (never returns None values)."""
     email = (email or "").strip().lower()
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, password, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
+    cursor.execute(
+        "SELECT id, name, email, password, subscription, subscription_expiry, devices FROM users WHERE email=?",
+        (email,))
     row = cursor.fetchone()
     conn.close()
     if not row:
         return None
     return {
         "id": row[0],
-        "name": row[1],
-        "email": row[2],
-        "password": row[3],
-        "subscription": row[4],
-        "subscription_expiry": row[5],
-        "devices": row[6]
+        "name": row[1] or "",
+        "email": row[2] or "",
+        "password": row[3] or "",
+        "subscription": row[4] or "free",
+        "subscription_expiry": row[5] or "",
+        "devices": row[6] or ""
     }
 
 # ---------------- Device / Login ----------------
 def get_device_limit(subscription):
-    """Return device limit per plan (adjust as required)."""
     s = (subscription or "").lower()
     if s == "basic":
         return 1
@@ -119,24 +106,19 @@ def get_device_limit(subscription):
     return 1  # default for free
 
 def login_user(email, password, device_id):
-    """
-    Authenticate user and enforce device limit.
-    Returns:
-      - True on successful login
-      - "device_limit" if device limit reached
-      - False on invalid credentials
-    """
+    """Authenticate user and enforce device limit."""
     email = (email or "").strip().lower()
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, password, subscription, subscription_expiry, devices FROM users WHERE email=?", (email,))
+    cursor.execute(
+        "SELECT id, password, subscription, subscription_expiry, devices FROM users WHERE email=?",
+        (email,))
     row = cursor.fetchone()
     if not row:
         conn.close()
         return False
 
     user_id, hashed_pw, subscription, expiry, devices = row
-
     if not check_password_hash(hashed_pw, password):
         conn.close()
         return False
@@ -156,7 +138,6 @@ def login_user(email, password, device_id):
 
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
-    """Try multiple formats; return datetime or None."""
     if not s:
         return None
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
@@ -164,63 +145,47 @@ def parse_datetime_safe(s):
             return datetime.strptime(s, fmt)
         except Exception:
             continue
-    # try fromisoformat as last resort
     try:
         return datetime.fromisoformat(s)
     except Exception:
         return None
 
 def check_subscription(email):
-    """
-    Boolean check: returns True if user has an active paid subscription (non-free and not expired).
-    This is used by web routes to allow/deny access.
-    """
+    """Return True if user has active paid subscription."""
     u = get_user_by_email(email)
     if not u:
         return False
     sub = (u.get("subscription") or "free").lower()
-    if sub in ("free", "", None):
+    if sub == "free":
         return False
-    expiry = u.get("subscription_expiry")
-    expiry_dt = parse_datetime_safe(expiry)
+    expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
         return expiry_dt >= datetime.now()
-    # If expiry missing but subscription set to paid, treat as active (you may change this behavior)
-    return True
+    return True  # if subscription set but no expiry
 
 def get_subscription_details(email):
-    """Return (subscription, expiry_datetime_or_None) for UI or admin pages."""
     u = get_user_by_email(email)
     if not u:
         return None
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     return {
-        "subscription": u.get("subscription"),
+        "subscription": u.get("subscription") or "free",
         "subscription_expiry": expiry_dt
     }
 
 def activate_subscription(email, plan, duration_months=1):
-    """
-    Activate/extend subscription for `email`.
-    - plan: string like 'premium'/'standard'/'basic'
-    - duration_months: integer months to add (will set expiry to now + duration)
-    Returns True on success, False on error.
-    """
+    """Activate/extend subscription for `email`."""
     email = (email or "").strip().lower()
     try:
         conn = get_conn()
         cursor = conn.cursor()
 
-        # compute new expiry: If user already has expiry in future, extend from that expiry
         cursor.execute("SELECT subscription_expiry FROM users WHERE email=?", (email,))
         row = cursor.fetchone()
         now = datetime.now()
         if row and row[0]:
             existing = parse_datetime_safe(row[0])
-            if existing and existing > now:
-                base = existing
-            else:
-                base = now
+            base = existing if existing and existing > now else now
         else:
             base = now
 
@@ -231,52 +196,42 @@ def activate_subscription(email, plan, duration_months=1):
             UPDATE users
             SET subscription=?, subscription_expiry=?
             WHERE email=?
-        """, (plan, expiry_str, email))
+        """, (plan or "premium", expiry_str, email))
         conn.commit()
-
-        # verify
-        cursor.execute("SELECT subscription, subscription_expiry FROM users WHERE email=?", (email,))
-        updated = cursor.fetchone()
         conn.close()
-        print(f"✅ Subscription updated for {email}: {updated}")
+        print(f"✅ Subscription updated for {email}: {plan}, {expiry_str}")
         return True
     except Exception as e:
         print("❌ Error in activate_subscription:", e)
         return False
 
-# ---------------- Admin helpers / debug ----------------
+# ---------------- Admin helpers ----------------
 def list_users(limit=100):
-    """Return list of users for debugging/admin UI."""
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, email, subscription, subscription_expiry, devices FROM users LIMIT ?", (limit,))
     rows = cursor.fetchall()
     conn.close()
-    out = []
-    for r in rows:
-        out.append({
-            "id": r[0],
-            "name": r[1],
-            "email": r[2],
-            "subscription": r[3],
-            "subscription_expiry": r[4],
-            "devices": r[5]
-        })
-    return out
+    return [{
+        "id": r[0],
+        "name": r[1] or "",
+        "email": r[2] or "",
+        "subscription": r[3] or "free",
+        "subscription_expiry": r[4] or "",
+        "devices": r[5] or ""
+    } for r in rows]
 
-# ---------------- Quick manual helpers (one-off usage) ----------------
 def add_device_to_user(email, device_id):
     """Manual helper for testing."""
     u = get_user_by_email(email)
     if not u:
         return False
     devices = [d for d in (u.get("devices") or "").split(",") if d]
-    if device_id in devices:
-        return True
-    devices.append(device_id)
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE users SET devices=? WHERE email=?", (",".join(devices), email))
-    conn.commit()
-    conn.close()
+    if device_id not in devices:
+        devices.append(device_id)
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET devices=? WHERE email=?", (",".join(devices), email))
+        conn.commit()
+        conn.close()
     return True
