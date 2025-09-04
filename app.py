@@ -4,7 +4,7 @@ import uuid
 import razorpay
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from dotenv import load_dotenv
 import hmac
 import hashlib
@@ -48,46 +48,32 @@ fm_init_db()
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
+    """Check if user has an active paid subscription"""
     try:
         details = get_subscription_details(email)
         if details:
             sub = (details.get("subscription") or "").lower()
             expiry = details.get("subscription_expiry")
             if sub and sub != "free":
-                if expiry:
-                    if isinstance(expiry, str):
-                        try:
-                            expiry_dt = datetime.fromisoformat(expiry)
-                        except Exception:
-                            expiry_dt = None
-                    elif isinstance(expiry, datetime):
-                        expiry_dt = expiry
-                    else:
-                        expiry_dt = None
-                    if expiry_dt:
-                        return datetime.utcnow() <= expiry_dt
-                    else:
+                if isinstance(expiry, datetime):
+                    return datetime.now(timezone.utc) <= expiry.astimezone(timezone.utc)
+                elif isinstance(expiry, str):
+                    try:
+                        expiry_dt = datetime.fromisoformat(expiry)
+                        return datetime.now(timezone.utc) <= expiry_dt
+                    except Exception:
                         return True
                 else:
                     return True
-        sess_sub = (session.get("subscription") or "").lower()
-        sess_exp = session.get("subscription_expiry")
-        if sess_sub and sess_sub != "free":
-            if sess_exp:
-                try:
-                    sess_dt = datetime.fromisoformat(sess_exp)
-                    return datetime.utcnow() <= sess_dt
-                except Exception:
-                    return True
-            return True
     except Exception as e:
-        print("has_active_subscription unexpected error:", e)
+        print("has_active_subscription error:", e)
     try:
         return bool(check_subscription(email))
     except Exception:
         return False
 
 def _apply_session_subscription_from_db(email):
+    """Sync subscription info from DB to session"""
     try:
         details = get_subscription_details(email)
     except Exception as e:
@@ -144,7 +130,6 @@ def signup():
             flash("Email already registered!", "danger")
             return redirect(url_for("signup"))
     return render_template("signup.html")
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -178,6 +163,7 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
+
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -201,7 +187,6 @@ def create_order():
     amount_inr = PLAN_MAP[plan]["amount"]
     duration = PLAN_MAP[plan]["duration_months"]
 
-    # Razorpay requires amount in paise
     amount_paise = amount_inr * 100
 
     session["selected_plan"] = plan
@@ -260,14 +245,12 @@ def payment_success():
         duration = session.get("selected_duration", 1)
         email = session["email"]
 
-        # Activate subscription
         ok = False
         try:
             ok = activate_subscription(email, plan, duration)
         except Exception as e:
             print("activate_subscription error:", e)
 
-        # Update session from DB if activation succeeded
         if ok:
             _apply_session_subscription_from_db(email)
             flash("✅ Subscription Activated Successfully!", "success")
@@ -287,7 +270,6 @@ def payment_success():
         print("Error in payment_success:", e)
         flash("Payment processing error occurred", "danger")
         return redirect(url_for("pricing"))
-
 # ---------------- RAZORPAY WEBHOOK ----------------
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
