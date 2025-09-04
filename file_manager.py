@@ -1,12 +1,12 @@
 import os
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta, timezone  # <- timezone imported
+from datetime import datetime, timedelta, timezone  # UTC-aware
 
 DB_NAME = "users.db"
-DB_PATH = DB_NAME  # change if storing elsewhere
+DB_PATH = DB_NAME
 
-# ---------------- DB helpers & init ----------------
+# ---------------- DB helpers ----------------
 def get_conn():
     return sqlite3.connect(DB_PATH)
 
@@ -45,7 +45,7 @@ def ensure_schema():
     conn.commit()
     conn.close()
 
-# initialize DB on import
+# ---------------- Initialize DB ----------------
 ensure_schema()
 init_db()
 
@@ -158,7 +158,6 @@ def check_subscription(email):
         return False
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
-        # UTC now
         now_utc = datetime.now(timezone.utc)
         return now_utc <= expiry_dt  # True if still active
     return True  # subscription set but no expiry, treat as active
