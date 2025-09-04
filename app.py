@@ -48,13 +48,12 @@ except Exception as e:
     print("⚠️ Razorpay client init failed:", e)
 
 # ---------------- Ensure DB schema ----------------
-# file_manager exposes ensure_schema and init_db — call them to be safe
 ensure_schema()
 fm_init_db()
 
 # ---------------- Helper: check active subscription ----------------
 def has_active_subscription(email: str) -> bool:
-    """Wrapper using file_manager.check_subscription for clarity."""
+    """Authoritative check from DB (do not rely solely on session)."""
     try:
         return check_subscription(email)
     except Exception as e:
@@ -64,9 +63,15 @@ def has_active_subscription(email: str) -> bool:
 # ---------------- AUTH ROUTES ----------------
 @app.route("/profile")
 def profile():
-    if "user" not in session:   # agar user login nahi hai to login page bhejo
+    # Use session["email"] consistently
+    if "email" not in session:
+        flash("Login required", "warning")
         return redirect(url_for("login"))
-    return render_template("profile.html")
+    user = get_user_by_email(session["email"])
+    sub_details = get_subscription_details(session["email"]) or {}
+    return render_template("profile.html", user=user, subscription=sub_details)
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -83,6 +88,12 @@ def signup():
             session.permanent = True
             session["user_name"] = name
             session["email"] = email
+            # set session subscription info from DB (fresh)
+            details = get_subscription_details(email)
+            if details:
+                session["subscription"] = details.get("subscription")
+                expiry = details.get("subscription_expiry")
+                session["subscription_expiry"] = expiry.isoformat() if expiry else None
             flash("Signup successful!", "success")
             return redirect(url_for("home"))
         else:
@@ -110,6 +121,17 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             session["email"] = email
+
+            # IMPORTANT: populate subscription info from DB into session
+            sub_details = get_subscription_details(email)
+            if sub_details:
+                session["subscription"] = sub_details.get("subscription")
+                expiry = sub_details.get("subscription_expiry")
+                session["subscription_expiry"] = expiry.isoformat() if expiry else None
+            else:
+                session["subscription"] = "free"
+                session["subscription_expiry"] = None
+
             flash("Login successful!", "success")
             return redirect(url_for("home"))
 
@@ -125,7 +147,9 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.clear()
+    session_keys = list(session.keys())
+    for k in session_keys:
+        session.pop(k, None)
     flash("You have been logged out.", "info")
     return redirect(url_for("home"))
 # app.py — Part 2 (continue)
@@ -176,6 +200,22 @@ def create_order():
     return jsonify(order)
 
 
+def _apply_session_subscription_from_db(email):
+    """Helper: refresh subscription info from DB into session."""
+    try:
+        details = get_subscription_details(email)
+        if not details:
+            session["subscription"] = "free"
+            session["subscription_expiry"] = None
+            return
+        session["subscription"] = details.get("subscription")
+        expiry = details.get("subscription_expiry")
+        session["subscription_expiry"] = expiry.isoformat() if expiry else None
+        session.modified = True
+    except Exception as e:
+        print("Error refreshing session subscription:", e)
+
+
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     try:
@@ -216,8 +256,10 @@ def payment_success():
         print(f"Activating {plan} plan for {email} with {duration} months duration")
         ok = activate_subscription(email, plan, duration)
         if ok:
+            # IMPORTANT: refresh session subscription from DB so protected routes see it
+            _apply_session_subscription_from_db(email)
             flash("✅ Subscription Activated Successfully!", "success")
-            print("Subscription activated in database")
+            print("Subscription activated in database and session refreshed")
         else:
             flash("❌ Database error activating subscription", "danger")
             print("Failed to activate subscription in database")
@@ -266,8 +308,6 @@ def razorpay_webhook():
                 payment = data.get("payload", {}).get("payment", {}).get("entity", {})
                 email = payment.get("email")
                 description = payment.get("description", "") or ""
-                # Expect plan in description or pass data via notes in order creation
-                # Example: description 'premium Subscription - ₹1' -> parse plan
                 plan = None
                 if "premium" in description.lower():
                     plan = "premium"
@@ -277,10 +317,11 @@ def razorpay_webhook():
                     plan = "basic"
 
                 if email and plan:
-                    # Default duration mapping (same as create_order)
                     duration_map = {"basic": 1, "standard": 1, "premium": 2}
                     duration = duration_map.get(plan, 1)
-                    activate_subscription(email, plan, duration)
+                    ok = activate_subscription(email, plan, duration)
+                    if ok:
+                        print(f"Webhook: activated {plan} for {email}")
         except Exception as e:
             print("Webhook auto-activate error:", e)
 
@@ -309,6 +350,8 @@ def test_payment(plan):
         return redirect(url_for("pricing"))
 
     if activate_subscription(session["email"], plan, duration):
+        # mirror DB into session immediately
+        _apply_session_subscription_from_db(session["email"])
         flash(f"✅ {plan.capitalize()} Subscription Activated for Testing!", "success")
     else:
         flash("❌ Failed to activate test subscription", "danger")
@@ -340,6 +383,7 @@ def esic_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
 
+    # AUTHORITATIVE DB check (ensures we use DB state)
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
@@ -360,7 +404,6 @@ def pf_highlight_page():
 
 
 # ---------------- PROCESS API ----------------
-# Note: highlight_pf and highlight_esic must return (output_pdf_path, not_found_excel_path)
 from pf_highlight import highlight_pf
 from esic_highlight import highlight_esic
 
@@ -421,5 +464,6 @@ def admin_users():
 
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # default 5000 rakho
     app.run(host="0.0.0.0", port=port)
+
