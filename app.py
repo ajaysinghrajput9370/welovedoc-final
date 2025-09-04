@@ -11,7 +11,7 @@ import hmac
 import hashlib
 import json
 
-# Import functions from file_manager.py (make sure file_manager.py is the fixed version)
+# Import from file_manager.py
 from file_manager import (
     ensure_schema, init_db as fm_init_db,
     signup_user, login_user, check_subscription,
@@ -19,7 +19,7 @@ from file_manager import (
     get_subscription_details, list_users
 )
 
-# ---------------- App Config ----------------
+# ---------------- Config ----------------
 load_dotenv()
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['UPLOAD_FOLDER'] = os.getenv("UPLOAD_FOLDER", "uploads")
@@ -27,50 +27,56 @@ app.config['RESULT_FOLDER'] = os.getenv("RESULT_FOLDER", "results")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
 app.permanent_session_lifetime = timedelta(days=30)
 
-# Ensure folders exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
-# ---------------- Razorpay / Env ----------------
+# ---------------- Razorpay ----------------
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 ADMIN_VIEW_SECRET = os.getenv("ADMIN_VIEW_SECRET", "changeme_admin_secret")
-
-if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
-    print("⚠️  Missing Razorpay keys in environment. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.")
 
 razorpay_client = None
 try:
     if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
         razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 except Exception as e:
-    print("⚠️ Razorpay client init failed:", e)
+    print("⚠️ Razorpay init failed:", e)
 
-# ---------------- Ensure DB schema ----------------
+# ---------------- Ensure DB ----------------
 ensure_schema()
 fm_init_db()
 
-# ---------------- Helper: check active subscription ----------------
+# ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
-    """Authoritative check from DB (do not rely solely on session)."""
+    """Authoritative DB check"""
     try:
         return check_subscription(email)
     except Exception as e:
-        print("Error checking subscription:", e)
+        print("Check subscription error:", e)
         return False
 
-# ---------------- AUTH ROUTES ----------------
+def _apply_session_subscription_from_db(email):
+    """Refresh session subscription info from DB"""
+    details = get_subscription_details(email)
+    if not details:
+        session["subscription"] = "free"
+        session["subscription_expiry"] = None
+    else:
+        session["subscription"] = details.get("subscription")
+        expiry = details.get("subscription_expiry")
+        session["subscription_expiry"] = expiry.isoformat() if expiry else None
+    session.modified = True
+
+# ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
-    # Use session["email"] consistently
     if "email" not in session:
         flash("Login required", "warning")
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
     return render_template("profile.html", user=user, subscription=sub_details)
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -88,12 +94,7 @@ def signup():
             session.permanent = True
             session["user_name"] = name
             session["email"] = email
-            # set session subscription info from DB (fresh)
-            details = get_subscription_details(email)
-            if details:
-                session["subscription"] = details.get("subscription")
-                expiry = details.get("subscription_expiry")
-                session["subscription_expiry"] = expiry.isoformat() if expiry else None
+            _apply_session_subscription_from_db(email)
             flash("Signup successful!", "success")
             return redirect(url_for("home"))
         else:
@@ -101,7 +102,6 @@ def signup():
             return redirect(url_for("signup"))
 
     return render_template("signup.html")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -114,29 +114,19 @@ def login():
         if result is True:
             user = get_user_by_email(email)
             if not user:
-                flash("Login error: user not found after auth", "danger")
+                flash("Login error", "danger")
                 return redirect(url_for("login"))
 
             session.permanent = True
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             session["email"] = email
-
-            # IMPORTANT: populate subscription info from DB into session
-            sub_details = get_subscription_details(email)
-            if sub_details:
-                session["subscription"] = sub_details.get("subscription")
-                expiry = sub_details.get("subscription_expiry")
-                session["subscription_expiry"] = expiry.isoformat() if expiry else None
-            else:
-                session["subscription"] = "free"
-                session["subscription_expiry"] = None
+            _apply_session_subscription_from_db(email)
 
             flash("Login successful!", "success")
             return redirect(url_for("home"))
-
         elif result == "device_limit":
-            flash("❌ Device limit exceeded for this subscription", "danger")
+            flash("❌ Device limit exceeded", "danger")
             return redirect(url_for("login"))
         else:
             flash("Invalid credentials", "danger")
@@ -144,15 +134,12 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/logout")
 def logout():
-    session_keys = list(session.keys())
-    for k in session_keys:
-        session.pop(k, None)
-    flash("You have been logged out.", "info")
+    session.clear()
+    flash("Logged out", "info")
     return redirect(url_for("home"))
-# app.py — Part 2 (continue)
+# app.py — Part 2 (payment, tools, process, main)
 # ---------------- PAYMENT ROUTES ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -200,22 +187,6 @@ def create_order():
     return jsonify(order)
 
 
-def _apply_session_subscription_from_db(email):
-    """Helper: refresh subscription info from DB into session."""
-    try:
-        details = get_subscription_details(email)
-        if not details:
-            session["subscription"] = "free"
-            session["subscription_expiry"] = None
-            return
-        session["subscription"] = details.get("subscription")
-        expiry = details.get("subscription_expiry")
-        session["subscription_expiry"] = expiry.isoformat() if expiry else None
-        session.modified = True
-    except Exception as e:
-        print("Error refreshing session subscription:", e)
-
-
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     try:
@@ -256,7 +227,7 @@ def payment_success():
         print(f"Activating {plan} plan for {email} with {duration} months duration")
         ok = activate_subscription(email, plan, duration)
         if ok:
-            # IMPORTANT: refresh session subscription from DB so protected routes see it
+            # refresh session from DB so protected routes recognize the new state
             _apply_session_subscription_from_db(email)
             flash("✅ Subscription Activated Successfully!", "success")
             print("Subscription activated in database and session refreshed")
@@ -301,19 +272,19 @@ def razorpay_webhook():
         data = json.loads(payload or "{}")
         print("📦 Webhook received:", data)
 
-        # Optional: automatically activate subscription on payment.captured webhook
+        # Auto-activate on payment.captured if possible
         try:
             event = data.get("event")
             if event == "payment.captured":
                 payment = data.get("payload", {}).get("payment", {}).get("entity", {})
                 email = payment.get("email")
-                description = payment.get("description", "") or ""
+                description = (payment.get("description") or "").lower()
                 plan = None
-                if "premium" in description.lower():
+                if "premium" in description:
                     plan = "premium"
-                elif "standard" in description.lower():
+                elif "standard" in description:
                     plan = "standard"
-                elif "basic" in description.lower():
+                elif "basic" in description:
                     plan = "basic"
 
                 if email and plan:
@@ -350,7 +321,6 @@ def test_payment(plan):
         return redirect(url_for("pricing"))
 
     if activate_subscription(session["email"], plan, duration):
-        # mirror DB into session immediately
         _apply_session_subscription_from_db(session["email"])
         flash(f"✅ {plan.capitalize()} Subscription Activated for Testing!", "success")
     else:
@@ -383,7 +353,7 @@ def esic_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
 
-    # AUTHORITATIVE DB check (ensures we use DB state)
+    # Always check DB authoritative state
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
@@ -464,6 +434,5 @@ def admin_users():
 
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # default 5000 rakho
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
