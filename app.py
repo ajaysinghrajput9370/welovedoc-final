@@ -48,7 +48,6 @@ fm_init_db()
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
-    """Check if user has an active paid subscription"""
     try:
         details = get_subscription_details(email)
         if details:
@@ -73,7 +72,6 @@ def has_active_subscription(email: str) -> bool:
         return False
 
 def _apply_session_subscription_from_db(email):
-    """Sync subscription info from DB to session"""
     try:
         details = get_subscription_details(email)
     except Exception as e:
@@ -105,7 +103,17 @@ def profile():
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
-    return render_template("profile.html", user=user, subscription=sub_details)
+    # Days left calculation
+    days_left = None
+    try:
+        expiry = sub_details.get("subscription_expiry")
+        if expiry:
+            if isinstance(expiry, str):
+                expiry = datetime.fromisoformat(expiry)
+            days_left = (expiry - datetime.utcnow()).days
+    except Exception:
+        days_left = None
+    return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -176,9 +184,9 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 1, "duration_months": 1},
-        "standard":  {"amount": 3500, "duration_months": 1},
-        "premium":   {"amount": 6000, "duration_months": 2},
+        "basic":     {"amount": 3000, "duration_months": 1},   # ₹30.00
+        "standard":  {"amount": 3500, "duration_months": 1},   # ₹35.00
+        "premium":   {"amount": 6000, "duration_months": 2},   # ₹60.00
     }
 
     if plan not in PLAN_MAP:
@@ -186,7 +194,7 @@ def create_order():
 
     amount_inr = PLAN_MAP[plan]["amount"]
     duration = PLAN_MAP[plan]["duration_months"]
-    amount_paise = amount_inr * 100
+    amount_paise = amount_inr  # Razorpay amount in paise already
 
     session["selected_plan"] = plan
     session["selected_duration"] = duration
