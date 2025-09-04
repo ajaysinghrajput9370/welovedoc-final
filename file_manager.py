@@ -61,9 +61,11 @@ def login_user(email, password, device_id):
 # ---------------- Device Limit Per Plan ----------------
 def get_device_limit(subscription):
     if subscription == "basic":
+        return 1
+    elif subscription == "standard":
         return 2
-    elif subscription in ["standard", "premium"]:
-        return 4
+    elif subscription == "premium":
+        return 3
     return 1  # Free plan default
 # ---------------- Subscription Check ----------------
 def check_subscription(email):
@@ -78,17 +80,21 @@ def check_subscription(email):
 
     sub_type, expiry = row
 
+    # Free users never allowed
     if sub_type == "free" or not expiry:
         return False
 
     try:
-        # Try parsing datetime with time and fallback to just date
-        try:
-            expiry_date = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            expiry_date = datetime.strptime(expiry, "%Y-%m-%d")
+        # Handle both datetime and date-only formats
+        expiry_date = None
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            try:
+                expiry_date = datetime.strptime(expiry, fmt)
+                break
+            except ValueError:
+                continue
 
-        if expiry_date >= datetime.now():
+        if expiry_date and expiry_date >= datetime.now():
             return True
     except Exception as e:
         print("⚠️ Date parse error in check_subscription:", e)
