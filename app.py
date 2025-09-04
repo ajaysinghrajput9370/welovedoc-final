@@ -178,7 +178,6 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
-
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -226,6 +225,7 @@ def create_order():
     session["razorpay_order_id"] = order.get("id")
     session.modified = True
     return jsonify(order)
+
 # ---------------- PAYMENT SUCCESS ----------------
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
@@ -288,7 +288,6 @@ def payment_success():
         flash("Payment processing error occurred", "danger")
         return redirect(url_for("pricing"))
 
-
 # ---------------- RAZORPAY WEBHOOK ----------------
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
@@ -322,7 +321,6 @@ def razorpay_webhook():
         print("Webhook error:", e)
         return "Error processing webhook", 400
 
-
 # ---------------- TEST PAYMENT (FOR DEBUG) ----------------
 @app.route("/test_payment/<plan>")
 def test_payment(plan):
@@ -349,17 +347,14 @@ def test_payment(plan):
 
     return redirect(url_for("home"))
 
-
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
     return render_template("welovedoc.html")
 
-
 @app.route("/pricing")
 def pricing():
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
-
 
 # ---------------- PROTECTED TOOL ROUTES ----------------
 def _require_login():
@@ -367,7 +362,6 @@ def _require_login():
         flash("Login required", "warning")
         return False
     return True
-
 
 @app.route("/esic-highlight")
 def esic_highlight_page():
@@ -378,7 +372,6 @@ def esic_highlight_page():
         return redirect(url_for("pricing"))
     return render_template("esic-highlight.html")
 
-
 @app.route("/pf-highlight")
 def pf_highlight_page():
     if not _require_login():
@@ -387,7 +380,6 @@ def pf_highlight_page():
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
     return render_template("pf-highlight.html")
-
 
 # ---------------- PROCESS API ----------------
 from pf_highlight import highlight_pf
@@ -432,12 +424,10 @@ def process():
         print("Process error:", e)
         return jsonify({"error": str(e)}), 500
 
-
 # ---------------- DOWNLOAD ----------------
 @app.route("/download/<filename>")
 def download_file(filename):
     return send_from_directory(app.config['RESULT_FOLDER'], filename, as_attachment=True)
-
 
 # ---------------- Admin / Debug ----------------
 @app.route("/admin/users")
@@ -447,7 +437,6 @@ def admin_users():
         abort(403)
     users = list_users(200)
     return render_template("admin_users.html", users=users)
-
 
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
