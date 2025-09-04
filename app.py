@@ -130,6 +130,7 @@ def signup():
             flash("Email already registered!", "danger")
             return redirect(url_for("signup"))
     return render_template("signup.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -163,7 +164,6 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
-
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -186,7 +186,6 @@ def create_order():
 
     amount_inr = PLAN_MAP[plan]["amount"]
     duration = PLAN_MAP[plan]["duration_months"]
-
     amount_paise = amount_inr * 100
 
     session["selected_plan"] = plan
@@ -270,6 +269,7 @@ def payment_success():
         print("Error in payment_success:", e)
         flash("Payment processing error occurred", "danger")
         return redirect(url_for("pricing"))
+
 # ---------------- RAZORPAY WEBHOOK ----------------
 @app.route("/razorpay_webhook", methods=["POST"])
 def razorpay_webhook():
@@ -328,7 +328,6 @@ def test_payment(plan):
         flash(f"✅ {plan.capitalize()} Subscription Activated in session (DB update failed).", "warning")
 
     return redirect(url_for("home"))
-
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
