@@ -15,6 +15,7 @@ import json
 from file_manager import (
     ensure_schema, init_db as fm_init_db,
     signup_user, login_user, check_subscription,
+    days_left=days_left
     activate_subscription, get_user_by_email,
     get_subscription_details, list_users
 )
