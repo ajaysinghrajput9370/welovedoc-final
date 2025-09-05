@@ -143,15 +143,25 @@ def _apply_session_subscription_from_db(email):
             session["subscription_expiry"] = None
     session.modified = True
 
-# ---------------- Auth Routes ----------------
+## ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
     if "email" not in session:
         flash("Login required", "warning")
         return redirect(url_for("login"))
-    user = get_user_by_email(session["email"])
-    sub_details = get_subscription_details(session["email"]) or {}
-    return render_template("profile.html", user=user, subscription=sub_details)
+
+    email = session["email"]
+    user = get_user_by_email(email)
+    sub_details = get_subscription_details(email) or {}
+    days_left = get_days_left(email)  # <-- add this
+
+    return render_template(
+        "profile.html",
+        user=user,
+        subscription=sub_details,
+        days_left=days_left  # <-- pass to template
+    )
+
 
 
 @app.route("/signup", methods=["GET", "POST"])
