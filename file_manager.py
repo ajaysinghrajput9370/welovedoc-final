@@ -4,11 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone  # UTC-aware
 
 DB_NAME = "users.db"
-DB_PATH = DB_NAME
+DB_PATH = DB_NAME  # Ensure same path on deploy
 
 # ---------------- DB helpers ----------------
 def get_conn():
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
 def init_db():
     """Create users table if not exists"""
@@ -98,9 +98,7 @@ def get_device_limit(subscription):
     s = (subscription or "").lower()
     if s == "basic":
         return 2
-    elif s == "standard":
-        return 4
-    elif s == "premium":
+    elif s in ["standard", "premium"]:
         return 4
     return 1  # free default
 
@@ -122,6 +120,7 @@ def login_user(email, password, device_id):
         conn.close()
         return False
 
+    # Handle devices
     devices_list = [d for d in (devices or "").split(",") if d]
     if device_id not in devices_list:
         limit = get_device_limit(subscription)
@@ -134,6 +133,7 @@ def login_user(email, password, device_id):
 
     conn.close()
     return True
+
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
     if not s:
@@ -159,8 +159,8 @@ def check_subscription(email):
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
         now_utc = datetime.now(timezone.utc)
-        return now_utc <= expiry_dt  # True if still active
-    return True  # subscription set but no expiry, treat as active
+        return now_utc <= expiry_dt
+    return True  # No expiry set → treat as active
 
 def get_days_left(email):
     """Return integer days left for subscription (0 if expired or free)."""
@@ -179,19 +179,17 @@ def get_subscription_details(email):
     if not u:
         return None
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
-    expiry_local = expiry_dt.astimezone() if expiry_dt else None
     return {
         "subscription": u.get("subscription") or "free",
-        "subscription_expiry": expiry_local
+        "subscription_expiry": expiry_dt
     }
 
 def activate_subscription(email, plan, duration_months=1):
-    """Activate or extend subscription for `email` with UTC-safe expiry."""
+    """Activate or extend subscription with UTC-safe expiry."""
     email = (email or "").strip().lower()
     try:
         conn = get_conn()
         cursor = conn.cursor()
-
         cursor.execute("SELECT subscription_expiry FROM users WHERE email=?", (email,))
         row = cursor.fetchone()
         now_utc = datetime.now(timezone.utc)
@@ -202,7 +200,7 @@ def activate_subscription(email, plan, duration_months=1):
             base = now_utc
 
         new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
-        expiry_str = new_expiry.isoformat()  # ISO format in UTC
+        expiry_str = new_expiry.isoformat()
 
         cursor.execute("""
             UPDATE users
@@ -237,7 +235,7 @@ def list_users(limit=100):
     } for r in rows]
 
 def add_device_to_user(email, device_id):
-    """Manual helper for testing."""
+    """Manual helper to add a device."""
     u = get_user_by_email(email)
     if not u:
         return False
