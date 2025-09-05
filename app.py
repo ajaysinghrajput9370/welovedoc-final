@@ -103,16 +103,20 @@ def profile():
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
-    # Days left calculation
-    days_left = None
+    
+    # ----- FIX: Ensure days_left is always int -----
+    days_left = 0
     try:
         expiry = sub_details.get("subscription_expiry")
         if expiry:
             if isinstance(expiry, str):
                 expiry = datetime.fromisoformat(expiry)
-            days_left = (expiry - datetime.utcnow()).days
+            delta = expiry - datetime.utcnow()
+            days_left = max(0, delta.days)
     except Exception:
-        days_left = None
+        days_left = 0
+    # -------------------------------------------------
+    
     return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -336,6 +340,7 @@ def test_payment(plan):
         flash(f"✅ {plan.capitalize()} Subscription Activated in session (DB update failed).", "warning")
 
     return redirect(url_for("home"))
+
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
