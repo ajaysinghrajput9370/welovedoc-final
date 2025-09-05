@@ -89,13 +89,12 @@
 
     <div class="detail"><b>Name:</b> {{ user.name }}</div>
     <div class="detail"><b>Email:</b> {{ user.email }}</div>
-    <div class="detail"><b>Subscription Plan:</b> {{ subscription.subscription|default('Free')|capitalize }}</div>
+    <div class="detail"><b>Subscription Plan:</b> {{ user.subscription|default('Free')|capitalize }}</div>
 
-    {% set days = days_left|default(0) %}
-    {% if subscription.subscription|lower != "free" %}
-      {% if days > 0 %}
+    {% if user.subscription|lower != "free" %}
+      {% if days_left > 0 %}
         <div class="countdown active-plan">
-          ✅ Days Left: {{ days }}
+          ✅ Days Left: {{ days_left }}
         </div>
       {% else %}
         <div class="countdown expired-plan">
