@@ -10,6 +10,10 @@ import hmac
 import hashlib
 import json
 
+# ---------------- Persistent DB Fix ----------------
+PERSISTENT_DIR = os.getenv("DATA_DIR", "/opt/render/data")
+os.makedirs(PERSISTENT_DIR, exist_ok=True)
+
 # Import from file_manager.py
 from file_manager import (
     ensure_schema, init_db as fm_init_db,
@@ -44,7 +48,7 @@ except Exception as e:
 
 # ---------------- Ensure DB ----------------
 ensure_schema()
-fm_init_db()
+fm_init_db()  # Ensure persistent DB path inside file_manager uses PERSISTENT_DIR
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
@@ -103,8 +107,7 @@ def profile():
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
-    
-    # ----- FIX: Ensure days_left is always int -----
+
     days_left = 0
     try:
         expiry = sub_details.get("subscription_expiry")
@@ -115,8 +118,7 @@ def profile():
             days_left = max(0, delta.days)
     except Exception:
         days_left = 0
-    # -------------------------------------------------
-    
+
     return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -176,6 +178,7 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
+
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -188,9 +191,9 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 100, "duration_months": 1},   # ₹1.00
-        "standard":  {"amount": 350000, "duration_months": 1},   # ₹3500.00
-        "premium":   {"amount": 600000, "duration_months": 2},   # ₹6000.00
+        "basic":     {"amount": 100, "duration_months": 1},     # ₹1.00
+        "standard":  {"amount": 350000, "duration_months": 1},  # ₹3500.00
+        "premium":   {"amount": 600000, "duration_months": 2},  # ₹6000.00
     }
 
     if plan not in PLAN_MAP:
@@ -198,7 +201,7 @@ def create_order():
 
     amount_inr = PLAN_MAP[plan]["amount"]
     duration = PLAN_MAP[plan]["duration_months"]
-    amount_paise = amount_inr  # Razorpay amount in paise already
+    amount_paise = amount_inr
 
     session["selected_plan"] = plan
     session["selected_duration"] = duration
@@ -221,7 +224,6 @@ def create_order():
     session["razorpay_order_id"] = order.get("id")
     session.modified = True
     return jsonify(order)
-
 # ---------------- PAYMENT SUCCESS ----------------
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
