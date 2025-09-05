@@ -188,9 +188,9 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 3000, "duration_months": 1},   # ₹30.00
-        "standard":  {"amount": 3500, "duration_months": 1},   # ₹35.00
-        "premium":   {"amount": 6000, "duration_months": 2},   # ₹60.00
+        "basic":     {"amount": 100, "duration_months": 1},   # ₹1.00
+        "standard":  {"amount": 350000, "duration_months": 1},   # ₹3500.00
+        "premium":   {"amount": 600000, "duration_months": 2},   # ₹6000.00
     }
 
     if plan not in PLAN_MAP:
