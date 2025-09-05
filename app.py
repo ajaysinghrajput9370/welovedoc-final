@@ -1,3 +1,4 @@
+# app.py — Part 1
 from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash, abort
 import os
 import uuid
@@ -10,11 +11,11 @@ import hmac
 import hashlib
 import json
 
-# ---------------- Persistent DB Fix ----------------
+# ---------------- Persistent Data ----------------
 PERSISTENT_DIR = os.getenv("DATA_DIR", "/opt/render/data")
 os.makedirs(PERSISTENT_DIR, exist_ok=True)
 
-# Import from file_manager.py
+# ---------------- File Manager ----------------
 from file_manager import (
     ensure_schema, init_db as fm_init_db,
     signup_user, login_user, check_subscription,
@@ -22,7 +23,7 @@ from file_manager import (
     get_subscription_details, list_users
 )
 
-# ---------------- Config ----------------
+# ---------------- App Config ----------------
 load_dotenv()
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['UPLOAD_FOLDER'] = os.getenv("UPLOAD_FOLDER", "uploads")
@@ -48,10 +49,11 @@ except Exception as e:
 
 # ---------------- Ensure DB ----------------
 ensure_schema()
-fm_init_db()  # Ensure persistent DB path inside file_manager uses PERSISTENT_DIR
+fm_init_db()
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
+    """Return True if user has active paid subscription."""
     try:
         details = get_subscription_details(email)
         if details:
@@ -76,6 +78,7 @@ def has_active_subscription(email: str) -> bool:
         return False
 
 def _apply_session_subscription_from_db(email):
+    """Sync subscription info from DB into session."""
     try:
         details = get_subscription_details(email)
     except Exception as e:
@@ -99,13 +102,14 @@ def _apply_session_subscription_from_db(email):
             session["subscription_expiry"] = None
     session.modified = True
 
-# ---------------- Auth Routes ----------------
+# ---------------- AUTH ROUTES ----------------
 @app.route("/profile")
 def profile():
     if "email" not in session:
         flash("Login required", "warning")
         return redirect(url_for("login"))
     user = get_user_by_email(session["email"])
+    _apply_session_subscription_from_db(session["email"])
     sub_details = get_subscription_details(session["email"]) or {}
 
     days_left = 0
@@ -179,6 +183,7 @@ def logout():
     flash("Logged out", "info")
     return redirect(url_for("home"))
 
+# app.py — Part 2
 # ---------------- PAYMENT: CREATE ORDER ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -191,7 +196,7 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 100, "duration_months": 1},     # ₹1.00
+        "basic":     {"amount": 100, "duration_months": 1},     # ₹1.00 for testing
         "standard":  {"amount": 350000, "duration_months": 1},  # ₹3500.00
         "premium":   {"amount": 600000, "duration_months": 2},  # ₹6000.00
     }
@@ -224,6 +229,7 @@ def create_order():
     session["razorpay_order_id"] = order.get("id")
     session.modified = True
     return jsonify(order)
+
 # ---------------- PAYMENT SUCCESS ----------------
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
@@ -268,6 +274,7 @@ def payment_success():
             _apply_session_subscription_from_db(email)
             flash("✅ Subscription Activated Successfully!", "success")
         else:
+            # fallback in session
             session["subscription"] = plan
             session["subscription_expiry"] = (datetime.utcnow() + timedelta(days=30*duration)).isoformat()
             session.modified = True
@@ -317,7 +324,7 @@ def razorpay_webhook():
         print("Webhook error:", e)
         return "Error processing webhook", 400
 
-# ---------------- TEST PAYMENT (FOR DEBUG) ----------------
+# ---------------- TEST PAYMENT (DEBUG) ----------------
 @app.route("/test_payment/<plan>")
 def test_payment(plan):
     if "email" not in session:
