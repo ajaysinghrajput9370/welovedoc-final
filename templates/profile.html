@@ -91,16 +91,21 @@
     <div class="detail"><b>Email:</b> {{ user.email }}</div>
     <div class="detail"><b>Subscription Plan:</b> {{ user.subscription|default('Free')|capitalize }}</div>
 
+    {% set days = days_left if days_left is not none else 0 %}
     {% if user.subscription != "free" %}
-      {% if days_left > 0 %}
+      {% if days > 0 %}
         <div class="countdown active-plan">
-          ✅ Days Left: {{ days_left }}
+          ✅ Days Left: {{ days }}
         </div>
       {% else %}
         <div class="countdown expired-plan">
           ❌ Subscription Expired
         </div>
       {% endif %}
+    {% else %}
+      <div class="countdown expired-plan">
+        💡 Free Plan
+      </div>
     {% endif %}
  
     <a href="{{ url_for('home') }}" class="btn btn-home">⬅ Back to Home</a>
