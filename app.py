@@ -196,7 +196,7 @@ def create_order():
     plan = (data.get("plan") or "").lower().strip()
 
     PLAN_MAP = {
-        "basic":     {"amount": 100, "duration_months": 1},     # ₹1.00 for testing
+        "basic":     {"amount": 100, "duration_months": 1},     # ₹1.00 for testinG
         "standard":  {"amount": 350000, "duration_months": 1},  # ₹3500.00
         "premium":   {"amount": 600000, "duration_months": 2},  # ₹6000.00
     }
