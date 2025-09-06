@@ -1,4 +1,4 @@
-# app.py — Part 1
+# app.py — Fixed version
 from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash, abort
 import os
 import uuid
@@ -11,12 +11,12 @@ import hmac
 import hashlib
 import json
 
-# Import from file_manager.py (you will provide/fix this file)
+# Import from file_manager.py
 from file_manager import (
     ensure_schema, init_db as fm_init_db,
     signup_user, login_user, check_subscription,
     activate_subscription, get_user_by_email,
-    get_subscription_details, list_users
+    get_subscription_details, list_users, update_device_login
 )
 
 # ---------------- Config ----------------
@@ -43,7 +43,7 @@ try:
 except Exception as e:
     print("⚠️ Razorpay init failed:", e)
 
-# ---------------- Ensure DB (file_manager should implement these safely) ----------------
+# ---------------- Ensure DB ----------------
 ensure_schema()
 fm_init_db()
 
@@ -133,7 +133,7 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
-# app.py — Part 2
+
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
@@ -212,6 +212,9 @@ def login():
             session["user_name"] = user["name"]
             session["email"] = email
             _apply_session_subscription_from_db(email)
+            
+            # Update device login time
+            update_device_login(email, device_id)
 
             flash("Login successful!", "success")
             return redirect(url_for("home"))
@@ -230,10 +233,104 @@ def logout():
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
-# app.py — Part 3
+
 # ---------------- PAYMENT ROUTES ----------------
-# (⚡ Same as your code — no change made)
-# ... keep your payment, webhook, and protected routes code exactly as it is ...
+@app.route("/create_order", methods=["POST"])
+def create_order():
+    if "email" not in session:
+        return jsonify({"error": "Login required"}), 401
+        
+    plan = request.json.get("plan", "basic")
+    amount_map = {"basic": 300000, "standard": 350000, "premium": 100}  # in paise
+    
+    if plan not in amount_map:
+        return jsonify({"error": "Invalid plan"}), 400
+        
+    try:
+        order = razorpay_client.order.create({
+            "amount": amount_map[plan],
+            "currency": "INR",
+            "receipt": f"receipt_{session['email']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "notes": {
+                "email": session["email"],
+                "plan": plan
+            }
+        })
+        return jsonify(order)
+    except Exception as e:
+        print("Razorpay order error:", e)
+        return jsonify({"error": "Payment gateway error"}), 500
+
+
+@app.route("/payment_success", methods=["POST"])
+def payment_success():
+    if "email" not in session:
+        flash("Login required", "warning")
+        return redirect(url_for("login"))
+        
+    payment_id = request.form.get("razorpay_payment_id")
+    order_id = request.form.get("razorpay_order_id")
+    signature = request.form.get("razorpay_signature")
+    plan = request.form.get("plan", "basic")
+    
+    # Verify payment signature
+    try:
+        params_dict = {
+            'razorpay_order_id': order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        }
+        
+        razorpay_client.utility.verify_payment_signature(params_dict)
+        
+        # Activate subscription
+        duration = 2 if plan == "premium" else 1
+        success = activate_subscription(session["email"], plan, duration)
+        
+        if success:
+            _apply_session_subscription_from_db(session["email"])
+            flash("Payment successful! Subscription activated.", "success")
+        else:
+            flash("Payment successful but subscription activation failed. Contact support.", "warning")
+            
+    except Exception as e:
+        print("Payment verification error:", e)
+        flash("Payment verification failed", "danger")
+        
+    return redirect(url_for("profile"))
+
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    # Verify webhook signature
+    signature = request.headers.get('X-Razorpay-Signature')
+    webhook_body = request.get_data()
+    
+    try:
+        razorpay_client.utility.verify_webhook_signature(
+            webhook_body, signature, RAZORPAY_WEBHOOK_SECRET
+        )
+        
+        payload = json.loads(webhook_body)
+        event = payload.get('event')
+        
+        if event == 'payment.captured':
+            payment = payload.get('payload', {}).get('payment', {}).get('entity', {})
+            notes = payment.get('notes', {})
+            email = notes.get('email')
+            plan = notes.get('plan', 'basic')
+            
+            if email:
+                duration = 2 if plan == "premium" else 1
+                activate_subscription(email, plan, duration)
+                print(f"Webhook: Subscription activated for {email}, plan: {plan}")
+                
+        return jsonify({"status": "success"}), 200
+        
+    except Exception as e:
+        print("Webhook error:", e)
+        return jsonify({"error": "Invalid signature"}), 400
+
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
