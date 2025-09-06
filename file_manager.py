@@ -1,11 +1,12 @@
-# file_manager.py
+# file_manager.py — Fixed version
 import os
 import sqlite3
+import json
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta, timezone  # UTC-aware
+from datetime import datetime, timedelta, timezone
 
 DB_NAME = "users.db"
-DB_PATH = DB_NAME  # Ensure same path on deploy
+DB_PATH = DB_NAME
 
 # ---------------- DB helpers ----------------
 def get_conn():
@@ -23,7 +24,8 @@ def init_db():
             password TEXT,
             subscription TEXT DEFAULT 'free',
             subscription_expiry TEXT,
-            devices TEXT
+            devices TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
@@ -42,6 +44,11 @@ def ensure_schema():
         cursor.execute("ALTER TABLE users ADD COLUMN subscription_expiry TEXT")
     if "devices" not in cols:
         cursor.execute("ALTER TABLE users ADD COLUMN devices TEXT")
+    if "created_at" not in cols:
+        # Add column without default (SQLite limitation)
+        cursor.execute("ALTER TABLE users ADD COLUMN created_at TIMESTAMP")
+        # Fill existing rows with current timestamp
+        cursor.execute("UPDATE users SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL")
 
     conn.commit()
     conn.close()
@@ -67,7 +74,7 @@ def signup_user(name, email, password, subscription="free"):
     cursor.execute("""
         INSERT INTO users (name, email, password, subscription, subscription_expiry, devices)
         VALUES (?, ?, ?, ?, ?, ?)
-    """, (name or "", email, hashed_pw, subscription or "free", None, None))
+    """, (name or "", email, hashed_pw, subscription or "free", None, json.dumps({})))
     conn.commit()
     conn.close()
     return True
@@ -91,7 +98,7 @@ def get_user_by_email(email):
         "password": row[3] or "",
         "subscription": row[4] or "free",
         "subscription_expiry": row[5] or "",
-        "devices": row[6] or ""
+        "devices": row[6] or "{}"
     }
 
 # ---------------- Device / Login ----------------
@@ -116,24 +123,57 @@ def login_user(email, password, device_id):
         conn.close()
         return False
 
-    user_id, hashed_pw, subscription, expiry, devices = row
+    user_id, hashed_pw, subscription, expiry, devices_json = row
     if not check_password_hash(hashed_pw, password):
         conn.close()
         return False
 
     # Handle devices
-    devices_list = [d for d in (devices or "").split(",") if d]
-    if device_id not in devices_list:
-        limit = get_device_limit(subscription)
-        if len(devices_list) >= limit:
-            conn.close()
-            return "device_limit"
-        devices_list.append(device_id)
-        cursor.execute("UPDATE users SET devices=? WHERE id=?", (",".join(devices_list), user_id))
-        conn.commit()
-
+    try:
+        devices = json.loads(devices_json or "{}")
+    except:
+        devices = {}
+    
+    limit = get_device_limit(subscription)
+    
+    # If device exists, allow login
+    if device_id in devices:
+        conn.close()
+        return True
+    
+    # If device doesn't exist, check limit
+    if len(devices) >= limit:
+        # Remove oldest device if limit exceeded
+        oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
+        if oldest_device:
+            del devices[oldest_device]
+    
+    # Add new device
+    devices[device_id] = datetime.now(timezone.utc).isoformat()
+    
+    cursor.execute("UPDATE users SET devices=? WHERE id=?", (json.dumps(devices), user_id))
+    conn.commit()
     conn.close()
     return True
+
+def update_device_login(email, device_id):
+    """Update device login timestamp."""
+    email = (email or "").strip().lower()
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT devices FROM users WHERE email=?", (email,))
+    row = cursor.fetchone()
+    
+    if row and row[0]:
+        try:
+            devices = json.loads(row[0])
+            devices[device_id] = datetime.now(timezone.utc).isoformat()
+            cursor.execute("UPDATE users SET devices=? WHERE email=?", (json.dumps(devices), email))
+            conn.commit()
+        except:
+            pass
+    
+    conn.close()
 
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
@@ -221,8 +261,8 @@ def list_users(limit=100):
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, name, email, subscription, subscription_expiry, devices
-        FROM users LIMIT ?
+        SELECT id, name, email, subscription, subscription_expiry, devices, created_at
+        FROM users ORDER BY created_at DESC LIMIT ?
     """, (limit,))
     rows = cursor.fetchall()
     conn.close()
@@ -232,20 +272,6 @@ def list_users(limit=100):
         "email": r[2] or "",
         "subscription": r[3] or "free",
         "subscription_expiry": r[4] or "",
-        "devices": r[5] or ""
+        "devices": r[5] or "{}",
+        "created_at": r[6] or ""
     } for r in rows]
-
-def add_device_to_user(email, device_id):
-    """Manual helper to add a device."""
-    u = get_user_by_email(email)
-    if not u:
-        return False
-    devices = [d for d in (u.get("devices") or "").split(",") if d]
-    if device_id not in devices:
-        devices.append(device_id)
-        conn = get_conn()
-        cursor = conn.cursor()
-        cursor.execute("UPDATE users SET devices=? WHERE email=?", (",".join(devices), email))
-        conn.commit()
-        conn.close()
-    return True
