@@ -373,6 +373,64 @@ def pf_highlight_page():
 
     return render_template("pf-highlight.html")
 
+# ---------------- PDF TOOLS ROUTES (FREE ACCESS) ----------------
+
+@app.route("/merge-pdf")
+def merge_pdf_page():
+    return render_template("merge-pdf.html")
+
+@app.route("/split-pdf")
+def split_pdf_page():
+    return render_template("split-pdf.html")
+
+@app.route("/compress-pdf")
+def compress_pdf_page():
+    return render_template("compress-pdf.html")
+
+@app.route("/jpg-to-pdf")
+def jpg_to_pdf_page():
+    return render_template("jpg-to-pdf.html")
+
+@app.route("/word-to-pdf")
+def word_to_pdf_page():
+    return render_template("word-to-pdf.html")
+
+@app.route("/pdf-to-word")
+def pdf_to_word_page():
+    return render_template("pdf-to-word.html")
+
+@app.route("/excel-to-pdf")
+def excel_to_pdf_page():
+    return render_template("excel-to-pdf.html")
+
+@app.route("/pdf-to-excel")
+def pdf_to_excel_page():
+    return render_template("pdf-to-excel.html")
+
+@app.route("/pdf-to-jpg")
+def pdf_to_jpg_page():
+    return render_template("pdf-to-jpg.html")
+
+@app.route("/rotate-pdf")
+def rotate_pdf_page():
+    return render_template("rotate-pdf.html")
+
+@app.route("/extract-pages")
+def extract_pages_page():
+    return render_template("extract-pages.html")
+
+@app.route("/protect-pdf")
+def protect_pdf_page():
+    return render_template("protect-pdf.html")
+
+@app.route("/pf-esic-ecr")
+def pf_esic_ecr_page():
+    return render_template("pf-esic-ecr.html")
+
+@app.route("/stamp")
+def stamp_page():
+    return render_template("stamp.html")
+
 
 # ---------------- PROCESS API ----------------
 from pf_highlight import highlight_pf
