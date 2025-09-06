@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Pricing - We ❤️ Doc</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -23,7 +23,7 @@
           <p><strong>Devices:</strong> 2</p>
           <p><strong>Duration:</strong> 1 Month</p>
           <p><strong>Price:</strong> ₹3000</p>
-          <hr style="margin:15px 0;" />
+          <hr style="margin:15px 0;">
           <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#004d40;">
             <li>✔️ Unlimited PF & ESIC Highlight</li>
             <li>✔️ Upload & Process Large Files</li>
@@ -49,7 +49,7 @@
           <p><strong>Devices:</strong> 4</p>
           <p><strong>Duration:</strong> 1 Month</p>
           <p><strong>Price:</strong> ₹3500</p>
-          <hr style="margin:15px 0;" />
+          <hr style="margin:15px 0;">
           <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#bf360c;">
             <li>✔️ Unlimited PF & ESIC Highlight</li>
             <li>✔️ Upload & Process Large Files</li>
@@ -65,14 +65,15 @@
           </button>
         </div>
       </div>
+
       <!-- Premium Plan -->
       <div class="card pricing-card premium" style="background:linear-gradient(135deg,#e1bee7,#ba68c8); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
         <div class="card-header" style="font-size:22px; font-weight:700; color:#6a1b9a; margin-bottom:20px;">Premium</div>
         <div class="card-body" style="color:#333; font-size:16px;">
           <p><strong>Devices:</strong> 4</p>
           <p><strong>Duration:</strong> 2 Months</p>
-          <p><strong>Price:</strong> ₹6000</p>
-          <hr style="margin:15px 0;" />
+          <p><strong>Price:</strong> ₹1</p>
+          <hr style="margin:15px 0;">
           <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#4a148c;">
             <li>✔️ All Standard Features</li>
             <li>✔️ 2X Longer Subscription Period</li>
@@ -102,6 +103,13 @@
 <!-- Razorpay Script -->
 <script>
 function payNow(plan, price) {
+  // Check if user is logged in
+  {% if not session.get('email') %}
+    alert("Please login first to subscribe");
+    window.location.href = "/login";
+    return;
+  {% endif %}
+
   fetch("/create_order", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -109,6 +117,11 @@ function payNow(plan, price) {
   })
   .then(res => res.json())
   .then(order => {
+    if (order.error) {
+      alert(order.error);
+      return;
+    }
+    
     console.log("Order created:", order);
     
     var options = {
@@ -116,11 +129,12 @@ function payNow(plan, price) {
       "amount": order.amount,
       "currency": "INR",
       "name": "We ❤️ Doc",
-      "description": plan + " Subscription - ₹" + (order.amount / 100),
+      "description": plan + " Subscription - ₹" + (order.amount/100),
       "order_id": order.id,
       "handler": function (response){
         console.log("Payment successful:", response);
         
+        // DIRECT form submission instead of creating form dynamically
         var formData = new FormData();
         formData.append('razorpay_payment_id', response.razorpay_payment_id);
         formData.append('razorpay_order_id', response.razorpay_order_id);
@@ -132,8 +146,8 @@ function payNow(plan, price) {
           body: formData
         })
         .then(res => {
-          console.log("Redirecting to home...");
-          window.location.href = '/';
+          console.log("Redirecting to profile...");
+          window.location.href = '/profile';
         })
         .catch(err => {
           console.error("Error:", err);
