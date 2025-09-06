@@ -77,6 +77,20 @@
       border-radius: 8px;
       margin-top: 15px;
     }
+    .btn-home {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn-home:hover {
+      background: #218838;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -109,6 +123,8 @@
       <a href="/pricing" class="btn btn-upgrade">🔁 Renew/Change Plan</a>
     {% endif %}
     
+    <br>
+    <a href="/" class="btn-home">🏠 Back to Home</a>
     <br>
     <a href="/logout" class="btn btn-logout">🚪 Logout</a>
   </div>
