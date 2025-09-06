@@ -1,4 +1,4 @@
-# file_manager.py — Fixed version
+# file_manager.py — Final Fixed version
 import os
 import sqlite3
 import json
@@ -10,7 +10,8 @@ DB_PATH = DB_NAME
 
 # ---------------- DB helpers ----------------
 def get_conn():
-    return sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+    # Removed detect_types to prevent SQLite from mis-parsing ISO datetime strings
+    return sqlite3.connect(DB_PATH)
 
 def init_db():
     """Create users table if not exists"""
@@ -45,9 +46,7 @@ def ensure_schema():
     if "devices" not in cols:
         cursor.execute("ALTER TABLE users ADD COLUMN devices TEXT")
     if "created_at" not in cols:
-        # Add column without default (SQLite limitation)
         cursor.execute("ALTER TABLE users ADD COLUMN created_at TIMESTAMP")
-        # Fill existing rows with current timestamp
         cursor.execute("UPDATE users SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL")
 
     conn.commit()
@@ -128,7 +127,6 @@ def login_user(email, password, device_id):
         conn.close()
         return False
 
-    # Handle devices
     try:
         devices = json.loads(devices_json or "{}")
     except:
@@ -136,19 +134,15 @@ def login_user(email, password, device_id):
     
     limit = get_device_limit(subscription)
     
-    # If device exists, allow login
     if device_id in devices:
         conn.close()
         return True
     
-    # If device doesn't exist, check limit
     if len(devices) >= limit:
-        # Remove oldest device if limit exceeded
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
         if oldest_device:
             del devices[oldest_device]
     
-    # Add new device
     devices[device_id] = datetime.now(timezone.utc).isoformat()
     
     cursor.execute("UPDATE users SET devices=? WHERE id=?", (json.dumps(devices), user_id))
@@ -201,7 +195,7 @@ def check_subscription(email):
     if expiry_dt:
         now_utc = datetime.now(timezone.utc)
         return now_utc <= expiry_dt
-    return True  # No expiry set → treat as active
+    return True
 
 def get_days_left(email):
     """Return integer days left for subscription (0 if expired or free)."""
@@ -241,7 +235,8 @@ def activate_subscription(email, plan, duration_months=1):
             base = now_utc
 
         new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
-        expiry_str = new_expiry.isoformat()
+        # Save in safe SQL format
+        expiry_str = new_expiry.strftime("%Y-%m-%d %H:%M:%S")
 
         cursor.execute("""
             UPDATE users
