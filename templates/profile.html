@@ -13,6 +13,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
     .profile-card {
       max-width: 500px;
@@ -29,87 +30,87 @@
       background: linear-gradient(90deg, #ff6a00, #ee0979);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      font-size: 28px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
-    .detail {
+    .profile-details {
+      text-align: left;
+      margin: 20px 0;
+    }
+    .profile-details p {
+      margin: 10px 0;
+      padding: 8px 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
       font-size: 16px;
-      margin: 12px 0;
-      color: #333;
     }
-    .btn-logout, .btn-home {
-      display: inline-block;
-      margin: 15px 5px 0 5px;
-      width: 48%;
-      font-weight: bold;
+    .subscription-info {
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      color: white;
+      padding: 15px;
       border-radius: 12px;
-      transition: all 0.3s ease;
+      margin: 20px 0;
     }
-    .btn-home {
-      background-color: #6a11cb;
-      color: #fff;
-      border: none;
-    }
-    .btn-home:hover {
-      background-color: #2575fc;
-      color: #fff;
-    }
-    .btn-logout {
-      background-color: #ff416c;
-      color: #fff;
-      border: none;
-    }
-    .btn-logout:hover {
-      background-color: #ff4b2b;
-      color: #fff;
-    }
-    .countdown {
+    .days-left {
       font-size: 18px;
       font-weight: bold;
+      color: #ffc107;
+      margin-top: 10px;
+    }
+    .btn-upgrade {
+      background: linear-gradient(90deg, #ff6a00, #ee0979);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .btn-upgrade:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255,106,0,0.4);
+    }
+    .btn-logout {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
       margin-top: 15px;
-      padding: 10px;
-      border-radius: 12px;
-      color: #fff;
-    }
-    .active-plan {
-      background: linear-gradient(90deg, #56ab2f, #a8e063);
-    }
-    .expired-plan {
-      background: #ccc;
-      color: #333;
     }
   </style>
 </head>
 <body>
-
   <div class="profile-card">
     <div class="profile-header">
       <h2>👤 My Profile</h2>
     </div>
-
-    <div class="detail"><b>Name:</b> {{ user.name }}</div>
-    <div class="detail"><b>Email:</b> {{ user.email }}</div>
-    <div class="detail"><b>Subscription Plan:</b> {{ user.subscription|default('Free')|capitalize }}</div>
-
-    {% if user.subscription|lower != "free" %}
-      {% if days_left > 0 %}
-        <div class="countdown active-plan">
-          ✅ Days Left: {{ days_left }}
-        </div>
+    
+    <div class="profile-details">
+      <p><strong>Name:</strong> {{ user.name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+    
+    <div class="subscription-info">
+      <h4>📋 Subscription Details</h4>
+      <p><strong>Current Plan:</strong> {{ subscription.subscription|default('free', true)|title }}</p>
+      {% if subscription.subscription and subscription.subscription != 'free' %}
+        <p><strong>Expiry Date:</strong> {{ subscription.subscription_expiry|default('N/A', true) }}</p>
+        {% if days_left is not none %}
+          <p class="days-left">⏳ Days Left: {{ days_left }}</p>
+        {% endif %}
       {% else %}
-        <div class="countdown expired-plan">
-          ❌ Subscription Expired
-        </div>
+        <p><strong>Status:</strong> Free Plan</p>
       {% endif %}
+    </div>
+    
+    {% if subscription.subscription == 'free' %}
+      <a href="/pricing" class="btn btn-upgrade">💎 Upgrade Plan</a>
     {% else %}
-      <div class="countdown expired-plan">
-        💡 Free Plan
-      </div>
+      <a href="/pricing" class="btn btn-upgrade">🔁 Renew/Change Plan</a>
     {% endif %}
-
-    <a href="{{ url_for('home') }}" class="btn btn-home">⬅ Back to Home</a>
-    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    
+    <br>
+    <a href="/logout" class="btn btn-logout">🚪 Logout</a>
   </div>
-
 </body>
 </html>
