@@ -24,7 +24,14 @@ class User(Base):
     devices = Column(Text, default="{}")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-Base.metadata.create_all(engine)
+# ---------------- Schema Init ----------------
+def ensure_schema():
+    """Ensure all database tables exist."""
+    try:
+        Base.metadata.create_all(engine)
+        print("✅ Database schema ensured.")
+    except Exception as e:
+        print("❌ Error ensuring schema:", e)
 
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
