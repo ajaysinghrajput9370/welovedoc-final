@@ -8,7 +8,12 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import IntegrityError
 
 # ---------------- DB Setup ----------------
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/dbname")
+# Render ke Environment Variable DATABASE_URL use karega
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://welovedoc_db_0xq6_user:B4muQkmSmGkxueJxHVOvpC1HC4J9o2gl"
+    "@dpg-d2vv133e5dus73eho3eg-a.oregon-postgres.render.com:5432/welovedoc_db_0xq6"
+)
 
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
@@ -104,6 +109,7 @@ def login_user(email, password, device_id):
         return True
 
     if len(devices) >= limit:
+        # remove oldest device
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
         if oldest_device:
             del devices[oldest_device]
