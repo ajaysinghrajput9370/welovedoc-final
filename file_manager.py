@@ -221,3 +221,24 @@ def list_users(limit=100):
         })
     db.close()
     return users
+
+def update_device_login(email, device_id):
+    """Update device login timestamp for an existing device."""
+    email = (email or "").strip().lower()
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return False
+
+        try:
+            devices = json.loads(user.devices or "{}")
+            devices[device_id] = datetime.now(timezone.utc).isoformat()
+            user.devices = json.dumps(devices)
+            db.commit()
+            return True
+        except Exception:
+            db.rollback()
+            return False
+    finally:
+        db.close()
