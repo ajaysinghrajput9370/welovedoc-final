@@ -8,20 +8,13 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import IntegrityError
 
 # ---------------- DB Setup ----------------
-# Render ke Environment Variable DATABASE_URL use karega
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://welovedoc_db_0xq6_user:B4muQkmSmGkxueJxHVOvpC1HC4J9o2gl"
-    "@dpg-d2vv133e5dus73eho3eg-a.oregon-postgres.render.com:5432/welovedoc_db_0xq6"
-)
-
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/dbname")
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=True)
     email = Column(String, unique=True, index=True, nullable=False)
@@ -38,7 +31,6 @@ def signup_user(name, email, password, subscription="free"):
     email = (email or "").strip().lower()
     if not email or not password:
         return False
-
     db = SessionLocal()
     try:
         hashed_pw = generate_password_hash(password)
@@ -75,6 +67,7 @@ def get_user_by_email(email):
         "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else "",
         "devices": user.devices or "{}"
     }
+
 # ---------------- Device / Login ----------------
 def get_device_limit(subscription):
     s = (subscription or "").lower()
@@ -92,7 +85,6 @@ def login_user(email, password, device_id):
     if not user:
         db.close()
         return False
-
     if not check_password_hash(user.password, password):
         db.close()
         return False
@@ -103,13 +95,11 @@ def login_user(email, password, device_id):
         devices = {}
 
     limit = get_device_limit(user.subscription)
-
     if device_id in devices:
         db.close()
         return True
 
     if len(devices) >= limit:
-        # remove oldest device
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
         if oldest_device:
             del devices[oldest_device]
@@ -199,8 +189,8 @@ def activate_subscription(email, plan, duration_months=1):
     now_utc = datetime.now(timezone.utc)
     existing = parse_datetime_safe(user.subscription_expiry)
     base = existing if existing and existing > now_utc else now_utc
-
     new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
+
     user.subscription = plan or "premium"
     user.subscription_expiry = new_expiry
 
