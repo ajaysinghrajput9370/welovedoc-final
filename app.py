@@ -8,7 +8,7 @@ from datetime import timedelta, datetime
 from dotenv import load_dotenv
 import json
 
-# Import from file_manager.py
+# Import from file_manager.py (ensure_schema exists in file_manager)
 from file_manager import (
     ensure_schema,
     signup_user, login_user, check_subscription,
@@ -16,7 +16,7 @@ from file_manager import (
     get_subscription_details, list_users, update_device_login
 )
 
-# ---------------- CONFIG ----------------
+# ---------------- Config ----------------
 load_dotenv()
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['UPLOAD_FOLDER'] = os.getenv("UPLOAD_FOLDER", "uploads")
@@ -27,7 +27,7 @@ app.permanent_session_lifetime = timedelta(days=30)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
-# ---------------- RAZORPAY ----------------
+# ---------------- Razorpay ----------------
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
@@ -40,36 +40,48 @@ try:
 except Exception as e:
     print("⚠️ Razorpay init failed:", e)
 
-# ---------------- ENSURE DB ----------------
+# ---------------- Ensure DB ----------------
 try:
     ensure_schema()
 except Exception as e:
     print("Warning: ensure_schema() failed on import:", e)
 
-# ---------------- HELPERS ----------------
+# ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
-    """Check if user subscription is active"""
+    """
+    DB-first authoritative check with session fallback.
+    Returns True if subscription is active in DB OR session indicates active (fallback).
+    """
     try:
-        details = get_subscription_details(email)
+        details = None
+        try:
+            details = get_subscription_details(email)
+        except Exception as e:
+            print("get_subscription_details error (ignored):", e)
+
         if details:
             sub = (details.get("subscription") or "").lower()
             expiry = details.get("subscription_expiry")
             if sub and sub != "free":
-                expiry_dt = None
-                if isinstance(expiry, str):
-                    try:
-                        expiry_dt = datetime.fromisoformat(expiry)
-                    except Exception:
+                if expiry:
+                    expiry_dt = None
+                    if isinstance(expiry, str):
                         try:
-                            expiry_dt = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
-                        except:
-                            expiry_dt = None
-                elif isinstance(expiry, datetime):
-                    expiry_dt = expiry
+                            expiry_dt = datetime.fromisoformat(expiry)
+                        except Exception:
+                            try:
+                                expiry_dt = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+                            except Exception:
+                                expiry_dt = None
+                    elif isinstance(expiry, datetime):
+                        expiry_dt = expiry
 
-                if expiry_dt:
-                    return datetime.utcnow() <= expiry_dt
-                return True
+                    if expiry_dt:
+                        return datetime.utcnow() <= expiry_dt
+                    else:
+                        return True
+                else:
+                    return True
 
         sess_sub = (session.get("subscription") or "").lower()
         sess_exp = session.get("subscription_expiry")
@@ -78,7 +90,7 @@ def has_active_subscription(email: str) -> bool:
                 try:
                     sess_dt = datetime.fromisoformat(sess_exp)
                     return datetime.utcnow() <= sess_dt
-                except:
+                except Exception:
                     return True
             return True
 
@@ -87,12 +99,12 @@ def has_active_subscription(email: str) -> bool:
 
     try:
         return bool(check_subscription(email))
-    except:
+    except Exception:
         return False
 
 
 def _apply_session_subscription_from_db(email):
-    """Sync subscription info from DB to session"""
+    """Refresh session subscription info from DB; if DB missing, leave session untouched except default to 'free'."""
     try:
         details = get_subscription_details(email)
     except Exception as e:
@@ -113,13 +125,44 @@ def _apply_session_subscription_from_db(email):
                     session["subscription_expiry"] = expiry
                 else:
                     session["subscription_expiry"] = str(expiry)
-            except:
+            except Exception:
                 session["subscription_expiry"] = None
         else:
             session["subscription_expiry"] = None
     session.modified = True
 
-# ---------------- AUTH ROUTES ----------------
+# ---------------- Auth Routes ----------------
+@app.route("/profile")
+def profile():
+    if "email" not in session:
+        flash("Login required", "warning")
+        return redirect(url_for("login"))
+
+    user = get_user_by_email(session["email"])
+    sub_details = get_subscription_details(session["email"]) or {}
+
+    days_left = None
+    expiry = sub_details.get("subscription_expiry")
+    if sub_details.get("subscription") and sub_details["subscription"] != "free" and expiry:
+        try:
+            if isinstance(expiry, str):
+                expiry_date = datetime.fromisoformat(expiry).date()
+            elif isinstance(expiry, datetime):
+                expiry_date = expiry.date()
+            else:
+                expiry_date = None
+
+            if expiry_date:
+                today = datetime.utcnow().date()
+                days_left = (expiry_date - today).days
+                if days_left < 0:
+                    days_left = 0
+        except Exception as e:
+            print("days_left calculation error:", e)
+
+    return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -165,6 +208,7 @@ def login():
             session["user_name"] = user["name"]
             session["email"] = email
             _apply_session_subscription_from_db(email)
+
             update_device_login(email, device_id)
 
             flash("Login successful!", "success")
@@ -185,38 +229,44 @@ def logout():
     flash("Logged out", "info")
     return redirect(url_for("home"))
 
+
 # ---------------- PAYMENT ROUTES ----------------
 @app.route("/create_order", methods=["POST"])
 def create_order():
     if "email" not in session:
         return jsonify({"error": "Login required"}), 401
+
     if not razorpay_client:
         return jsonify({"error": "Payment gateway not configured"}), 500
 
     plan = request.json.get("plan", "basic")
-    amount_map = {"basic": 100, "standard": 350000, "premium": 600000}
+    amount_map = {"basic": 100, "standard": 350000, "premium": 600000}  # in paise
 
     if plan not in amount_map:
         return jsonify({"error": "Invalid plan"}), 400
 
     try:
+        # ✅ Fix Razorpay receipt length (max 40 chars)
+        receipt_str = f"{uuid.uuid4().hex[:30]}"  # truncated 30 chars
         order = razorpay_client.order.create({
             "amount": amount_map[plan],
             "currency": "INR",
-            "receipt": f"receipt_{session['email']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-            "notes": {"email": session["email"], "plan": plan}
+            "receipt": f"receipt_{receipt_str}",
+            "notes": {
+                "email": session["email"],
+                "plan": plan
+            }
         })
         return jsonify(order)
     except Exception as e:
         print("Razorpay order error:", e)
         return jsonify({"error": "Payment gateway error"}), 500
-
-
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     if "email" not in session:
         flash("Login required", "warning")
         return redirect(url_for("login"))
+
     if not razorpay_client:
         flash("Payment gateway not configured", "danger")
         return redirect(url_for("pricing"))
@@ -226,6 +276,7 @@ def payment_success():
     signature = request.form.get("razorpay_signature")
     plan = request.form.get("plan", "basic")
 
+    # Verify payment signature
     try:
         params_dict = {
             'razorpay_order_id': order_id,
@@ -234,9 +285,9 @@ def payment_success():
         }
         razorpay_client.utility.verify_payment_signature(params_dict)
 
+        # Activate subscription
         duration = 2 if plan == "premium" else 1
         success = activate_subscription(session["email"], plan, duration)
-
         if success:
             _apply_session_subscription_from_db(session["email"])
             flash("Payment successful! Subscription activated.", "success")
@@ -245,6 +296,7 @@ def payment_success():
     except Exception as e:
         print("Payment verification error:", e)
         flash("Payment verification failed", "danger")
+        return redirect(url_for("profile"))
 
     return redirect(url_for("profile"))
 
@@ -258,7 +310,9 @@ def webhook():
     webhook_body = request.get_data()
 
     try:
-        razorpay_client.utility.verify_webhook_signature(webhook_body, signature, RAZORPAY_WEBHOOK_SECRET)
+        razorpay_client.utility.verify_webhook_signature(
+            webhook_body, signature, RAZORPAY_WEBHOOK_SECRET
+        )
         payload = json.loads(webhook_body)
         event = payload.get('event')
 
@@ -276,6 +330,8 @@ def webhook():
     except Exception as e:
         print("Webhook error:", e)
         return jsonify({"error": "Invalid signature or webhook processing error"}), 400
+
+
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
@@ -285,37 +341,6 @@ def home():
 @app.route("/pricing")
 def pricing():
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
-
-
-@app.route("/profile")
-def profile():
-    if "email" not in session:
-        flash("Login required", "warning")
-        return redirect(url_for("login"))
-
-    user = get_user_by_email(session["email"])
-    sub_details = get_subscription_details(session["email"]) or {}
-
-    days_left = None
-    expiry = sub_details.get("subscription_expiry")
-    if sub_details.get("subscription") and sub_details["subscription"] != "free" and expiry:
-        try:
-            if isinstance(expiry, str):
-                expiry_date = datetime.fromisoformat(expiry).date()
-            elif isinstance(expiry, datetime):
-                expiry_date = expiry.date()
-            else:
-                expiry_date = None
-
-            if expiry_date:
-                today = datetime.utcnow().date()
-                days_left = (expiry_date - today).days
-                if days_left < 0:
-                    days_left = 0
-        except Exception as e:
-            print("days_left calculation error:", e)
-
-    return render_template("profile.html", user=user, subscription=sub_details, days_left=days_left)
 
 
 # ---------------- PROTECTED TOOL ROUTES ----------------
@@ -330,11 +355,9 @@ def _require_login():
 def esic_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
-
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
-
     return render_template("esic-highlight.html")
 
 
@@ -342,11 +365,9 @@ def esic_highlight_page():
 def pf_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
-
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
-
     return render_template("pf-highlight.html")
 
 
@@ -355,53 +376,66 @@ def pf_highlight_page():
 def merge_pdf_page():
     return render_template("merge-pdf.html")
 
+
 @app.route("/split-pdf")
 def split_pdf_page():
     return render_template("split-pdf.html")
+
 
 @app.route("/compress-pdf")
 def compress_pdf_page():
     return render_template("compress-pdf.html")
 
+
 @app.route("/jpg-to-pdf")
 def jpg_to_pdf_page():
     return render_template("jpg-to-pdf.html")
+
 
 @app.route("/word-to-pdf")
 def word_to_pdf_page():
     return render_template("word-to-pdf.html")
 
+
 @app.route("/pdf-to-word")
 def pdf_to_word_page():
     return render_template("pdf-to-word.html")
+
 
 @app.route("/excel-to-pdf")
 def excel_to_pdf_page():
     return render_template("excel-to-pdf.html")
 
+
 @app.route("/pdf-to-excel")
 def pdf_to_excel_page():
     return render_template("pdf-to-excel.html")
+
 
 @app.route("/pdf-to-jpg")
 def pdf_to_jpg_page():
     return render_template("pdf-to-jpg.html")
 
+
 @app.route("/rotate-pdf")
 def rotate_pdf_page():
     return render_template("rotate-pdf.html")
+
 
 @app.route("/extract-pages")
 def extract_pages_page():
     return render_template("extract-pages.html")
 
+
 @app.route("/protect-pdf")
 def protect_pdf_page():
     return render_template("protect-pdf.html")
 
+
 @app.route("/pf-esic-ecr")
 def pf_esic_ecr_page():
     return render_template("pf-esic-ecr.html")
+
 
 @app.route("/stamp")
 def stamp_page():
@@ -430,7 +464,6 @@ def process():
 
         pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
         excel_path = os.path.join(app.config['UPLOAD_FOLDER'], excel_filename)
-
         pdf_file.save(pdf_path)
         excel_file.save(excel_path)
 
@@ -446,7 +479,6 @@ def process():
             response["excel_url"] = f"/download/{os.path.basename(not_found_excel)}"
 
         return jsonify(response), 200
-
     except Exception as e:
         print("Process error:", e)
         return jsonify({"error": str(e)}), 500
@@ -457,7 +489,7 @@ def download_file(filename):
     return send_from_directory(app.config['RESULT_FOLDER'], filename, as_attachment=True)
 
 
-# ---------------- ADMIN / DEBUG ----------------
+# ---------------- Admin / Debug ----------------
 @app.route("/admin/users")
 def admin_users():
     token = request.args.get("token")
@@ -470,4 +502,4 @@ def admin_users():
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
