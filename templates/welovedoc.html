@@ -623,22 +623,20 @@
     <header>
         <div class="container header-content">
             <div class="logo-section">
-                  <div class="logo">
-                  <img src="{{ url_for('static', filename='logo.png') }}"  alt="We Love Doc Logo" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
-               <span class="logo-text" style="display: none;">We ❤️ Doc</span>
-           </div>
-             <nav>
-                 <ul>
-                       <li><a href="/">Home</a></li>
-                       <li><a href="/pf-highlight">PF Highlight</a></li>
-                       <li><a href="/esic-highlight">ESIC Highlight</a></li>
-                       <li><a href="/merge-pdf">Merge PDF</a></li>
-                      <li><a href="/compress-pdf">Compress PDF</a></li>
-                  </div>
-                         </li>
-                          <li><a href="/all-tools">All Tools</a></li>
-                          <li><a href="/pricing">Pricing</a></li>
-                      </ul>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
+                    <span class="logo-text" style="display: none;">We ❤️ Doc</span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pf-highlight">PF Highlight</a></li>
+                        <li><a href="/esic-highlight">ESIC Highlight</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <li><a href="/all-tools">All Tools</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
                 </nav>
             </div>
             
@@ -696,7 +694,7 @@
                 </div>
                 
                 <div class="card pf-card" onclick="location.href='/pf-highlight'">
-                    <div class="popular-badge">Most  Popular</div>
+                    <div class="popular-badge">Most Popular</div>
                     <div class="card-icon">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
