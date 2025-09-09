@@ -1,60 +1,32 @@
-# file_manager.py — Final Fixed version
+# file_manager.py — PostgreSQL (SQLAlchemy) version
 import os
-import sqlite3
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import IntegrityError
 
-DB_NAME = "users.db"
-DB_PATH = DB_NAME
+# ---------------- DB Setup ----------------
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/dbname")
 
-# ---------------- DB helpers ----------------
-def get_conn():
-    # Removed detect_types to prevent SQLite from mis-parsing ISO datetime strings
-    return sqlite3.connect(DB_PATH)
+engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
 
-def init_db():
-    """Create users table if not exists"""
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            email TEXT UNIQUE,
-            password TEXT,
-            subscription TEXT DEFAULT 'free',
-            subscription_expiry TEXT,
-            devices TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
+class User(Base):
+    __tablename__ = "users"
 
-def ensure_schema():
-    """Ensure important columns exist (safe on existing DB)."""
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(users)")
-    cols = [row[1] for row in cursor.fetchall()]
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
+    subscription = Column(String, default="free")
+    subscription_expiry = Column(DateTime, nullable=True)
+    devices = Column(Text, default="{}")
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    if "subscription" not in cols:
-        cursor.execute("ALTER TABLE users ADD COLUMN subscription TEXT DEFAULT 'free'")
-    if "subscription_expiry" not in cols:
-        cursor.execute("ALTER TABLE users ADD COLUMN subscription_expiry TEXT")
-    if "devices" not in cols:
-        cursor.execute("ALTER TABLE users ADD COLUMN devices TEXT")
-    if "created_at" not in cols:
-        cursor.execute("ALTER TABLE users ADD COLUMN created_at TIMESTAMP")
-        cursor.execute("UPDATE users SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL")
-
-    conn.commit()
-    conn.close()
-
-# ---------------- Initialize DB ----------------
-ensure_schema()
-init_db()
+Base.metadata.create_all(engine)
 
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
@@ -62,44 +34,42 @@ def signup_user(name, email, password, subscription="free"):
     if not email or not password:
         return False
 
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM users WHERE email=?", (email,))
-    if cursor.fetchone():
-        conn.close()
+    db = SessionLocal()
+    try:
+        hashed_pw = generate_password_hash(password)
+        new_user = User(
+            name=name or "",
+            email=email,
+            password=hashed_pw,
+            subscription=subscription or "free",
+            subscription_expiry=None,
+            devices=json.dumps({})
+        )
+        db.add(new_user)
+        db.commit()
+        return True
+    except IntegrityError:
+        db.rollback()
         return False
-
-    hashed_pw = generate_password_hash(password)
-    cursor.execute("""
-        INSERT INTO users (name, email, password, subscription, subscription_expiry, devices)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (name or "", email, hashed_pw, subscription or "free", None, json.dumps({})))
-    conn.commit()
-    conn.close()
-    return True
+    finally:
+        db.close()
 
 def get_user_by_email(email):
     email = (email or "").strip().lower()
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, name, email, password, subscription, subscription_expiry, devices
-        FROM users WHERE email=?
-    """, (email,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+    db.close()
+    if not user:
         return None
     return {
-        "id": row[0],
-        "name": row[1] or "",
-        "email": row[2] or "",
-        "password": row[3] or "",
-        "subscription": row[4] or "free",
-        "subscription_expiry": row[5] or "",
-        "devices": row[6] or "{}"
+        "id": user.id,
+        "name": user.name or "",
+        "email": user.email or "",
+        "password": user.password or "",
+        "subscription": user.subscription or "free",
+        "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else "",
+        "devices": user.devices or "{}"
     }
-
 # ---------------- Device / Login ----------------
 def get_device_limit(subscription):
     s = (subscription or "").lower()
@@ -112,74 +82,66 @@ def get_device_limit(subscription):
 def login_user(email, password, device_id):
     """Authenticate user and enforce device limit."""
     email = (email or "").strip().lower()
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, password, subscription, subscription_expiry, devices FROM users WHERE email=?",
-        (email,))
-    row = cursor.fetchone()
-    if not row:
-        conn.close()
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        db.close()
         return False
 
-    user_id, hashed_pw, subscription, expiry, devices_json = row
-    if not check_password_hash(hashed_pw, password):
-        conn.close()
+    if not check_password_hash(user.password, password):
+        db.close()
         return False
 
     try:
-        devices = json.loads(devices_json or "{}")
+        devices = json.loads(user.devices or "{}")
     except:
         devices = {}
-    
-    limit = get_device_limit(subscription)
-    
+
+    limit = get_device_limit(user.subscription)
+
     if device_id in devices:
-        conn.close()
+        db.close()
         return True
-    
+
     if len(devices) >= limit:
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
         if oldest_device:
             del devices[oldest_device]
-    
+
     devices[device_id] = datetime.now(timezone.utc).isoformat()
-    
-    cursor.execute("UPDATE users SET devices=? WHERE id=?", (json.dumps(devices), user_id))
-    conn.commit()
-    conn.close()
+    user.devices = json.dumps(devices)
+    db.commit()
+    db.close()
     return True
 
 def update_device_login(email, device_id):
     """Update device login timestamp."""
     email = (email or "").strip().lower()
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT devices FROM users WHERE email=?", (email,))
-    row = cursor.fetchone()
-    
-    if row and row[0]:
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+    if user:
         try:
-            devices = json.loads(row[0])
+            devices = json.loads(user.devices or "{}")
             devices[device_id] = datetime.now(timezone.utc).isoformat()
-            cursor.execute("UPDATE users SET devices=? WHERE email=?", (json.dumps(devices), email))
-            conn.commit()
+            user.devices = json.dumps(devices)
+            db.commit()
         except:
             pass
-    
-    conn.close()
+    db.close()
 
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
     if not s:
         return None
+    if isinstance(s, datetime):
+        return s.replace(tzinfo=timezone.utc)
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
         try:
-            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+            return datetime.strptime(str(s), fmt).replace(tzinfo=timezone.utc)
         except Exception:
             continue
     try:
-        return datetime.fromisoformat(s).replace(tzinfo=timezone.utc)
+        return datetime.fromisoformat(str(s)).replace(tzinfo=timezone.utc)
     except Exception:
         return None
 
@@ -222,51 +184,45 @@ def get_subscription_details(email):
 def activate_subscription(email, plan, duration_months=1):
     """Activate or extend subscription with UTC-safe expiry."""
     email = (email or "").strip().lower()
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        db.close()
+        return False
+
+    now_utc = datetime.now(timezone.utc)
+    existing = parse_datetime_safe(user.subscription_expiry)
+    base = existing if existing and existing > now_utc else now_utc
+
+    new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
+    user.subscription = plan or "premium"
+    user.subscription_expiry = new_expiry
+
     try:
-        conn = get_conn()
-        cursor = conn.cursor()
-        cursor.execute("SELECT subscription_expiry FROM users WHERE email=?", (email,))
-        row = cursor.fetchone()
-        now_utc = datetime.now(timezone.utc)
-        if row and row[0]:
-            existing = parse_datetime_safe(row[0])
-            base = existing if existing and existing > now_utc else now_utc
-        else:
-            base = now_utc
-
-        new_expiry = base + timedelta(days=30 * max(1, int(duration_months)))
-        # Save in safe SQL format
-        expiry_str = new_expiry.strftime("%Y-%m-%d %H:%M:%S")
-
-        cursor.execute("""
-            UPDATE users
-            SET subscription=?, subscription_expiry=?
-            WHERE email=?
-        """, (plan or "premium", expiry_str, email))
-        conn.commit()
-        conn.close()
-        print(f"✅ Subscription updated for {email}: {plan}, {expiry_str}")
+        db.commit()
+        print(f"✅ Subscription updated for {email}: {plan}, {new_expiry}")
         return True
     except Exception as e:
         print("❌ Error in activate_subscription:", e)
+        db.rollback()
         return False
+    finally:
+        db.close()
 
 # ---------------- Admin helpers ----------------
 def list_users(limit=100):
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, name, email, subscription, subscription_expiry, devices, created_at
-        FROM users ORDER BY created_at DESC LIMIT ?
-    """, (limit,))
-    rows = cursor.fetchall()
-    conn.close()
-    return [{
-        "id": r[0],
-        "name": r[1] or "",
-        "email": r[2] or "",
-        "subscription": r[3] or "free",
-        "subscription_expiry": r[4] or "",
-        "devices": r[5] or "{}",
-        "created_at": r[6] or ""
-    } for r in rows]
+    db = SessionLocal()
+    rows = db.query(User).order_by(User.created_at.desc()).limit(limit).all()
+    users = []
+    for u in rows:
+        users.append({
+            "id": u.id,
+            "name": u.name or "",
+            "email": u.email or "",
+            "subscription": u.subscription or "free",
+            "subscription_expiry": u.subscription_expiry.isoformat() if u.subscription_expiry else "",
+            "devices": u.devices or "{}",
+            "created_at": u.created_at.isoformat() if u.created_at else ""
+        })
+    db.close()
+    return users
