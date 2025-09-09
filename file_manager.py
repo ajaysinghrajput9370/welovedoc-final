@@ -1,4 +1,4 @@
-# file_manager.py — PostgreSQL (SQLAlchemy) version with subscription & device limit fix
+# file_manager.py — PostgreSQL (SQLAlchemy) version with subscription + device limit + duration
 import os
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -13,7 +13,7 @@ engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-# ---------------- Device Limits per Plan ----------------
+# ---------------- Plan Config ----------------
 PLAN_DEVICE_LIMIT = {
     "free": 1,
     "basic": 2,
@@ -28,7 +28,6 @@ PLAN_DURATION_MONTHS = {
     "premium": 2
 }
 
-# ---------------- Models ----------------
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -37,12 +36,11 @@ class User(Base):
     password = Column(String, nullable=False)
     subscription = Column(String, default="free")
     subscription_expiry = Column(DateTime, nullable=True)
-    devices = Column(Text, default="{}")  # JSON {device_id: timestamp_iso}
+    devices = Column(Text, default="{}")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 # ---------------- Schema Init ----------------
 def ensure_schema():
-    """Ensure all database tables exist."""
     try:
         Base.metadata.create_all(engine)
         print("✅ Database schema ensured.")
@@ -96,7 +94,7 @@ def get_device_limit(subscription):
     return PLAN_DEVICE_LIMIT.get((subscription or "free").lower(), 1)
 
 def login_user(email, password, device_id):
-    """Authenticate user and enforce device limit + plan expiry."""
+    """Authenticate user and enforce device limit."""
     email = (email or "").strip().lower()
     db = SessionLocal()
     user = db.query(User).filter(User.email == email).first()
@@ -107,84 +105,119 @@ def login_user(email, password, device_id):
         db.close()
         return False
 
-    # Check subscription expiry
-    if user.subscription != "free":
-        now_utc = datetime.now(timezone.utc)
-        expiry_dt = user.subscription_expiry
-        if expiry_dt and expiry_dt.tzinfo is None:
-            expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
-        if not expiry_dt or now_utc > expiry_dt:
-            # Subscription expired → revert to free
-            user.subscription = "free"
-            user.subscription_expiry = None
-            user.devices = json.dumps({})
-            db.commit()
-
-    # Load devices
     try:
         devices = json.loads(user.devices or "{}")
     except:
         devices = {}
 
     limit = get_device_limit(user.subscription)
-
-    # Allow login if device already registered
     if device_id in devices:
         db.close()
         return True
 
-    # Enforce device limit
     if len(devices) >= limit:
-        return False  # ❌ deny login if limit exceeded
+        oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
+        if oldest_device:
+            del devices[oldest_device]
 
-    # Register new device
     devices[device_id] = datetime.now(timezone.utc).isoformat()
     user.devices = json.dumps(devices)
     db.commit()
     db.close()
     return True
-# ---------------- Subscription Handling ----------------
-def save_subscription(email, plan):
-    """Activate or renew a user's subscription based on plan duration."""
+# ---------------- Subscription logic ----------------
+def parse_datetime_safe(s):
+    if not s:
+        return None
+    if isinstance(s, datetime):
+        return s.replace(tzinfo=timezone.utc)
+    try:
+        return datetime.fromisoformat(str(s)).replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+def check_subscription(email):
+    u = get_user_by_email(email)
+    if not u:
+        return False
+    sub = (u.get("subscription") or "free").lower()
+    if sub == "free":
+        return False
+    expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
+    if expiry_dt:
+        now_utc = datetime.now(timezone.utc)
+        return now_utc <= expiry_dt
+    return False
+
+def get_days_left(email):
+    u = get_user_by_email(email)
+    if not u:
+        return 0
+    expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
+    if not expiry_dt:
+        return 0
+    now_utc = datetime.now(timezone.utc)
+    delta = expiry_dt - now_utc
+    return max(0, delta.days)
+
+def get_subscription_details(email):
+    u = get_user_by_email(email)
+    if not u:
+        return None
+    expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
+    sub = (u.get("subscription") or "free").lower()
+    return {
+        "subscription": sub,
+        "subscription_expiry": expiry_dt,
+        "device_limit": get_device_limit(sub),
+        "days_left": get_days_left(email)
+    }
+
+def activate_subscription(email, plan):
+    """Activate or extend subscription based on PLAN_DURATION_MONTHS."""
     email = (email or "").strip().lower()
+    plan = (plan or "free").lower()
+    months = PLAN_DURATION_MONTHS.get(plan, 0)
     db = SessionLocal()
     user = db.query(User).filter(User.email == email).first()
     if not user:
         db.close()
         return False
 
-    months = PLAN_DURATION_MONTHS.get(plan.lower(), 0)
     now_utc = datetime.now(timezone.utc)
-
+    existing = parse_datetime_safe(user.subscription_expiry)
+    base = existing if existing and existing > now_utc else now_utc
     if months > 0:
-        if user.subscription_expiry and user.subscription_expiry > now_utc:
-            new_expiry = user.subscription_expiry + timedelta(days=30 * months)
-        else:
-            new_expiry = now_utc + timedelta(days=30 * months)
+        new_expiry = base + timedelta(days=30 * months)
         user.subscription = plan
         user.subscription_expiry = new_expiry
     else:
         user.subscription = "free"
         user.subscription_expiry = None
 
-    db.commit()
-    db.close()
-    return True
+    try:
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        return False
+    finally:
+        db.close()
 
-def check_subscription(email):
-    """Return True if subscription is active, else False."""
-    email = (email or "").strip().lower()
+# ---------------- Admin helpers ----------------
+def list_users(limit=100):
     db = SessionLocal()
-    user = db.query(User).filter(User.email == email).first()
+    rows = db.query(User).order_by(User.created_at.desc()).limit(limit).all()
+    users = []
+    for u in rows:
+        users.append({
+            "id": u.id,
+            "name": u.name or "",
+            "email": u.email or "",
+            "subscription": u.subscription or "free",
+            "subscription_expiry": u.subscription_expiry.isoformat() if u.subscription_expiry else "",
+            "devices": u.devices or "{}",
+            "created_at": u.created_at.isoformat() if u.created_at else ""
+        })
     db.close()
-    if not user:
-        return False
-    if user.subscription == "free":
-        return False
-    now_utc = datetime.now(timezone.utc)
-    return bool(user.subscription_expiry and user.subscription_expiry > now_utc)
-
-# ---------------- Compatibility Wrapper ----------------
-def activate_subscription(email, plan):
-    """Alias for save_subscription to avoid ImportError in app.py"""
-    return save_subscription(email, plan)
+    return users
