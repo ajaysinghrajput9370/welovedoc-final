@@ -240,7 +240,7 @@ def create_order():
         return jsonify({"error": "Payment gateway not configured"}), 500
 
     plan = request.json.get("plan", "basic")
-    amount_map = {"basic": 100, "standard": 350000, "premium": 600000}  # in paise
+    amount_map = {"basic": 300000, "standard": 350000, "premium": 600000}  # in paise
 
     if plan not in amount_map:
         return jsonify({"error": "Invalid plan"}), 400
