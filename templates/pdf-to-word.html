@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word to PDF Converter | welovedoc</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.17/mammoth.browser.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -336,31 +338,80 @@
             }
             
             // Convert button click event
-            convertBtn.addEventListener('click', function() {
+            convertBtn.addEventListener('click', async function() {
                 const file = convertBtn.file;
                 if (!file) return;
                 
-                // Simulate conversion process
+                // Start conversion process
                 status.textContent = 'Converting...';
                 convertBtn.disabled = true;
                 
                 let progressValue = 0;
-                const interval = setInterval(() => {
-                    progressValue += 5;
-                    progress.style.width = `${progressValue}%`;
-                    
-                    if (progressValue >= 100) {
-                        clearInterval(interval);
-                        status.textContent = 'Conversion complete!';
-                        
-                        // Show download section
-                        downloadSection.style.display = 'block';
-                        
-                        // Set up download (this would be the actual PDF file in a real application)
-                        downloadBtn.href = URL.createObjectURL(file);
-                        downloadBtn.download = file.name.replace(/\.[^/.]+$/, "") + '.pdf';
+                const progressInterval = setInterval(() => {
+                    progressValue += 2;
+                    if (progressValue > 90) {
+                        clearInterval(progressInterval);
+                        return;
                     }
+                    progress.style.width = `${progressValue}%`;
                 }, 100);
+                
+                try {
+                    // Convert Word to PDF
+                    const arrayBuffer = await file.arrayBuffer();
+                    
+                    // Convert using Mammoth.js to get HTML first
+                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    const htmlContent = result.value;
+                    
+                    // Create a simple PDF using pdf-lib
+                    const pdfDoc = await PDFLib.PDFDocument.create();
+                    const page = pdfDoc.addPage([600, 800]);
+                    
+                    // For a real implementation, you would need a more sophisticated
+                    // HTML to PDF conversion. This is a simplified version.
+                    const textLines = htmlContent.replace(/<[^>]*>/g, '').split('\n');
+                    let y = 750;
+                    const fontSize = 12;
+                    
+                    for (const line of textLines) {
+                        if (line.trim() && y > 50) {
+                            page.drawText(line, {
+                                x: 50,
+                                y: y,
+                                size: fontSize,
+                                color: PDFLib.rgb(0, 0, 0),
+                            });
+                            y -= fontSize + 5;
+                        }
+                    }
+                    
+                    // Save the PDF
+                    const pdfBytes = await pdfDoc.save();
+                    
+                    // Create a Blob from the PDF bytes
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Update UI
+                    clearInterval(progressInterval);
+                    progress.style.width = '100%';
+                    status.textContent = 'Conversion complete!';
+                    
+                    // Show download section
+                    downloadSection.style.display = 'block';
+                    
+                    // Set up download
+                    downloadBtn.href = url;
+                    downloadBtn.download = file.name.replace(/\.[^/.]+$/, "") + '.pdf';
+                    
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    status.textContent = 'Error converting file. Please try again.';
+                    status.style.color = '#dc3545';
+                    clearInterval(progressInterval);
+                    convertBtn.disabled = false;
+                }
             });
         });
     </script>
