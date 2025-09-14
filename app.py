@@ -450,7 +450,7 @@ def stamp_page():
 
 
 @app.route("/about")
-def stamp_page():
+def about_page():
     return render_template("about.html")
 
 # ---------------- PROCESS API ----------------
