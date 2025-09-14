@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://welovedoc.in/sitemap.xml
