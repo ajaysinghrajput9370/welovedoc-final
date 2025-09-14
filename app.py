@@ -341,7 +341,14 @@ def home():
 @app.route("/pricing")
 def pricing():
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
+    
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(os.path.dirname(__file__), 'sitemap.xml')
 
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(os.path.dirname(__file__), 'robots.txt')
 
 # ---------------- PROTECTED TOOL ROUTES ----------------
 def _require_login():
