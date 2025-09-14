@@ -449,6 +449,10 @@ def stamp_page():
     return render_template("stamp.html")
 
 
+@app.route("/about")
+def stamp_page():
+    return render_template("about.html")
+
 # ---------------- PROCESS API ----------------
 from pf_highlight import highlight_pf
 from esic_highlight import highlight_esic
