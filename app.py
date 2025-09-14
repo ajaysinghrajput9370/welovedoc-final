@@ -453,6 +453,24 @@ def stamp_page():
 def about_page():
     return render_template("about.html")
 
+# --- Help & Support Pages ---
+
+@app.route("/faq")
+def faq_page():
+    return render_template("faq.html")
+
+@app.route("/contact-support")
+def contact_support_page():
+    return render_template("contact_support.html")
+
+@app.route("/privacy-policy")
+def privacy_policy_page():
+    return render_template("privacy_policy.html")
+
+@app.route("/terms-of-service")
+def terms_service_page():
+    return render_template("terms_service.html")
+    
 # ---------------- PROCESS API ----------------
 from pf_highlight import highlight_pf
 from esic_highlight import highlight_esic
