@@ -459,9 +459,9 @@ def about_page():
 def faq_page():
     return render_template("faq.html")
 
-@app.route("/contact-support")
-def contact_support_page():
-    return render_template("contact_support.html")
+@app.route("/contact")
+def contact_page():
+    return render_template("contact.html")
 
 @app.route("/privacy-policy")
 def privacy_policy_page():
