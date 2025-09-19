@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
 import json
+from activity_logger import log_activity
 
 # Import from file_manager.py (ensure_schema exists in file_manager)
 from file_manager import (
