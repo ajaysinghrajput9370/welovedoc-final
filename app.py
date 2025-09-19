@@ -4,7 +4,7 @@ import uuid
 import razorpay
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from dotenv import load_dotenv
 import json
 
@@ -13,7 +13,8 @@ from file_manager import (
     ensure_schema,
     signup_user, login_user, check_subscription,
     activate_subscription, get_user_by_email,
-    get_subscription_details, list_users, update_device_login
+    get_subscription_details, list_users, update_device_login,
+    log_activity, get_recent_activity
 )
 
 # ---------------- Config ----------------
@@ -47,16 +48,42 @@ except Exception as e:
     print("Warning: ensure_schema() failed on import:", e)
 
 # ---------------- Helpers ----------------
+def _parse_iso_to_aware(dt_obj):
+    """
+    Convert a datetime or ISO string to a timezone-aware datetime (UTC).
+    If parsing fails, returns None.
+    """
+    if not dt_obj:
+        return None
+    if isinstance(dt_obj, datetime):
+        return dt_obj if dt_obj.tzinfo else dt_obj.replace(tzinfo=timezone.utc)
+    # try to parse string variants
+    try:
+        # Python 3.11+ fromisoformat can parse offset; if no offset assume UTC
+        parsed = datetime.fromisoformat(str(dt_obj))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    except Exception:
+        # try common fallback
+        for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+            try:
+                parsed = datetime.strptime(str(dt_obj), fmt)
+                return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+    return None
+
 def has_active_subscription(email: str) -> bool:
     """
     DB-first authoritative check with session fallback.
-    Returns True if subscription is active in DB OR session indicates active (fallback).
+    Timezone-aware comparisons to avoid naive/aware errors.
     """
     try:
+        # try DB details first (preferred)
         details = None
         try:
             details = get_subscription_details(email)
         except Exception as e:
+            # non-fatal; we'll fallback to session or check_subscription
             print("get_subscription_details error (ignored):", e)
 
         if details:
@@ -64,42 +91,37 @@ def has_active_subscription(email: str) -> bool:
             expiry = details.get("subscription_expiry")
             if sub and sub != "free":
                 if expiry:
-                    expiry_dt = None
-                    if isinstance(expiry, str):
-                        try:
-                            expiry_dt = datetime.fromisoformat(expiry)
-                        except Exception:
-                            try:
-                                expiry_dt = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
-                            except Exception:
-                                expiry_dt = None
-                    elif isinstance(expiry, datetime):
-                        expiry_dt = expiry
-
+                    expiry_dt = _parse_iso_to_aware(expiry)
                     if expiry_dt:
-                        return datetime.utcnow() <= expiry_dt
+                        now_utc = datetime.now(timezone.utc)
+                        return now_utc <= expiry_dt
                     else:
+                        # if expiry present but unparseable, treat as active (safer fallback)
                         return True
                 else:
+                    # subscription set but no expiry -> consider active
                     return True
 
+        # session fallback (if DB not accessible)
         sess_sub = (session.get("subscription") or "").lower()
         sess_exp = session.get("subscription_expiry")
         if sess_sub and sess_sub != "free":
             if sess_exp:
-                try:
-                    sess_dt = datetime.fromisoformat(sess_exp)
-                    return datetime.utcnow() <= sess_dt
-                except Exception:
+                sess_dt = _parse_iso_to_aware(sess_exp)
+                if sess_dt:
+                    return datetime.now(timezone.utc) <= sess_dt
+                else:
                     return True
             return True
 
     except Exception as e:
         print("has_active_subscription unexpected error:", e)
 
+    # last resort: use check_subscription() from file_manager if available
     try:
         return bool(check_subscription(email))
-    except Exception:
+    except Exception as e:
+        print("check_subscription fallback error:", e)
         return False
 
 
@@ -130,7 +152,6 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
-
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
@@ -145,16 +166,10 @@ def profile():
     expiry = sub_details.get("subscription_expiry")
     if sub_details.get("subscription") and sub_details["subscription"] != "free" and expiry:
         try:
-            if isinstance(expiry, str):
-                expiry_date = datetime.fromisoformat(expiry).date()
-            elif isinstance(expiry, datetime):
-                expiry_date = expiry.date()
-            else:
-                expiry_date = None
-
-            if expiry_date:
-                today = datetime.utcnow().date()
-                days_left = (expiry_date - today).days
+            expiry_dt = _parse_iso_to_aware(expiry)
+            if expiry_dt:
+                today = datetime.now(timezone.utc).date()
+                days_left = (expiry_dt.date() - today).days
                 if days_left < 0:
                     days_left = 0
         except Exception as e:
@@ -181,6 +196,11 @@ def signup():
             session["email"] = email
             _apply_session_subscription_from_db(email)
             flash("Signup successful!", "success")
+            # log activity
+            try:
+                log_activity(email, "signup", "user signed up")
+            except Exception:
+                pass
             return redirect(url_for("home"))
         else:
             flash("Email already registered!", "danger")
@@ -211,6 +231,12 @@ def login():
 
             update_device_login(email, device_id)
 
+            # log activity
+            try:
+                log_activity(email, "login", f"device {device_id}")
+            except Exception:
+                pass
+
             flash("Login successful!", "success")
             return redirect(url_for("home"))
         elif result == "device_limit":
@@ -225,6 +251,12 @@ def login():
 
 @app.route("/logout")
 def logout():
+    # log logout if user present
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "logout", "user logged out")
+    except Exception:
+        pass
     session.clear()
     flash("Logged out", "info")
     return redirect(url_for("home"))
@@ -240,7 +272,7 @@ def create_order():
         return jsonify({"error": "Payment gateway not configured"}), 500
 
     plan = request.json.get("plan", "basic")
-    amount_map = {"basic": 299900, "standard": 349900, "premium": 599900}  # in paise
+    amount_map = {"basic": 100, "standard": 349900, "premium": 599900}  # in paise
 
     if plan not in amount_map:
         return jsonify({"error": "Invalid plan"}), 400
@@ -261,6 +293,7 @@ def create_order():
     except Exception as e:
         print("Razorpay order error:", e)
         return jsonify({"error": "Payment gateway error"}), 500
+
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     if "email" not in session:
@@ -285,11 +318,14 @@ def payment_success():
         }
         razorpay_client.utility.verify_payment_signature(params_dict)
 
-        # Activate subscription
-        duration = 2 if plan == "premium" else 1
-        success = activate_subscription(session["email"], plan, duration)
+        # Activate subscription (file_manager.activate_subscription expects (email, plan))
+        success = activate_subscription(session["email"], plan)
         if success:
             _apply_session_subscription_from_db(session["email"])
+            try:
+                log_activity(session["email"], "subscription", f"activated {plan} via payment_success")
+            except Exception:
+                pass
             flash("Payment successful! Subscription activated.", "success")
         else:
             flash("Payment successful but subscription activation failed. Contact support.", "warning")
@@ -322,8 +358,11 @@ def webhook():
             email = notes.get('email')
             plan = notes.get('plan', 'basic')
             if email:
-                duration = 2 if plan == "premium" else 1
-                activate_subscription(email, plan, duration)
+                activate_subscription(email, plan)
+                try:
+                    log_activity(email, "subscription", f"activated {plan} via webhook")
+                except Exception:
+                    pass
                 print(f"Webhook: Subscription activated for {email}, plan: {plan}")
 
         return jsonify({"status": "success"}), 200
@@ -365,6 +404,11 @@ def esic_highlight_page():
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
+    # log access
+    try:
+        log_activity(session.get("email"), "esic-highlight", "opened page")
+    except Exception:
+        pass
     return render_template("esic-highlight.html")
 
 
@@ -375,100 +419,199 @@ def pf_highlight_page():
     if not has_active_subscription(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
+    try:
+        log_activity(session.get("email"), "pf-highlight", "opened page")
+    except Exception:
+        pass
     return render_template("pf-highlight.html")
 
 
 # ---------------- PDF TOOLS ROUTES (FREE ACCESS) ----------------
 @app.route("/merge-pdf")
 def merge_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "merge-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("merge-pdf.html")
 
 
 @app.route("/split-pdf")
 def split_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "split-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("split-pdf.html")
 
 
 @app.route("/compress-pdf")
 def compress_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "compress-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("compress-pdf.html")
 
 
 @app.route("/jpg-to-pdf")
 def jpg_to_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "jpg-to-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("jpg-to-pdf.html")
 
 
 @app.route("/word-to-pdf")
 def word_to_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "word-to-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("word-to-pdf.html")
 
 
 @app.route("/pdf-to-word")
 def pdf_to_word_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "pdf-to-word", "opened page")
+    except Exception:
+        pass
     return render_template("pdf-to-word.html")
 
 
 @app.route("/excel-to-pdf")
 def excel_to_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "excel-to-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("excel-to-pdf.html")
 
 
 @app.route("/pdf-to-excel")
 def pdf_to_excel_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "pdf-to-excel", "opened page")
+    except Exception:
+        pass
     return render_template("pdf-to-excel.html")
 
 
 @app.route("/pdf-to-jpg")
 def pdf_to_jpg_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "pdf-to-jpg", "opened page")
+    except Exception:
+        pass
     return render_template("pdf-to-jpg.html")
 
 
 @app.route("/rotate-pdf")
 def rotate_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "rotate-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("rotate-pdf.html")
 
 
 @app.route("/extract-pages")
 def extract_pages_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "extract-pages", "opened page")
+    except Exception:
+        pass
     return render_template("extract-pages.html")
 
 
 @app.route("/protect-pdf")
 def protect_pdf_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "protect-pdf", "opened page")
+    except Exception:
+        pass
     return render_template("protect-pdf.html")
 
 
 @app.route("/pf-esic-ecr")
 def pf_esic_ecr_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "pf-esic-ecr", "opened page")
+    except Exception:
+        pass
     return render_template("pf-esic-ecr.html")
 
 
 @app.route("/stamp")
 def stamp_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "stamp", "opened page")
+    except Exception:
+        pass
     return render_template("stamp.html")
 
 
 @app.route("/about")
 def about_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "about", "opened page")
+    except Exception:
+        pass
     return render_template("about.html")
 
 # --- Help & Support Pages ---
 
 @app.route("/faq")
 def faq_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "faq", "opened page")
+    except Exception:
+        pass
     return render_template("faq.html")
 
 @app.route("/contact")
 def contact_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "contact", "opened page")
+    except Exception:
+        pass
     return render_template("contact.html")
 
 @app.route("/privacy-policy")
 def privacy_policy_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "privacy-policy", "opened page")
+    except Exception:
+        pass
     return render_template("privacy_policy.html")
 
 @app.route("/terms-of-service")
 def terms_service_page():
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "terms-service", "opened page")
+    except Exception:
+        pass
     return render_template("terms_service.html")
     
 # ---------------- PROCESS API ----------------
@@ -507,6 +650,12 @@ def process():
         if not_found_excel:
             response["excel_url"] = f"/download/{os.path.basename(not_found_excel)}"
 
+        # log processing action
+        try:
+            log_activity(session.get("email"), f"process-{mode}", f"processed files: {os.path.basename(pdf_filename)}")
+        except Exception:
+            pass
+
         return jsonify(response), 200
     except Exception as e:
         print("Process error:", e)
@@ -515,6 +664,12 @@ def process():
 
 @app.route("/download/<filename>")
 def download_file(filename):
+    # optional: log downloads
+    try:
+        if "email" in session:
+            log_activity(session.get("email"), "download", filename)
+    except Exception:
+        pass
     return send_from_directory(app.config['RESULT_FOLDER'], filename, as_attachment=True)
 
 
@@ -526,6 +681,28 @@ def admin_users():
         abort(403)
     users = list_users(200)
     return render_template("admin_users.html", users=users)
+
+@app.route("/admin/logs_html")
+def admin_logs_html():
+    token = request.args.get("token")
+    if not token or token != ADMIN_VIEW_SECRET:
+        abort(403)
+    logs = get_recent_activity(200)
+    html = """
+    <h2>Recent User Activity</h2>
+    <table border="1" cellpadding="5">
+      <tr><th>Email</th><th>Tool</th><th>Action</th><th>Time</th></tr>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.email }}</td>
+        <td>{{ log.tool }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.time }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    """
+    return render_template_string(html, logs=logs)
 
 
 # ---------------- MAIN ----------------
