@@ -88,7 +88,6 @@ def get_user_by_email(email):
         "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else "",
         "devices": user.devices or "{}"
     }
-
 # ---------------- Device / Login ----------------
 def get_device_limit(subscription):
     return PLAN_DEVICE_LIMIT.get((subscription or "free").lower(), 1)
@@ -125,6 +124,7 @@ def login_user(email, password, device_id):
     db.commit()
     db.close()
     return True
+
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
     if not s:
@@ -173,7 +173,7 @@ def get_subscription_details(email):
         "days_left": get_days_left(email)
     }
 
-def activate_subscription(email, plan):
+def activate_subscription(email, plan="free"):
     """Activate or extend subscription based on PLAN_DURATION_MONTHS."""
     email = (email or "").strip().lower()
     plan = (plan or "free").lower()
