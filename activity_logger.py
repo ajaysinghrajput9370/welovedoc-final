@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, timezone
 
-LOG_FILE = "user_activity.log"  # is file me activity save hogi
+LOG_FILE = "user_activity.log"  # sab activity yahan save hogi
 
 def log_activity(user_email, tool_name, action="used tool"):
     """User ki activity ko record karega."""
@@ -16,8 +16,6 @@ def log_activity(user_email, tool_name, action="used tool"):
     # file me save karo
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry) + "\n")
-
-    print("✅ Activity logged:", entry)
 
 def read_logs(limit=50):
     """Last activities dekhne ke liye"""
