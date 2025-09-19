@@ -48,10 +48,6 @@ except Exception as e:
 
 # ---------------- Helpers ----------------
 def has_active_subscription(email: str) -> bool:
-    """
-    DB-first authoritative check with session fallback.
-    Returns True if subscription is active in DB OR session indicates active (fallback).
-    """
     try:
         details = None
         try:
@@ -130,7 +126,6 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
-
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
@@ -261,6 +256,8 @@ def create_order():
     except Exception as e:
         print("Razorpay order error:", e)
         return jsonify({"error": "Payment gateway error"}), 500
+
+
 @app.route("/payment_success", methods=["POST"])
 def payment_success():
     if "email" not in session:
@@ -285,9 +282,8 @@ def payment_success():
         }
         razorpay_client.utility.verify_payment_signature(params_dict)
 
-        # Activate subscription
-        duration = 2 if plan == "premium" else 1
-        success = activate_subscription(session["email"], plan, duration)
+        # Activate subscription (2 arguments: email + plan)
+        success = activate_subscription(session["email"], plan)
         if success:
             _apply_session_subscription_from_db(session["email"])
             flash("Payment successful! Subscription activated.", "success")
@@ -298,7 +294,8 @@ def payment_success():
         flash("Payment verification failed", "danger")
         return redirect(url_for("profile"))
 
-    return redirect(url_for("profile"))
+    # Redirect to home/profile instead of pricing
+    return redirect(url_for("home"))
 
 
 @app.route("/webhook", methods=["POST"])
@@ -322,16 +319,13 @@ def webhook():
             email = notes.get('email')
             plan = notes.get('plan', 'basic')
             if email:
-                duration = 2 if plan == "premium" else 1
-                activate_subscription(email, plan, duration)
+                activate_subscription(email, plan)
                 print(f"Webhook: Subscription activated for {email}, plan: {plan}")
 
         return jsonify({"status": "success"}), 200
     except Exception as e:
         print("Webhook error:", e)
         return jsonify({"error": "Invalid signature or webhook processing error"}), 400
-
-
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
@@ -340,7 +334,11 @@ def home():
 
 @app.route("/pricing")
 def pricing():
+    # Only show pricing if user not subscribed
+    if "email" in session and has_active_subscription(session["email"]):
+        return redirect(url_for("home"))
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
+
 
 @app.route('/sitemap.xml')
 def sitemap():
@@ -440,7 +438,6 @@ def stamp_page():
 def about_page():
     return render_template("about.html")
 
-# --- Help & Support Pages ---
 @app.route("/faq")
 def faq_page():
     return render_template("faq.html")
