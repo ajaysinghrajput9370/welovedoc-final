@@ -1,4 +1,4 @@
-# file_manager.py — Full unified PostgreSQL version
+# file_manager.py — Full version with log_activity
 import os
 import json
 from datetime import datetime, timedelta, timezone
@@ -55,6 +55,7 @@ def signup_user(name, email, password, subscription="free"):
         )
         db.add(new_user)
         db.commit()
+        log_activity(email, "signup")
         return True
     except IntegrityError:
         db.rollback()
@@ -97,6 +98,7 @@ def login_user(email, password, device_id):
     limit = get_device_limit(user.subscription)
     if device_id in devices:
         db.close()
+        log_activity(email, f"login_existing_device:{device_id}")
         return True
     if len(devices) >= limit:
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
@@ -106,26 +108,8 @@ def login_user(email, password, device_id):
     user.devices = json.dumps(devices)
     db.commit()
     db.close()
+    log_activity(email, f"login_new_device:{device_id}")
     return True
-
-def update_device_login(email, device_id):
-    email = (email or "").strip().lower()
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            return False
-        try:
-            devices = json.loads(user.devices or "{}")
-            devices[device_id] = datetime.now(timezone.utc).isoformat()
-            user.devices = json.dumps(devices)
-            db.commit()
-            return True
-        except:
-            db.rollback()
-            return False
-    finally:
-        db.close()
 
 # ---------------- Subscription ----------------
 def parse_datetime_safe(s):
@@ -193,6 +177,7 @@ def activate_subscription(email, plan):
         user.subscription_expiry = None
     try:
         db.commit()
+        log_activity(email, f"subscription_activated:{plan}")
         return True
     except:
         db.rollback()
@@ -217,3 +202,13 @@ def list_users(limit=100):
         })
     db.close()
     return users
+
+# ---------------- Logging ----------------
+LOG_FILE = os.getenv("ACTIVITY_LOG_FILE", "activity.log")
+def log_activity(email, action):
+    """Simple log for user actions"""
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now(timezone.utc).isoformat()} | {email} | {action}\n")
+    except:
+        pass
