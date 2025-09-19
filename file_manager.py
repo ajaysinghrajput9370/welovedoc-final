@@ -35,9 +35,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     subscription = Column(String, default="free")
-    subscription_expiry = Column(DateTime, nullable=True)
+    subscription_expiry = Column(DateTime(timezone=True), nullable=True)  # ✅ timezone-aware
     devices = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))  # ✅ UTC safe
 
 # ---------------- Schema Init ----------------
 def ensure_schema():
@@ -130,13 +130,16 @@ def parse_datetime_safe(s):
     if not s:
         return None
     if isinstance(s, datetime):
-        return s.replace(tzinfo=timezone.utc)
+        if s.tzinfo is None:
+            return s.replace(tzinfo=timezone.utc)
+        return s
     try:
-        return datetime.fromisoformat(str(s)).replace(tzinfo=timezone.utc)
+        dt = datetime.fromisoformat(str(s))
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
     except Exception:
         return None
 
-def check_subscription(email):
+def has_active_subscription(email):
     u = get_user_by_email(email)
     if not u:
         return False
@@ -144,10 +147,10 @@ def check_subscription(email):
     if sub == "free":
         return False
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
-    if expiry_dt:
-        now_utc = datetime.now(timezone.utc)
-        return now_utc <= expiry_dt
-    return False
+    if not expiry_dt:
+        return False
+    now_utc = datetime.now(timezone.utc)
+    return now_utc <= expiry_dt
 
 def get_days_left(email):
     u = get_user_by_email(email)
