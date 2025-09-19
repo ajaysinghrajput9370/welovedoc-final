@@ -1,11 +1,9 @@
-# file_manager.py — PostgreSQL (SQLAlchemy) version with subscription + device limit + duration
+# file_manager_db.py
 import os
 import json
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.exc import IntegrityError
 
 # ---------------- DB Setup ----------------
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/dbname")
@@ -13,21 +11,7 @@ engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-# ---------------- Plan Config ----------------
-PLAN_DEVICE_LIMIT = {
-    "free": 1,
-    "basic": 2,
-    "standard": 4,
-    "premium": 4
-}
-
-PLAN_DURATION_MONTHS = {
-    "free": 0,
-    "basic": 1,
-    "standard": 1,
-    "premium": 2
-}
-
+# ---------------- User Model ----------------
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -35,17 +19,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     subscription = Column(String, default="free")
-    subscription_expiry = Column(DateTime(timezone=True), nullable=True)   # ✅ timezone-aware
+    subscription_expiry = Column(DateTime, nullable=True)
     devices = Column(Text, default="{}")
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))  # ✅ UTC safe
-
-class AccessLog(Base):
-    __tablename__ = "access_logs"
-    id = Column(Integer, primary_key=True, index=True)
-    user_email = Column(String, index=True)
-    tool = Column(String, index=True)
-    action = Column(String)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 # ---------------- Schema Init ----------------
 def ensure_schema():
@@ -54,6 +30,17 @@ def ensure_schema():
         print("✅ Database schema ensured.")
     except Exception as e:
         print("❌ Error ensuring schema:", e)
+# file_manager_logic.py
+import json
+from datetime import datetime, timedelta, timezone
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
+from file_manager_db import SessionLocal, User
+
+# ---------------- Plan Config ----------------
+PLAN_DEVICE_LIMIT = {"free": 1, "basic": 2, "standard": 4, "premium": 4}
+PLAN_DURATION_MONTHS = {"free": 0, "basic": 1, "standard": 1, "premium": 2}
+
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
     email = (email or "").strip().lower()
@@ -101,51 +88,39 @@ def get_device_limit(subscription):
     return PLAN_DEVICE_LIMIT.get((subscription or "free").lower(), 1)
 
 def login_user(email, password, device_id):
-    """Authenticate user and enforce device limit."""
     email = (email or "").strip().lower()
     db = SessionLocal()
     user = db.query(User).filter(User.email == email).first()
-    if not user:
+    if not user or not check_password_hash(user.password, password):
         db.close()
         return False
-    if not check_password_hash(user.password, password):
-        db.close()
-        return False
-
     try:
         devices = json.loads(user.devices or "{}")
     except:
         devices = {}
-
     limit = get_device_limit(user.subscription)
     if device_id in devices:
-        log_activity(email, "login", "existing device")
         db.close()
         return True
-
     if len(devices) >= limit:
         oldest_device = min(devices.items(), key=lambda x: x[1])[0] if devices else None
         if oldest_device:
             del devices[oldest_device]
-
     devices[device_id] = datetime.now(timezone.utc).isoformat()
     user.devices = json.dumps(devices)
     db.commit()
-
-    log_activity(email, "login", f"new device {device_id}")
     db.close()
     return True
 
-# ---------------- Subscription logic ----------------
+# ---------------- Subscription ----------------
 def parse_datetime_safe(s):
     if not s:
         return None
     if isinstance(s, datetime):
-        return s if s.tzinfo else s.replace(tzinfo=timezone.utc)
+        return s.replace(tzinfo=timezone.utc)
     try:
-        dt = datetime.fromisoformat(str(s))
-        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
-    except Exception:
+        return datetime.fromisoformat(str(s)).replace(tzinfo=timezone.utc)
+    except:
         return None
 
 def check_subscription(email):
@@ -157,8 +132,7 @@ def check_subscription(email):
         return False
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if expiry_dt:
-        now_utc = datetime.now(timezone.utc)
-        return now_utc <= expiry_dt
+        return datetime.now(timezone.utc) <= expiry_dt
     return False
 
 def get_days_left(email):
@@ -168,8 +142,7 @@ def get_days_left(email):
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
     if not expiry_dt:
         return 0
-    now_utc = datetime.now(timezone.utc)
-    delta = expiry_dt - now_utc
+    delta = expiry_dt - datetime.now(timezone.utc)
     return max(0, delta.days)
 
 def get_subscription_details(email):
@@ -186,7 +159,6 @@ def get_subscription_details(email):
     }
 
 def activate_subscription(email, plan):
-    """Activate or extend subscription based on PLAN_DURATION_MONTHS."""
     email = (email or "").strip().lower()
     plan = (plan or "free").lower()
     months = PLAN_DURATION_MONTHS.get(plan, 0)
@@ -195,53 +167,57 @@ def activate_subscription(email, plan):
     if not user:
         db.close()
         return False
-
     now_utc = datetime.now(timezone.utc)
     existing = parse_datetime_safe(user.subscription_expiry)
     base = existing if existing and existing > now_utc else now_utc
     if months > 0:
-        new_expiry = base + timedelta(days=30 * months)
         user.subscription = plan
-        user.subscription_expiry = new_expiry
+        user.subscription_expiry = base + timedelta(days=30 * months)
     else:
         user.subscription = "free"
         user.subscription_expiry = None
-
     try:
         db.commit()
-        log_activity(email, "subscription", f"activated {plan}")
         return True
-    except Exception:
+    except:
         db.rollback()
         return False
     finally:
         db.close()
 
-# ---------------- Activity helpers ----------------
-def log_activity(user_email, tool, action):
+# ---------------- Admin helpers ----------------
+def list_users(limit=100):
     db = SessionLocal()
-    try:
-        entry = AccessLog(user_email=user_email, tool=tool, action=action)
-        db.add(entry)
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        print("log_activity error:", e)
-    finally:
-        db.close()
+    rows = db.query(User).order_by(User.created_at.desc()).limit(limit).all()
+    users = []
+    for u in rows:
+        users.append({
+            "id": u.id,
+            "name": u.name or "",
+            "email": u.email or "",
+            "subscription": u.subscription or "free",
+            "subscription_expiry": u.subscription_expiry.isoformat() if u.subscription_expiry else "",
+            "devices": u.devices or "{}",
+            "created_at": u.created_at.isoformat() if u.created_at else ""
+        })
+    db.close()
+    return users
 
-def get_recent_activity(limit=50):
+def update_device_login(email, device_id):
+    email = (email or "").strip().lower()
     db = SessionLocal()
     try:
-        rows = db.query(AccessLog).order_by(AccessLog.created_at.desc()).limit(limit).all()
-        return [
-            {
-                "email": r.user_email,
-                "tool": r.tool,
-                "action": r.action,
-                "time": r.created_at.isoformat()
-            }
-            for r in rows
-        ]
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return False
+        try:
+            devices = json.loads(user.devices or "{}")
+            devices[device_id] = datetime.now(timezone.utc).isoformat()
+            user.devices = json.dumps(devices)
+            db.commit()
+            return True
+        except:
+            db.rollback()
+            return False
     finally:
         db.close()
