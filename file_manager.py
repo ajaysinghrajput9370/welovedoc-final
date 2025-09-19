@@ -35,9 +35,17 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     subscription = Column(String, default="free")
-    subscription_expiry = Column(DateTime(timezone=True), nullable=True)  # ✅ timezone-aware
+    subscription_expiry = Column(DateTime(timezone=True), nullable=True)   # ✅ timezone-aware
     devices = Column(Text, default="{}")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))  # ✅ UTC safe
+
+class AccessLog(Base):
+    __tablename__ = "access_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_email = Column(String, index=True)
+    tool = Column(String, index=True)
+    action = Column(String)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 # ---------------- Schema Init ----------------
 def ensure_schema():
@@ -46,7 +54,6 @@ def ensure_schema():
         print("✅ Database schema ensured.")
     except Exception as e:
         print("❌ Error ensuring schema:", e)
-
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
     email = (email or "").strip().lower()
@@ -112,6 +119,7 @@ def login_user(email, password, device_id):
 
     limit = get_device_limit(user.subscription)
     if device_id in devices:
+        log_activity(email, "login", "existing device")
         db.close()
         return True
 
@@ -123,23 +131,24 @@ def login_user(email, password, device_id):
     devices[device_id] = datetime.now(timezone.utc).isoformat()
     user.devices = json.dumps(devices)
     db.commit()
+
+    log_activity(email, "login", f"new device {device_id}")
     db.close()
     return True
+
 # ---------------- Subscription logic ----------------
 def parse_datetime_safe(s):
     if not s:
         return None
     if isinstance(s, datetime):
-        if s.tzinfo is None:
-            return s.replace(tzinfo=timezone.utc)
-        return s
+        return s if s.tzinfo else s.replace(tzinfo=timezone.utc)
     try:
         dt = datetime.fromisoformat(str(s))
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
     except Exception:
         return None
 
-def has_active_subscription(email):
+def check_subscription(email):
     u = get_user_by_email(email)
     if not u:
         return False
@@ -147,10 +156,10 @@ def has_active_subscription(email):
     if sub == "free":
         return False
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
-    if not expiry_dt:
-        return False
-    now_utc = datetime.now(timezone.utc)
-    return now_utc <= expiry_dt
+    if expiry_dt:
+        now_utc = datetime.now(timezone.utc)
+        return now_utc <= expiry_dt
+    return False
 
 def get_days_left(email):
     u = get_user_by_email(email)
@@ -200,6 +209,7 @@ def activate_subscription(email, plan):
 
     try:
         db.commit()
+        log_activity(email, "subscription", f"activated {plan}")
         return True
     except Exception:
         db.rollback()
@@ -207,41 +217,31 @@ def activate_subscription(email, plan):
     finally:
         db.close()
 
-# ---------------- Admin helpers ----------------
-def list_users(limit=100):
-    db = SessionLocal()
-    rows = db.query(User).order_by(User.created_at.desc()).limit(limit).all()
-    users = []
-    for u in rows:
-        users.append({
-            "id": u.id,
-            "name": u.name or "",
-            "email": u.email or "",
-            "subscription": u.subscription or "free",
-            "subscription_expiry": u.subscription_expiry.isoformat() if u.subscription_expiry else "",
-            "devices": u.devices or "{}",
-            "created_at": u.created_at.isoformat() if u.created_at else ""
-        })
-    db.close()
-    return users
-
-def update_device_login(email, device_id):
-    """Update device login timestamp for an existing device."""
-    email = (email or "").strip().lower()
+# ---------------- Activity helpers ----------------
+def log_activity(user_email, tool, action):
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            return False
+        entry = AccessLog(user_email=user_email, tool=tool, action=action)
+        db.add(entry)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("log_activity error:", e)
+    finally:
+        db.close()
 
-        try:
-            devices = json.loads(user.devices or "{}")
-            devices[device_id] = datetime.now(timezone.utc).isoformat()
-            user.devices = json.dumps(devices)
-            db.commit()
-            return True
-        except Exception:
-            db.rollback()
-            return False
+def get_recent_activity(limit=50):
+    db = SessionLocal()
+    try:
+        rows = db.query(AccessLog).order_by(AccessLog.created_at.desc()).limit(limit).all()
+        return [
+            {
+                "email": r.user_email,
+                "tool": r.tool,
+                "action": r.action,
+                "time": r.created_at.isoformat()
+            }
+            for r in rows
+        ]
     finally:
         db.close()
