@@ -8,7 +8,7 @@ from datetime import timedelta, datetime
 from dotenv import load_dotenv
 import json
 
-# Import from file_manager.py (ensure_schema exists in file_manager)
+# Import from file_manager.py
 from file_manager import (
     ensure_schema,
     signup_user, login_user, check_subscription,
@@ -276,8 +276,8 @@ def payment_success():
     signature = request.form.get("razorpay_signature")
     plan = request.form.get("plan", "basic")
 
-    # Verify payment signature
     try:
+        # Verify payment signature
         params_dict = {
             'razorpay_order_id': order_id,
             'razorpay_payment_id': payment_id,
@@ -341,7 +341,7 @@ def home():
 @app.route("/pricing")
 def pricing():
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
-    
+
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory(os.path.dirname(__file__), 'sitemap.xml')
@@ -349,6 +349,7 @@ def sitemap():
 @app.route('/robots.txt')
 def robots():
     return send_from_directory(os.path.dirname(__file__), 'robots.txt')
+
 
 # ---------------- PROTECTED TOOL ROUTES ----------------
 def _require_login():
@@ -383,78 +384,63 @@ def pf_highlight_page():
 def merge_pdf_page():
     return render_template("merge-pdf.html")
 
-
 @app.route("/split-pdf")
 def split_pdf_page():
     return render_template("split-pdf.html")
-
 
 @app.route("/compress-pdf")
 def compress_pdf_page():
     return render_template("compress-pdf.html")
 
-
 @app.route("/jpg-to-pdf")
 def jpg_to_pdf_page():
     return render_template("jpg-to-pdf.html")
-
 
 @app.route("/word-to-pdf")
 def word_to_pdf_page():
     return render_template("word-to-pdf.html")
 
-
 @app.route("/pdf-to-word")
 def pdf_to_word_page():
     return render_template("pdf-to-word.html")
-
 
 @app.route("/excel-to-pdf")
 def excel_to_pdf_page():
     return render_template("excel-to-pdf.html")
 
-
 @app.route("/pdf-to-excel")
 def pdf_to_excel_page():
     return render_template("pdf-to-excel.html")
-
 
 @app.route("/pdf-to-jpg")
 def pdf_to_jpg_page():
     return render_template("pdf-to-jpg.html")
 
-
 @app.route("/rotate-pdf")
 def rotate_pdf_page():
     return render_template("rotate-pdf.html")
-
 
 @app.route("/extract-pages")
 def extract_pages_page():
     return render_template("extract-pages.html")
 
-
 @app.route("/protect-pdf")
 def protect_pdf_page():
     return render_template("protect-pdf.html")
-
 
 @app.route("/pf-esic-ecr")
 def pf_esic_ecr_page():
     return render_template("pf-esic-ecr.html")
 
-
 @app.route("/stamp")
 def stamp_page():
     return render_template("stamp.html")
-
 
 @app.route("/about")
 def about_page():
     return render_template("about.html")
 
 # --- Help & Support Pages ---
-
 @app.route("/faq")
 def faq_page():
     return render_template("faq.html")
@@ -470,7 +456,8 @@ def privacy_policy_page():
 @app.route("/terms-of-service")
 def terms_service_page():
     return render_template("terms_service.html")
-    
+
+
 # ---------------- PROCESS API ----------------
 from pf_highlight import highlight_pf
 from esic_highlight import highlight_esic
