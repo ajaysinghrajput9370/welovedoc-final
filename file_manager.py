@@ -1,15 +1,21 @@
-# file_manager_db.py
+# file_manager.py — Full unified PostgreSQL version
 import os
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import IntegrityError
 
 # ---------------- DB Setup ----------------
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/dbname")
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
+
+# ---------------- Plan Config ----------------
+PLAN_DEVICE_LIMIT = {"free": 1, "basic": 2, "standard": 4, "premium": 4}
+PLAN_DURATION_MONTHS = {"free": 0, "basic": 1, "standard": 1, "premium": 2}
 
 # ---------------- User Model ----------------
 class User(Base):
@@ -30,16 +36,6 @@ def ensure_schema():
         print("✅ Database schema ensured.")
     except Exception as e:
         print("❌ Error ensuring schema:", e)
-# file_manager_logic.py
-import json
-from datetime import datetime, timedelta, timezone
-from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.exc import IntegrityError
-from file_manager_db import SessionLocal, User
-
-# ---------------- Plan Config ----------------
-PLAN_DEVICE_LIMIT = {"free": 1, "basic": 2, "standard": 4, "premium": 4}
-PLAN_DURATION_MONTHS = {"free": 0, "basic": 1, "standard": 1, "premium": 2}
 
 # ---------------- User CRUD ----------------
 def signup_user(name, email, password, subscription="free"):
@@ -111,6 +107,25 @@ def login_user(email, password, device_id):
     db.commit()
     db.close()
     return True
+
+def update_device_login(email, device_id):
+    email = (email or "").strip().lower()
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return False
+        try:
+            devices = json.loads(user.devices or "{}")
+            devices[device_id] = datetime.now(timezone.utc).isoformat()
+            user.devices = json.dumps(devices)
+            db.commit()
+            return True
+        except:
+            db.rollback()
+            return False
+    finally:
+        db.close()
 
 # ---------------- Subscription ----------------
 def parse_datetime_safe(s):
@@ -202,22 +217,3 @@ def list_users(limit=100):
         })
     db.close()
     return users
-
-def update_device_login(email, device_id):
-    email = (email or "").strip().lower()
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            return False
-        try:
-            devices = json.loads(user.devices or "{}")
-            devices[device_id] = datetime.now(timezone.utc).isoformat()
-            user.devices = json.dumps(devices)
-            db.commit()
-            return True
-        except:
-            db.rollback()
-            return False
-    finally:
-        db.close()
