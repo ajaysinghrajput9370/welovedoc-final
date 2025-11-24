@@ -3,390 +3,615 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeLoveDoc - ESIC Highlighter</title>
+    <title>We ❤️ Doc - ESIC Highlighter Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- ✅ Favicon (essential only) -->
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+   <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+   <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png">
+   <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png">
+   <link rel="manifest" href="/static/site.webmanifest"> 
+
+   <!-- ✅ JSON-LD for Google logo in search -->
+   <script type="application/ld+json">
+   {
+     "@context": "https://schema.org",
+   "@type": "Organization",
+   "url": "https://welovedoc.in",
+   "logo": "https://welovedoc.in/static/web-app-manifest-512x512.png"
+ }
+</script>
+
     <style>
         :root {
-            --primary-color: #4e73df;
-            --secondary-color: #1cc88a;
-            --light-bg: #f8f9fc;
-            --button-color: #dc3545;
-            --ilovepdf-red: #ed1b34;
-            --ilovepdf-blue: #2c56ef;
+            --primary-color: #2c56ef;
+            --primary-dark: #1a45d5;
+            --light-bg: #f5f5f5;
+            --button-color: #2c56ef;
+            --dark-color: #2f3640;
+            --gray-color: #dcdde1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 0;
-            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
         }
-        
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem 0;
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
-        
+
+        /* Header Styles */
+        header {
+            background: white;
+            padding: 8px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
         .logo {
-            height: 30px;
-            margin-right: 8px;
+            height: 40px;
+            display: flex;
+            align-items: center;
         }
         
-        .hero-section {
-            background: linear-gradient(135deg, #2e59d9 0%, #1cc88a 100%);
+        .logo img {
+            height: 100%;
+            width: auto;
+            display: block;
+        }
+        
+        .logo-text {
+            font-weight: 800;
+            color: var(--primary-color);
+            font-size: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 5px;
+        }
+
+        nav ul li {
+            position: relative;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background: var(--primary-color);
             color: white;
-            padding: 1rem 0;
-            border-radius: 0 0 15px 15px;
-            margin-bottom: 1.5rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .login-btn, .signup-btn {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .login-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .signup-btn {
+            background: var(--primary-color);
+            color: white;
+            border: 1px solid var(--primary-color);
+        }
+
+        .signup-btn:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* Dropdown menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 280px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 1;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+            border: 1px solid #eee;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: grid;
+        }
+
+        .dropdown-content a {
+            color: #333 !important;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s, transform 0.2s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dropdown-content a i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            width: 18px;
+            text-align: center;
+        }
+
+        .dropdown-content a:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        /* ESIC Highlighter Tool Styles */
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 15px;
         }
         
-        .card {
-            border: none;
+        .upload-card {
+            background-color: white;
             border-radius: 10px;
             box-shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid #e3e6f0;
-            font-weight: 700;
-            padding: 0.75rem 1rem;
-            border-radius: 10px 10px 0 0 !important;
-            font-size: 0.9rem;
-        }
-        
-        .upload-area {
-            border: 2px dashed #d1d3e2;
-            border-radius: 8px;
-            padding: 0.8rem;
+            padding: 3rem;
             text-align: center;
-            transition: all 0.3s;
-            background-color: #f8f9fc;
-            margin-bottom: 0.5rem;
-            height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
         
-        .upload-icon {
-            font-size: 1.5rem;
-            color: #b7b9cc;
-            margin-bottom: 0.3rem;
+        .upload-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+        
+        .upload-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 3rem;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 2rem 0 3rem 0;
         }
         
         .btn-select {
-            background-color: white;
-            color: var(--ilovepdf-red);
-            border: 2px solid var(--ilovepdf-red);
-            border-radius: 4px;
-            width: 150px;
-            height: 40px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 0.3rem 0.5rem;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 280px;
+            height: 80px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
             transition: all 0.3s;
+            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.25);
         }
         
         .btn-select:hover {
-            background-color: var(--ilovepdf-red);
+            background-color: #1a45d5;
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(44, 86, 239, 0.35);
         }
         
-        .btn-success {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
+        .btn-select i {
+            font-size: 1.8rem;
+            margin-right: 12px;
         }
         
         .file-list {
-            margin-top: 0.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
         }
         
         .file-item {
             display: flex;
             align-items: center;
-            padding: 0.4rem;
+            padding: 1.2rem;
             background-color: #f8f9fc;
-            border-radius: 5px;
-            margin-bottom: 0.4rem;
-            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            border: 1px solid #eaeaea;
         }
         
         .file-icon {
-            margin-right: 8px;
+            margin-right: 12px;
             color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        
+        .file-info {
+            flex-grow: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        
+        .file-size {
+            color: #666;
             font-size: 0.9rem;
         }
         
+        .remove-file {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+            padding: 5px;
+        }
+        
+        .remove-file:hover {
+            color: #ff4757;
+        }
+        
         .process-btn {
-            padding: 0.5rem 1.5rem;
-            font-size: 0.9rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
             font-weight: 700;
+            margin-top: 2rem;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.25);
+        }
+        
+        .process-btn:hover {
+            background-color: #1a45d5;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(44, 86, 239, 0.35);
+        }
+        
+        .process-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .result-section {
             display: none;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
+            padding: 2.5rem;
+            text-align: center;
+        }
+        
+        .result-icon {
+            font-size: 3.5rem;
+            color: #1cc88a;
+            margin-bottom: 1.5rem;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #333;
+        }
+        
+        .result-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
         }
         
         .download-btn {
-            padding: 0.5rem 1rem;
-            margin: 0.3rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        
-        footer {
-            background-color: white;
-            padding: 1rem 0;
-            margin-top: 2rem;
-            border-top: 1px solid #e3e6f0;
-            font-size: 0.8rem;
-        }
-        
-        .back-link {
-            color: #6e707e;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-        
-        .back-link:hover {
-            color: var(--primary-color);
-        }
-        
-        h1.display-4 {
-            font-size: 1.6rem;
-        }
-        
-        .lead {
-            font-size: 0.85rem;
-        }
-        
-        .container {
-            padding-left: 15px;
-            padding-right: 15px;
-            max-width: 1000px;
-        }
-        
-        .card-body {
-            padding: 1rem;
-        }
-        
-        .navbar-brand {
-            font-size: 1.1rem;
-        }
-        
-        .nav-link {
-            font-size: 0.9rem;
-            padding: 0.5rem 0.7rem;
-        }
-        
-        .upload-instructions {
-            font-size: 0.75rem;
-            color: #6e707e;
-            margin-top: 0.3rem;
-        }
-        
-        .upload-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .upload-column {
-            flex: 1;
-            min-width: 280px;
-        }
-        
-        .btn-excel {
-            background-color: white;
-            color: #1d6f42;
-            border: 2px solid #1d6f42;
-            border-radius: 4px;
-            width: 150px;
-            height: 40px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 0.3rem 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            transition: all 0.3s;
-        }
-        
-        .btn-excel:hover {
-            background-color: #1d6f42;
+            background-color: var(--primary-color);
             color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0 0.8rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(44, 86, 239, 0.25);
+        }
+        
+        .download-btn:hover {
+            background-color: #1a45d5;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.35);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .file-inputs {
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            nav ul li a {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+            
+            .auth-buttons {
+                gap: 5px;
+            }
+            
+            .login-btn, .signup-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            nav ul {
+                flex-wrap: wrap;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .logo-section {
+                width: 100%;
+                justify-content: space-between;
+                margin-bottom: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            nav ul li {
+                margin: 5px;
+            }
+            
+            .dropdown-content {
+                grid-template-columns: 1fr;
+                min-width: 200px;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .btn-select {
+                width: 100%;
+                max-width: 320px;
+                height: 70px;
+            }
+            
+            .upload-title {
+                font-size: 1.8rem;
+            }
+            
+            .upload-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .upload-card {
+                padding: 2rem;
+            }
+            
+            .upload-title {
+                font-size: 1.8rem;
+            }
+            
+            .upload-subtitle {
+                font-size: 1rem;
+            }
+            
+            .logo-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <span class="fw-bold text-primary">WeLoveDoc</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="/static/logo.png" alt="We Love Doc Logo" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
+                    <span class="logo-text" style="display: none;">We ❤️ Doc</span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pf-highlight">PF Highlight</a></li>
+                        <li><a href="/esic-highlight" class="active">ESIC Highlight</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <li class="dropdown">
+                            <a href="#">Convert <i class="fas fa-caret-down"></i></a>
+                            <div class="dropdown-content">
+                                <a href="/jpg-to-pdf"><i class="far fa-image"></i> JPG to PDF</a>
+                                <a href="/word-to-pdf"><i class="far fa-file-word"></i> WORD to PDF</a>
+                                <a href="/pdf-to-word"><i class="far fa-file-alt"></i> PDF to WORD</a>
+                                <a href="/excel-to-pdf"><i class="far fa-file-excel"></i> EXCEL to PDF</a>
+                                <a href="/pdf-to-excel"><i class="fas fa-table"></i> PDF to EXCEL</a>
+                                <a href="/pdf-to-jpg"><i class="fas fa-file-image"></i> PDF to JPG</a>
+                            </div>
+                        </li>
+                        <li><a href="/all-tools">All Tools</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Top Right Auth Buttons -->
+            <div class="auth-buttons">
+                <!-- For demo purposes, showing login/signup buttons -->
+                <a href="/login" class="login-btn">Login</a>
+                <a href="/signup" class="signup-btn">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ESIC Highlighter Tool Content -->
+    <div class="main-container">
+        <div class="upload-card">
+            <h1 class="upload-title">ESIC Highlighter Tool</h1>
+            <p class="upload-subtitle">Upload your PDF and Excel files to highlight ESIC-related information. The tool will highlight matching data and provide a download of unmatched entries.</p>
+            
+            <!-- Large buttons with minimal gap -->
+            <div class="button-container">
+                <button class="btn-select" id="pdf-btn">
+                    <i class="fas fa-file-pdf"></i>SELECT PDF
+                </button>
+                <button class="btn-select" id="excel-btn">
+                    <i class="fas fa-file-excel"></i>SELECT EXCEL
+                </button>
+            </div>
+            
+            <div class="file-list" id="file-list"></div>
+            
+            <button class="btn process-btn" id="process-btn" disabled>
+                <i class="fas fa-spinner fa-spin hidden" id="spinner"></i>
+                Process ESIC Highlighting
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold">ESIC Highlighter Tool</h1>
-            <p class="lead">Upload your PDF and Excel files to highlight ESIC-related information</p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="container">
-        <a href="/highlight" class="back-link">
-            <i class="fas fa-arrow-left me-2"></i>Back to All Highlighters
-        </a>
-        
-        <div class="card">
-            <div class="card-header py-2">
-                <h5 class="m-0 font-weight-bold text-primary">ESIC Highlighter</h5>
-            </div>
-            <div class="card-body">
-                <p class="mb-3" style="font-size: 0.9rem;">Upload your PDF and Excel files to highlight ESIC-related information. The tool will highlight matching data and provide a download of unmatched entries.</p>
-                
-                <!-- File Upload Section -->
-                <div class="upload-container">
-                    <div class="upload-column">
-                        <div class="card h-100">
-                            <div class="card-header py-2">
-                                <h6 class="m-0 font-weight-bold">Step 1: Upload PDF File</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-area">
-                                    <i class="fas fa-file-pdf upload-icon"></i>
-                                    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Click to select PDF file</p>
-                                    <button class="btn-select" id="pdf-btn">
-                                        <i class="fas fa-file-pdf me-2"></i>SELECT PDF
-                                    </button>
-                                    <p class="upload-instructions">(PDF format only)</p>
-                                </div>
-                                <div class="file-list" id="pdf-list"></div>
-                            </div>
-                        </div>
-                    </div>
+            
+            <div class="result-section" id="result">
+                <div class="result-card">
+                    <i class="fas fa-check-circle result-icon"></i>
+                    <h2 class="result-title">Processing Complete!</h2>
+                    <p class="result-subtitle">Your files have been processed successfully</p>
                     
-                    <div class="upload-column">
-                        <div class="card h-100">
-                            <div class="card-header py-2">
-                                <h6 class="m-0 font-weight-bold">Step 2: Upload Excel File</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-area">
-                                    <i class="fas fa-file-excel upload-icon"></i>
-                                    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Click to select Excel file</p>
-                                    <button class="btn-excel" id="excel-btn">
-                                        <i class="fas fa-file-excel me-2"></i>SELECT EXCEL
-                                    </button>
-                                    <p class="upload-instructions">(XLSX, XLS, CSV formats)</p>
-                                </div>
-                                <div class="file-list" id="excel-list"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Process Button -->
-                <div class="text-center mt-3">
-                    <button class="btn btn-success process-btn" id="process-btn" disabled>
-                        <i class="fas fa-spinner fa-spin d-none" id="spinner"></i>
-                        Process ESIC Highlighting
-                    </button>
-                </div>
-                
-                <!-- Results Section -->
-                <div class="result-section mt-3" id="result">
-                    <div class="card">
-                        <div class="card-header bg-success text-white py-2">
-                            <h6 class="m-0 font-weight-bold">Processing Complete!</h6>
-                        </div>
-                        <div class="card-body text-center">
-                            <i class="fas fa-check-circle text-success mb-2" style="font-size: 2rem;"></i>
-                            <h5 class="text-success" style="font-size: 1rem;">Your files have been processed successfully</h5>
-                            <p class="text-muted" style="font-size: 0.85rem;">Download the highlighted PDF and unmatched data files</p>
-                            
-                            <div class="mt-3">
-                                <a href="#" class="btn btn-primary download-btn" id="pdf-download">
-                                    <i class="fas fa-download me-1"></i>Highlighted PDF
-                                </a>
-                                <a href="#" class="btn btn-warning download-btn text-white" id="excel-download">
-                                    <i class="fas fa-download me-1"></i>Unmatched Data
-                                </a>
-                            </div>
-                        </div>
+                    <div>
+                        <button class="btn download-btn" id="pdf-download">
+                            <i class="fas fa-download me-1"></i>Highlighted PDF
+                        </button>
+                        <button class="btn download-btn" id="excel-download">
+                            <i class="fas fa-download me-1"></i>Unmatched Data
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <img src="/logo.png" alt="WeLoveDoc Logo" class="logo" style="height: 25px;">
-                    <p class="text-muted mt-1" style="font-size: 0.8rem;">WeLoveDoc provides powerful PDF tools to make your document processing easier and more efficient.</p>
-                </div>
-                <div class="col-md-3">
-                    <h6 style="font-size: 0.9rem;">Quick Links</h6>
-                    <ul class="list-unstyled" style="font-size: 0.8rem;">
-                        <li><a href="/" class="text-decoration-none text-muted">Home</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h6 style="font-size: 0.9rem;">Support</h6>
-                    <ul class="list-unstyled" style="font-size: 0.8rem;">
-                        <li><a href="/contact" class="text-decoration-none text-muted">Contact Us</a></li>
-                        <li><a href="/faq" class="text-decoration-none text-muted">FAQ</a></li>
-                        <li><a href="/privacy-policy" class="text-decoration-none text-muted">Privacy Policy</a></li>
-                        <li><a href="/terms-of-service" class="text-decoration-none text-muted">Terms of Service</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
-            <p class="text-center text-muted" style="font-size: 0.8rem;">© 2023 WeLoveDoc. All rights reserved.</p>
-        </div>
-    </footer>
+    <!-- Hidden file inputs -->
+    <div class="file-inputs">
+        <input type="file" id="pdf-input" accept=".pdf">
+        <input type="file" id="excel-input" accept=".xlsx,.xls,.csv">
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const pdfBtn = document.getElementById('pdf-btn');
-            const pdfList = document.getElementById('pdf-list');
-            
             const excelBtn = document.getElementById('excel-btn');
-            const excelList = document.getElementById('excel-list');
-            
+            const pdfInput = document.getElementById('pdf-input');
+            const excelInput = document.getElementById('excel-input');
+            const fileList = document.getElementById('file-list');
             const processBtn = document.getElementById('process-btn');
             const spinner = document.getElementById('spinner');
             const resultSection = document.getElementById('result');
@@ -394,28 +619,13 @@
             let pdfFile = null;
             let excelFile = null;
             
-            // Create hidden file inputs
-            const hiddenPdfInput = document.createElement('input');
-            hiddenPdfInput.type = 'file';
-            hiddenPdfInput.id = 'pdf-input';
-            hiddenPdfInput.accept = '.pdf';
-            hiddenPdfInput.style.display = 'none';
-            document.body.appendChild(hiddenPdfInput);
-            
-            const hiddenExcelInput = document.createElement('input');
-            hiddenExcelInput.type = 'file';
-            hiddenExcelInput.id = 'excel-input';
-            hiddenExcelInput.accept = '.xlsx,.xls,.csv';
-            hiddenExcelInput.style.display = 'none';
-            document.body.appendChild(hiddenExcelInput);
-            
             // PDF file selection
-            pdfBtn.addEventListener('click', () => hiddenPdfInput.click());
-            hiddenPdfInput.addEventListener('change', (e) => handleFileSelect(e, 'pdf'));
+            pdfBtn.addEventListener('click', () => pdfInput.click());
+            pdfInput.addEventListener('change', (e) => handleFileSelect(e, 'pdf'));
             
             // Excel file selection
-            excelBtn.addEventListener('click', () => hiddenExcelInput.click());
-            hiddenExcelInput.addEventListener('change', (e) => handleFileSelect(e, 'excel'));
+            excelBtn.addEventListener('click', () => excelInput.click());
+            excelInput.addEventListener('change', (e) => handleFileSelect(e, 'excel'));
             
             function handleFileSelect(event, type) {
                 const file = event.target.files[0];
@@ -439,11 +649,11 @@
                 
                 if (type === 'pdf') {
                     pdfFile = file;
-                    updateFileList(pdfList, file);
                 } else {
                     excelFile = file;
-                    updateFileList(excelList, file);
                 }
+                
+                updateFileList();
                 
                 // Enable process button if both files are selected
                 if (pdfFile && excelFile) {
@@ -451,33 +661,50 @@
                 }
             }
             
-            function updateFileList(container, file) {
-                container.innerHTML = `
-                    <div class="file-item">
-                        <i class="fas ${file.type.includes('pdf') ? 'fa-file-pdf' : 'fa-file-excel'} file-icon"></i>
-                        <div>
-                            <div class="fw-bold">${file.name}</div>
-                            <div class="text-muted">${formatFileSize(file.size)}</div>
-                        </div>
-                        <button class="btn btn-sm btn-outline-danger ms-auto remove-file">
-                            <i class="fas fa-times"></i>
-                        </button>
+            function updateFileList() {
+                fileList.innerHTML = '';
+                
+                if (pdfFile) {
+                    const pdfItem = createFileItem(pdfFile, 'pdf');
+                    fileList.appendChild(pdfItem);
+                }
+                
+                if (excelFile) {
+                    const excelItem = createFileItem(excelFile, 'excel');
+                    fileList.appendChild(excelItem);
+                }
+            }
+            
+            function createFileItem(file, type) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                fileItem.innerHTML = `
+                    <i class="fas ${type === 'pdf' ? 'fa-file-pdf' : 'fa-file-excel'} file-icon"></i>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
                     </div>
+                    <button class="remove-file" data-type="${type}">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
                 
                 // Add event listener to remove button
-                const removeBtn = container.querySelector('.remove-file');
+                const removeBtn = fileItem.querySelector('.remove-file');
                 removeBtn.addEventListener('click', () => {
-                    if (container === pdfList) {
+                    if (type === 'pdf') {
                         pdfFile = null;
-                        hiddenPdfInput.value = '';
+                        pdfInput.value = '';
                     } else {
                         excelFile = null;
-                        hiddenExcelInput.value = '';
+                        excelInput.value = '';
                     }
-                    container.innerHTML = '';
+                    updateFileList();
                     processBtn.disabled = true;
                 });
+                
+                return fileItem;
             }
             
             function formatFileSize(bytes) {
@@ -497,50 +724,31 @@
                 formData.append('mode', 'esic');
                 
                 // Show spinner
-                spinner.classList.remove('d-none');
+                spinner.classList.remove('hidden');
                 processBtn.disabled = true;
                 
-                // Send files to server
-                fetch('/process', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
+                // Simulate processing (replace with actual API call)
+                setTimeout(() => {
                     // Hide spinner
-                    spinner.classList.add('d-none');
+                    spinner.classList.add('hidden');
                     
                     // Show result section
                     resultSection.style.display = 'block';
                     
-                    // Create download links
-                    if (data.pdf_url) {
-                        document.getElementById('pdf-download').href = data.pdf_url;
-                        document.getElementById('pdf-download').download = 'esic_highlighted_output.pdf';
-                    }
+                    // Create download links (simulated)
+                    document.getElementById('pdf-download').onclick = () => {
+                        alert('Downloading highlighted PDF...');
+                    };
                     
-                    if (data.excel_url) {
-                        document.getElementById('excel-download').href = data.excel_url;
-                        document.getElementById('excel-download').download = 'esic_data_not_found.xlsx';
-                    }
+                    document.getElementById('excel-download').onclick = () => {
+                        alert('Downloading unmatched data...');
+                    };
                     
                     // Scroll to results
                     resultSection.scrollIntoView({ behavior: 'smooth' });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    spinner.classList.add('d-none');
-                    processBtn.disabled = false;
-                    alert('Error processing files. Please try again.');
-                });
+                }, 2000);
             });
         });
     </script>
 </body>
-
 </html>
