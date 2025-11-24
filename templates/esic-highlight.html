@@ -163,6 +163,18 @@
             border-color: var(--primary-dark);
         }
 
+        .user-welcome {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 15px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
         /* Dropdown menu */
         .dropdown {
             position: relative;
@@ -401,6 +413,8 @@
             margin: 0 0.8rem;
             transition: all 0.3s;
             box-shadow: 0 4px 8px rgba(44, 86, 239, 0.25);
+            text-decoration: none;
+            display: inline-block;
         }
         
         .download-btn:hover {
@@ -548,10 +562,8 @@
             </div>
             
             <!-- Top Right Auth Buttons -->
-            <div class="auth-buttons">
-                <!-- For demo purposes, showing login/signup buttons -->
-                <a href="/login" class="login-btn">Login</a>
-                <a href="/signup" class="signup-btn">Sign Up</a>
+            <div class="auth-buttons" id="auth-buttons">
+                <!-- Dynamic content will be inserted here by JavaScript -->
             </div>
         </div>
     </header>
@@ -586,12 +598,12 @@
                     <p class="result-subtitle">Your files have been processed successfully</p>
                     
                     <div>
-                        <button class="btn download-btn" id="pdf-download">
+                        <a href="#" class="download-btn" id="pdf-download" download="highlighted_esic.pdf">
                             <i class="fas fa-download me-1"></i>Highlighted PDF
-                        </button>
-                        <button class="btn download-btn" id="excel-download">
+                        </a>
+                        <a href="#" class="download-btn" id="excel-download" download="unmatched_data.xlsx">
                             <i class="fas fa-download me-1"></i>Unmatched Data
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -615,9 +627,34 @@
             const processBtn = document.getElementById('process-btn');
             const spinner = document.getElementById('spinner');
             const resultSection = document.getElementById('result');
+            const authButtons = document.getElementById('auth-buttons');
             
             let pdfFile = null;
             let excelFile = null;
+
+            // Check if user is logged in (simulated)
+            const isLoggedIn = false; // Change to true to test logged in state
+            const userName = "John Doe"; // Change to actual user name
+            
+            // Update auth buttons based on login status
+            function updateAuthButtons() {
+                if (isLoggedIn && userName) {
+                    authButtons.innerHTML = `
+                        <div class="user-welcome">
+                            <span class="user-name">👋 Welcome, ${userName}</span>
+                        </div>
+                        <a href="/logout" class="login-btn">Logout</a>
+                    `;
+                } else {
+                    authButtons.innerHTML = `
+                        <a href="/login" class="login-btn">Login</a>
+                        <a href="/signup" class="signup-btn">Sign Up</a>
+                    `;
+                }
+            }
+            
+            // Initialize auth buttons
+            updateAuthButtons();
             
             // PDF file selection
             pdfBtn.addEventListener('click', () => pdfInput.click());
@@ -735,14 +772,17 @@
                     // Show result section
                     resultSection.style.display = 'block';
                     
-                    // Create download links (simulated)
-                    document.getElementById('pdf-download').onclick = () => {
-                        alert('Downloading highlighted PDF...');
-                    };
+                    // Create actual download links with sample data
+                    // In a real application, these would be URLs from your server
+                    const pdfDownload = document.getElementById('pdf-download');
+                    const excelDownload = document.getElementById('excel-download');
                     
-                    document.getElementById('excel-download').onclick = () => {
-                        alert('Downloading unmatched data...');
-                    };
+                    // Create blob URLs for download (simulated files)
+                    const pdfBlob = new Blob(['Simulated PDF content'], { type: 'application/pdf' });
+                    const excelBlob = new Blob(['Simulated Excel content'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    
+                    pdfDownload.href = URL.createObjectURL(pdfBlob);
+                    excelDownload.href = URL.createObjectURL(excelBlob);
                     
                     // Scroll to results
                     resultSection.scrollIntoView({ behavior: 'smooth' });
