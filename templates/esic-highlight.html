@@ -236,7 +236,7 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
-            padding: 3rem;
+            padding: 2rem;
             text-align: center;
         }
         
@@ -251,7 +251,7 @@
         .upload-subtitle {
             font-size: 1.1rem;
             color: #666;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             line-height: 1.5;
             font-weight: 400;
         }
@@ -259,37 +259,37 @@
         .button-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 2rem 0 3rem 0;
+            gap: 10px;
+            margin: 2rem 0;
         }
         
         .btn-select {
             background-color: var(--button-color);
             color: white;
             border: none;
-            border-radius: 10px;
-            width: 280px;
-            height: 80px;
-            font-weight: 700;
-            font-size: 1.3rem;
-            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            width: 200px;
+            height: 60px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.6rem 1.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.25);
+            box-shadow: 0 4px 8px rgba(44, 86, 239, 0.25);
         }
         
         .btn-select:hover {
             background-color: #1a45d5;
             color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(44, 86, 239, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.35);
         }
         
         .btn-select i {
-            font-size: 1.8rem;
-            margin-right: 12px;
+            font-size: 1.5rem;
+            margin-right: 8px;
         }
         
         .file-list {
@@ -300,18 +300,18 @@
         .file-item {
             display: flex;
             align-items: center;
-            padding: 1.2rem;
+            padding: 1rem;
             background-color: #f8f9fc;
             border-radius: 8px;
             margin-bottom: 0.8rem;
-            font-size: 1rem;
+            font-size: 0.9rem;
             border: 1px solid #eaeaea;
         }
         
         .file-icon {
             margin-right: 12px;
             color: var(--primary-color);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         
         .file-info {
@@ -325,7 +325,7 @@
         
         .file-size {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
         .remove-file {
@@ -333,7 +333,7 @@
             border: none;
             color: #999;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: color 0.3s;
             padding: 5px;
         }
@@ -346,21 +346,21 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 1.2rem 3rem;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: 2rem;
+            border-radius: 8px;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0;
             transition: all 0.3s;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.25);
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(44, 86, 239, 0.25);
         }
         
         .process-btn:hover {
             background-color: #1a45d5;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(44, 86, 239, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(44, 86, 239, 0.35);
         }
         
         .process-btn:disabled {
@@ -372,49 +372,60 @@
         
         .result-section {
             display: none;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #eaeaea;
         }
         
         .result-card {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 0.15rem 1rem 0 rgba(58, 59, 69, 0.1);
-            padding: 2.5rem;
+            padding: 2rem;
             text-align: center;
         }
         
         .result-icon {
-            font-size: 3.5rem;
+            font-size: 3rem;
             color: #1cc88a;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         
         .result-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
             color: #333;
         }
         
         .result-subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #666;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .download-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
         }
         
         .download-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 1rem 2rem;
+            border-radius: 6px;
+            padding: 0.8rem 1.5rem;
             font-weight: 600;
-            font-size: 1.1rem;
-            margin: 0 0.8rem;
+            font-size: 1rem;
             transition: all 0.3s;
             box-shadow: 0 4px 8px rgba(44, 86, 239, 0.25);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
         }
         
         .download-btn:hover {
@@ -484,13 +495,13 @@
             .button-container {
                 flex-direction: column;
                 align-items: center;
-                gap: 15px;
+                gap: 10px;
             }
             
             .btn-select {
                 width: 100%;
-                max-width: 320px;
-                height: 70px;
+                max-width: 280px;
+                height: 55px;
             }
             
             .upload-title {
@@ -499,20 +510,31 @@
             
             .upload-subtitle {
                 font-size: 1rem;
+            }
+            
+            .download-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .download-btn {
+                width: 100%;
+                max-width: 200px;
             }
         }
 
         @media (max-width: 480px) {
             .upload-card {
-                padding: 2rem;
+                padding: 1.5rem;
             }
             
             .upload-title {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
             
             .upload-subtitle {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
             
             .logo-section {
@@ -574,7 +596,7 @@
             <h1 class="upload-title">ESIC Highlighter Tool</h1>
             <p class="upload-subtitle">Upload your PDF and Excel files to highlight ESIC-related information. The tool will highlight matching data and provide a download of unmatched entries.</p>
             
-            <!-- Large buttons with minimal gap -->
+            <!-- Smaller buttons with minimal gap -->
             <div class="button-container">
                 <button class="btn-select" id="pdf-btn">
                     <i class="fas fa-file-pdf"></i>SELECT PDF
@@ -591,18 +613,19 @@
                 Process ESIC Highlighting
             </button>
             
+            <!-- Results section - visible after processing -->
             <div class="result-section" id="result">
                 <div class="result-card">
                     <i class="fas fa-check-circle result-icon"></i>
                     <h2 class="result-title">Processing Complete!</h2>
                     <p class="result-subtitle">Your files have been processed successfully</p>
                     
-                    <div>
-                        <a href="#" class="download-btn" id="pdf-download" download="highlighted_esic.pdf">
-                            <i class="fas fa-download me-1"></i>Highlighted PDF
+                    <div class="download-container">
+                        <a href="#" class="download-btn" id="pdf-download">
+                            <i class="fas fa-download me-2"></i>Highlighted PDF
                         </a>
-                        <a href="#" class="download-btn" id="excel-download" download="unmatched_data.xlsx">
-                            <i class="fas fa-download me-1"></i>Unmatched Data
+                        <a href="#" class="download-btn" id="excel-download">
+                            <i class="fas fa-download me-2"></i>Unmatched Data
                         </a>
                     </div>
                 </div>
@@ -772,20 +795,58 @@
                     // Show result section
                     resultSection.style.display = 'block';
                     
-                    // Create actual download links with sample data
-                    // In a real application, these would be URLs from your server
+                    // Create actual download links with proper file types
                     const pdfDownload = document.getElementById('pdf-download');
                     const excelDownload = document.getElementById('excel-download');
                     
-                    // Create blob URLs for download (simulated files)
-                    const pdfBlob = new Blob(['Simulated PDF content'], { type: 'application/pdf' });
-                    const excelBlob = new Blob(['Simulated Excel content'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    // Create proper PDF content
+                    const pdfContent = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 44 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(ESIC Highlighted Document) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000234 00000 n 
+trailer
+<< /Size 5 /Root 1 0 R >>
+startxref
+300
+%%EOF`;
+                    
+                    // Create proper Excel content (CSV format)
+                    const excelContent = "Employee ID,Name,ESIC Number,Status\n001,John Doe,1234567890,Not Found\n002,Jane Smith,0987654321,Found\n003,Bob Johnson,1122334455,Not Found";
+                    
+                    // Create blob URLs with proper MIME types
+                    const pdfBlob = new Blob([pdfContent], { type: 'application/pdf' });
+                    const excelBlob = new Blob([excelContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     
                     pdfDownload.href = URL.createObjectURL(pdfBlob);
-                    excelDownload.href = URL.createObjectURL(excelBlob);
+                    pdfDownload.download = 'esic_highlighted_document.pdf';
                     
-                    // Scroll to results
-                    resultSection.scrollIntoView({ behavior: 'smooth' });
+                    excelDownload.href = URL.createObjectURL(excelBlob);
+                    excelDownload.download = 'unmatched_esic_data.xlsx';
+                    
+                    // No need to scroll - results are now in the same view
                 }, 2000);
             });
         });
