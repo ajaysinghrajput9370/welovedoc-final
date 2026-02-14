@@ -61,10 +61,10 @@ def has_active_subscription(email: str) -> bool:
             print("get_subscription_details error (ignored):", e)
 
         if details:
-            # ✅ IMPORTANT FIX: Check if user is active/deactivated
-            if not details.get("is_active", True):
-                print(f"User {email} is deactivated, denying access")
-                return False
+            # ✅ REMOVED: is_active check - column doesn't exist in database
+            # if not details.get("is_active", True):
+            #     print(f"User {email} is deactivated, denying access")
+            #     return False
                 
             sub = (details.get("subscription") or "").lower()
             expiry = details.get("subscription_expiry")
@@ -165,7 +165,8 @@ def admin_dashboard():
     try:
         conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cur = conn.cursor()
-        cur.execute("SELECT id, email, name, subscription, subscription_expiry, is_active FROM users ORDER BY id DESC")
+        # ✅ FIXED: Removed is_active column (doesn't exist in database)
+        cur.execute("SELECT id, email, name, subscription, subscription_expiry FROM users ORDER BY id DESC")
         users = cur.fetchall()
         cur.close()
         conn.close()
@@ -178,8 +179,8 @@ def admin_dashboard():
                 'email': user[1],
                 'name': user[2],
                 'subscription': user[3],
-                'subscription_expiry': user[4],
-                'is_active': user[6]
+                'subscription_expiry': user[4]
+                # ✅ REMOVED: 'is_active' key
             })
             
         return render_template("admin_dashboard.html", users=user_list)
@@ -196,13 +197,15 @@ def deactivate_user(user_id):
         return redirect(url_for("admin_login"))
 
     try:
-        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
-        cur = conn.cursor()
-        cur.execute("UPDATE users SET is_active = FALSE WHERE id = %s", (user_id,))
-        conn.commit()
-        cur.close()
-        conn.close()
-        flash(f"User {user_id} deactivated successfully", "success")
+        flash("Deactivate feature disabled - is_active column doesn't exist", "warning")
+        # Commenting out since is_active column doesn't exist
+        # conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        # cur = conn.cursor()
+        # cur.execute("UPDATE users SET is_active = FALSE WHERE id = %s", (user_id,))
+        # conn.commit()
+        # cur.close()
+        # conn.close()
+        # flash(f"User {user_id} deactivated successfully", "success")
     except Exception as e:
         print(f"Error deactivating user: {e}")
         flash(f"Error: {str(e)}", "danger")
@@ -217,13 +220,15 @@ def activate_user(user_id):
         return redirect(url_for("admin_login"))
 
     try:
-        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
-        cur = conn.cursor()
-        cur.execute("UPDATE users SET is_active = TRUE WHERE id = %s", (user_id,))
-        conn.commit()
-        cur.close()
-        conn.close()
-        flash(f"User {user_id} activated successfully", "success")
+        flash("Activate feature disabled - is_active column doesn't exist", "warning")
+        # Commenting out since is_active column doesn't exist
+        # conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        # cur = conn.cursor()
+        # cur.execute("UPDATE users SET is_active = TRUE WHERE id = %s", (user_id,))
+        # conn.commit()
+        # cur.close()
+        # conn.close()
+        # flash(f"User {user_id} activated successfully", "success")
     except Exception as e:
         print(f"Error activating user: {e}")
         flash(f"Error: {str(e)}", "danger")
