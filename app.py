@@ -136,6 +136,12 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
+    # ---------------- Template Utility ----------------
+@app.context_processor
+def utility_processor():
+    from datetime import datetime
+    return dict(now=datetime.utcnow)
+
 
 # ---------------- ✅ NEW ADMIN ROUTES ----------------
 @app.route("/admin", methods=["GET", "POST"])
