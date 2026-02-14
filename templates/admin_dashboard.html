@@ -1,0 +1,23 @@
+<h2>User List</h2>
+
+<table border="1">
+<tr>
+  <th>ID</th>
+  <th>Email</th>
+  <th>Plan</th>
+  <th>Status</th>
+  <th>Action</th>
+</tr>
+
+{% for user in users %}
+<tr>
+  <td>{{ user[0] }}</td>
+  <td>{{ user[1] }}</td>
+  <td>{{ user[2] }}</td>
+  <td>{{ user[3] }}</td>
+  <td>
+    <a href="/admin/deactivate/{{ user[0] }}">Deactivate</a>
+  </td>
+</tr>
+{% endfor %}
+</table>
