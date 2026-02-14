@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
 import json
+import psycopg2  # ✅ Added for admin routes
 
 # Import from file_manager.py
 from file_manager import (
@@ -26,6 +27,10 @@ app.permanent_session_lifetime = timedelta(days=30)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
+
+# ---------------- Admin Config ----------------
+ADMIN_EMAIL = "admin@welovedoc.in"
+ADMIN_PASSWORD = "Mount@Fly1920"   # Isko baad me change kar dena
 
 # ---------------- Razorpay ----------------
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
@@ -126,6 +131,108 @@ def _apply_session_subscription_from_db(email):
         else:
             session["subscription_expiry"] = None
     session.modified = True
+
+# ---------------- ✅ NEW ADMIN ROUTES ----------------
+@app.route("/admin", methods=["GET", "POST"])
+def admin_login():
+    """Admin login page"""
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            session["admin"] = True
+            flash("Admin login successful!", "success")
+            return redirect(url_for("admin_dashboard"))
+        else:
+            flash("Invalid admin credentials", "danger")
+            return redirect(url_for("admin_login"))
+
+    return render_template("admin_login.html")
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    """Admin dashboard showing all users"""
+    if not session.get("admin"):
+        flash("Admin access required", "warning")
+        return redirect(url_for("admin_login"))
+
+    try:
+        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, name, subscription, subscription_expiry, device_limit, is_active FROM users ORDER BY id DESC")
+        users = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        # Convert to list of dictionaries for easier template access
+        user_list = []
+        for user in users:
+            user_list.append({
+                'id': user[0],
+                'email': user[1],
+                'name': user[2],
+                'subscription': user[3],
+                'subscription_expiry': user[4],
+                'device_limit': user[5],
+                'is_active': user[6]
+            })
+            
+        return render_template("admin_dashboard.html", users=user_list)
+    except Exception as e:
+        print(f"Admin dashboard error: {e}")
+        flash(f"Database error: {str(e)}", "danger")
+        return redirect(url_for("admin_login"))
+
+@app.route("/admin/deactivate/<int:user_id>")
+def deactivate_user(user_id):
+    """Deactivate a user account"""
+    if not session.get("admin"):
+        flash("Admin access required", "warning")
+        return redirect(url_for("admin_login"))
+
+    try:
+        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET is_active = FALSE WHERE id = %s", (user_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        flash(f"User {user_id} deactivated successfully", "success")
+    except Exception as e:
+        print(f"Error deactivating user: {e}")
+        flash(f"Error: {str(e)}", "danger")
+    
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/admin/activate/<int:user_id>")
+def activate_user(user_id):
+    """Activate a user account"""
+    if not session.get("admin"):
+        flash("Admin access required", "warning")
+        return redirect(url_for("admin_login"))
+
+    try:
+        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET is_active = TRUE WHERE id = %s", (user_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        flash(f"User {user_id} activated successfully", "success")
+    except Exception as e:
+        print(f"Error activating user: {e}")
+        flash(f"Error: {str(e)}", "danger")
+    
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/admin/logout")
+def admin_logout():
+    """Admin logout"""
+    session.pop("admin", None)
+    flash("Logged out from admin", "info")
+    return redirect(url_for("home"))
+
 # ---------------- Auth Routes ----------------
 @app.route("/profile")
 def profile():
@@ -241,7 +348,7 @@ def create_order():
         return jsonify({"error": "Invalid plan"}), 400
 
     try:
-        # ✅ Fix Razorpay receipt length (max 40 chars)
+        # Fix Razorpay receipt length (max 40 chars)
         receipt_str = f"{uuid.uuid4().hex[:30]}"  # truncated 30 chars
         order = razorpay_client.order.create({
             "amount": amount_map[plan],
@@ -326,6 +433,8 @@ def webhook():
     except Exception as e:
         print("Webhook error:", e)
         return jsonify({"error": "Invalid signature or webhook processing error"}), 400
+
+
 # ---------------- BASIC PAGES ----------------
 @app.route("/")
 def home():
