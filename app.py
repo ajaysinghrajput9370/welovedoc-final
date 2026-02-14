@@ -29,8 +29,8 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
 # ---------------- Admin Config ----------------
-ADMIN_EMAIL = "admin@welovedoc.in"
-ADMIN_PASSWORD = "Mount@Fly1920"   # Isko baad me change kar dena
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 # ---------------- Razorpay ----------------
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
@@ -61,6 +61,11 @@ def has_active_subscription(email: str) -> bool:
             print("get_subscription_details error (ignored):", e)
 
         if details:
+            # ✅ IMPORTANT FIX: Check if user is active/deactivated
+            if not details.get("is_active", True):
+                print(f"User {email} is deactivated, denying access")
+                return False
+                
             sub = (details.get("subscription") or "").lower()
             expiry = details.get("subscription_expiry")
             if sub and sub != "free":
