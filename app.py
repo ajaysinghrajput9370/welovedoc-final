@@ -165,7 +165,7 @@ def admin_dashboard():
     try:
         conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cur = conn.cursor()
-        cur.execute("SELECT id, email, name, subscription, subscription_expiry, device_limit, is_active FROM users ORDER BY id DESC")
+        cur.execute("SELECT id, email, name, subscription, subscription_expiry, is_active FROM users ORDER BY id DESC")
         users = cur.fetchall()
         cur.close()
         conn.close()
@@ -179,7 +179,6 @@ def admin_dashboard():
                 'name': user[2],
                 'subscription': user[3],
                 'subscription_expiry': user[4],
-                'device_limit': user[5],
                 'is_active': user[6]
             })
             
