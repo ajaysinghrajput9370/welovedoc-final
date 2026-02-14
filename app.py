@@ -141,6 +141,8 @@ def _apply_session_subscription_from_db(email):
 def utility_processor():
     from datetime import datetime
     return dict(now=datetime.utcnow)
+# ---------------- ✅ NEW ADMIN ROUTES ----------------
+@app.route("/admin", methods=["GET", "POST"])
 
 
 # ---------------- ✅ NEW ADMIN ROUTES ----------------
