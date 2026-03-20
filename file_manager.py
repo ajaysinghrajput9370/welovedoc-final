@@ -119,7 +119,7 @@ def login_user(email, password, device_id):
         if oldest_device:
             del devices[oldest_device]
 
-    devices[devexcept Exception:ice_id] = datetime.now(timezone.utc).isoformat()
+    devices[device_id] = datetime.now(timezone.utc).isoformat()
     user.devices = json.dumps(devices)
     db.commit()
     db.close()
@@ -233,7 +233,7 @@ def update_device_login(email, device_id):
 
         try:
             devices = json.loads(user.devices or "{}")
-            devices[devexcept Exception:ice_id] = datetime.now(timezone.utc).isoformat()
+            devices[device_id] = datetime.now(timezone.utc).isoformat()
             user.devices = json.dumps(devices)
             db.commit()
             return True
