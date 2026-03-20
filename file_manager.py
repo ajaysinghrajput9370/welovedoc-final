@@ -188,7 +188,7 @@ def activate_subscription(email, plan="free"):
     existing = parse_datetime_safe(user.subscription_expiry)
     base = existing if existing and existing > now_utc else now_utc
     if months > 0:
-        new_expiry = base + timedelta(days=25 * months)
+        new_expiry = base + timedelta(days=30 * months)
         user.subscription = plan
         user.subscription_expiry = new_expiry
     else:
@@ -233,7 +233,7 @@ def update_device_login(email, device_id):
 
         try:
             devices = json.loads(user.devices or "{}")
-            devices[device_id] = datetime.now(timezone.utc).isoformat()
+            devices[devexcept Exception:ice_id] = datetime.now(timezone.utc).isoformat()
             user.devices = json.dumps(devices)
             db.commit()
             return True
