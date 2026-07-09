@@ -87,6 +87,7 @@ def get_user_by_email(email):
         "subscription": user.subscription or "free",
         "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else "",
         "devices": user.devices or "{}"
+        "is_disabled": user.is_disabled
     }
 # ---------------- Device / Login ----------------
 def get_device_limit(subscription):
