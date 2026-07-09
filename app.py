@@ -199,25 +199,28 @@ def admin_dashboard():
 
 @app.route("/admin/deactivate/<int:user_id>")
 def deactivate_user(user_id):
-    """Deactivate a user account"""
     if not session.get("admin"):
         flash("Admin access required", "warning")
         return redirect(url_for("admin_login"))
 
     try:
-        flash("Deactivate feature disabled - is_active column doesn't exist", "warning")
-        # Commenting out since is_active column doesn't exist
-        # conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
-        # cur = conn.cursor()
-        # cur.execute("UPDATE users SET is_active = FALSE WHERE id = %s", (user_id,))
-        # conn.commit()
-        # cur.close()
-        # conn.close()
-        # flash(f"User {user_id} deactivated successfully", "success")
+        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        cur = conn.cursor()
+
+        cur.execute(
+            "UPDATE users SET is_disabled = TRUE WHERE id = %s",
+            (user_id,)
+        )
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        flash("Premium access disabled successfully.", "success")
+
     except Exception as e:
-        print(f"Error deactivating user: {e}")
-        flash(f"Error: {str(e)}", "danger")
-    
+        flash(str(e), "danger")
+
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/activate/<int:user_id>")
