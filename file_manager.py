@@ -37,7 +37,7 @@ class User(Base):
     subscription = Column(String, default="free")
     subscription_expiry = Column(DateTime, nullable=True)
     devices = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    is_disabled = Column(Integer, default=0)
 
 # ---------------- Schema Init ----------------
 def ensure_schema():
