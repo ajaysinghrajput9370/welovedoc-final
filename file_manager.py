@@ -86,7 +86,7 @@ def get_user_by_email(email):
         "password": user.password or "",
         "subscription": user.subscription or "free",
         "subscription_expiry": user.subscription_expiry.isoformat() if user.subscription_expiry else "",
-        "devices": user.devices or "{}"
+        "devices": user.devices or "{}",
         "is_disabled": user.is_disabled
     }
 # ---------------- Device / Login ----------------
