@@ -174,7 +174,7 @@ def admin_dashboard():
         conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cur = conn.cursor()
         # ✅ FIXED: Removed is_active column (doesn't exist in database)
-        cur.execute("SELECT id, email, name, subscription, subscription_expiry FROM users ORDER BY id DESC")
+        cur.execute("SELECT id, email, name, subscription, subscription_expiry, is_disabled FROM users ORDER BY id DESC")
         users = cur.fetchall()
         cur.close()
         conn.close()
@@ -183,13 +183,13 @@ def admin_dashboard():
         user_list = []
         for user in users:
             user_list.append({
-                'id': user[0],
-                'email': user[1],
-                'name': user[2],
-                'subscription': user[3],
-                'subscription_expiry': user[4]
-                # ✅ REMOVED: 'is_active' key
-            })
+    'id': user[0],
+    'email': user[1],
+    'name': user[2],
+    'subscription': user[3],
+    'subscription_expiry': user[4],
+    'is_disabled': user[5]
+})
             
         return render_template("admin_dashboard.html", users=user_list)
     except Exception as e:
