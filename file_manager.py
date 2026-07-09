@@ -141,14 +141,19 @@ def check_subscription(email):
     u = get_user_by_email(email)
     if not u:
         return False
+
+    if u.get("is_disabled", False):
+        return False
+
     sub = (u.get("subscription") or "free").lower()
     if sub == "free":
         return False
+
     expiry_dt = parse_datetime_safe(u.get("subscription_expiry"))
-    if expiry_dt:
-        now_utc = datetime.now(timezone.utc)
-        return now_utc <= expiry_dt
-    return False
+    if not expiry_dt:
+        return False
+
+    return datetime.now(timezone.utc) <= expiry_dt
 
 def get_days_left(email):
     u = get_user_by_email(email)
@@ -192,6 +197,7 @@ def activate_subscription(email, plan="free"):
         new_expiry = base + timedelta(days=30 * months)
         user.subscription = plan
         user.subscription_expiry = new_expiry
+        user.is_disabled = False
     else:
         user.subscription = "free"
         user.subscription_expiry = None
