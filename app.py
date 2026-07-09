@@ -7,14 +7,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
 import json
-import psycopg2  # ✅ Added for admin routes
+import psycopg2
 
 # Import from file_manager.py
 from file_manager import (
     ensure_schema,
-    signup_user, login_user, check_subscription,
+    signup_user, login_user,
     activate_subscription, get_user_by_email,
-    get_subscription_details, list_users, update_device_login
+    get_subscription_details, list_users, update_device_login,
+    is_subscription_active, set_user_disabled  # NEW
 )
 
 # ---------------- Config ----------------
@@ -52,69 +53,8 @@ except Exception as e:
     print("Warning: ensure_schema() failed on import:", e)
 
 # ---------------- Helpers ----------------
-def has_active_subscription(email: str) -> bool:
-    try:
-        details = None
-        try:
-            details = get_subscription_details(email)
-        except Exception as e:
-            print("get_subscription_details error (ignored):", e)
-
-        if details:
-            user = get_user_by_email(email)
-            if user and user.get("is_disabled", False):
-                return False
-
-            # ✅ REMOVED: is_active check - column doesn't exist in database
-            # if not details.get("is_active", True):
-            #     print(f"User {email} is deactivated, denying access")
-            #     return False
-                
-            sub = (details.get("subscription") or "").lower()
-            expiry = details.get("subscription_expiry")
-            if sub and sub != "free":
-                if expiry:
-                    expiry_dt = None
-                    if isinstance(expiry, str):
-                        try:
-                            expiry_dt = datetime.fromisoformat(expiry)
-                        except Exception:
-                            try:
-                                expiry_dt = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
-                            except Exception:
-                                expiry_dt = None
-                    elif isinstance(expiry, datetime):
-                        expiry_dt = expiry
-
-                    if expiry_dt:
-                        return datetime.utcnow() <= expiry_dt
-                    else:
-                        return True
-                else:
-                    return True
-
-        sess_sub = (session.get("subscription") or "").lower()
-        sess_exp = session.get("subscription_expiry")
-        if sess_sub and sess_sub != "free":
-            if sess_exp:
-                try:
-                    sess_dt = datetime.fromisoformat(sess_exp)
-                    return datetime.utcnow() <= sess_dt
-                except Exception:
-                    return True
-            return True
-
-    except Exception as e:
-        print("has_active_subscription unexpected error:", e)
-
-    try:
-        return bool(check_subscription(email))
-    except Exception:
-        return False
-
-
 def _apply_session_subscription_from_db(email):
-    """Refresh session subscription info from DB; if DB missing, leave session untouched except default to 'free'."""
+    """Refresh session subscription info from DB."""
     try:
         details = get_subscription_details(email)
     except Exception as e:
@@ -122,8 +62,8 @@ def _apply_session_subscription_from_db(email):
         details = None
 
     if not details:
-        session["subscription"] = session.get("subscription", "free")
-        session["subscription_expiry"] = session.get("subscription_expiry", None)
+        session["subscription"] = "free"
+        session["subscription_expiry"] = None
     else:
         session["subscription"] = details.get("subscription") or "free"
         expiry = details.get("subscription_expiry")
@@ -131,32 +71,25 @@ def _apply_session_subscription_from_db(email):
             session["subscription_expiry"] = expiry.isoformat()
         elif expiry:
             try:
-                if isinstance(expiry, str):
-                    session["subscription_expiry"] = expiry
-                else:
-                    session["subscription_expiry"] = str(expiry)
+                session["subscription_expiry"] = str(expiry)
             except Exception:
                 session["subscription_expiry"] = None
         else:
             session["subscription_expiry"] = None
     session.modified = True
-    # ---------------- Template Utility ----------------
+
+# ---------------- Template Utility ----------------
 @app.context_processor
 def utility_processor():
     from datetime import datetime
     return dict(now=datetime.utcnow)
-# ---------------- ✅ NEW ADMIN ROUTES ----------------
-@app.route("/admin", methods=["GET", "POST"])
 
-
-# ---------------- ✅ NEW ADMIN ROUTES ----------------
+# ---------------- Admin Routes ----------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
-    """Admin login page"""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-
         if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
             session["admin"] = True
             flash("Admin login successful!", "success")
@@ -164,12 +97,10 @@ def admin_login():
         else:
             flash("Invalid admin credentials", "danger")
             return redirect(url_for("admin_login"))
-
     return render_template("admin_login.html")
 
 @app.route("/admin/dashboard")
 def admin_dashboard():
-    """Admin dashboard showing all users"""
     if not session.get("admin"):
         flash("Admin access required", "warning")
         return redirect(url_for("admin_login"))
@@ -177,25 +108,53 @@ def admin_dashboard():
     try:
         conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cur = conn.cursor()
-        # ✅ FIXED: Removed is_active column (doesn't exist in database)
-        cur.execute("SELECT id, email, name, subscription, subscription_expiry, is_disabled FROM users ORDER BY id DESC")
-        users = cur.fetchall()
+        # Fetch all columns including is_disabled
+        cur.execute("""
+            SELECT id, email, name, subscription, subscription_expiry, is_disabled
+            FROM users ORDER BY id DESC
+        """)
+        rows = cur.fetchall()
         cur.close()
         conn.close()
-        
-        # Convert to list of dictionaries for easier template access
-        user_list = []
-        for user in users:
-            user_list.append({
-    'id': user[0],
-    'email': user[1],
-    'name': user[2],
-    'subscription': user[3],
-    'subscription_expiry': user[4],
-    'is_disabled': user[5]
-})
-            
-        return render_template("admin_dashboard.html", users=user_list)
+
+        users = []
+        for row in rows:
+            user_id, email, name, sub, expiry, disabled = row
+            # Compute status and action
+            sub_lower = (sub or "free").lower()
+            expiry_dt = None
+            if expiry:
+                try:
+                    expiry_dt = datetime.fromisoformat(str(expiry))
+                except:
+                    pass
+            now = datetime.utcnow()
+
+            if sub_lower == "free":
+                status = "Free User"
+                action = "--"
+            elif disabled:
+                status = "Premium Disabled"
+                action = "Premium Disabled"   # no button
+            elif expiry_dt and expiry_dt < now:
+                status = "Subscription Expired"
+                action = "Renew Required"
+            else:
+                status = "Premium Active"
+                action = "Disable Premium"    # button
+
+            users.append({
+                "id": user_id,
+                "email": email,
+                "name": name or "",
+                "subscription": sub,
+                "subscription_expiry": expiry,
+                "is_disabled": disabled,
+                "status": status,
+                "action": action
+            })
+
+        return render_template("admin_dashboard.html", users=users)
     except Exception as e:
         print(f"Admin dashboard error: {e}")
         flash(f"Database error: {str(e)}", "danger")
@@ -207,52 +166,53 @@ def deactivate_user(user_id):
         flash("Admin access required", "warning")
         return redirect(url_for("admin_login"))
 
-    try:
-        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
-        cur = conn.cursor()
-
-        cur.execute(
-            "UPDATE users SET is_disabled = TRUE WHERE id = %s",
-            (user_id,)
-        )
-
-        conn.commit()
-        cur.close()
+    # First get user to check if they are premium active
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    cur = conn.cursor()
+    cur.execute("SELECT subscription, subscription_expiry, is_disabled FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        flash("User not found", "danger")
         conn.close()
+        return redirect(url_for("admin_dashboard"))
 
-        flash("Premium access disabled successfully.", "success")
+    sub, expiry, disabled = row
+    if disabled:
+        flash("User is already disabled", "warning")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
 
-    except Exception as e:
-        flash(str(e), "danger")
+    # Only allow disabling if user has a paid plan and is not expired
+    sub_lower = (sub or "free").lower()
+    if sub_lower == "free":
+        flash("Cannot disable a free user", "warning")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
 
-    return redirect(url_for("admin_dashboard"))
+    expiry_dt = None
+    if expiry:
+        try:
+            expiry_dt = datetime.fromisoformat(str(expiry))
+        except:
+            pass
+    now = datetime.utcnow()
+    if expiry_dt and expiry_dt < now:
+        flash("User subscription is already expired", "warning")
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
 
-@app.route("/admin/activate/<int:user_id>")
-def activate_user(user_id):
-    """Activate a user account"""
-    if not session.get("admin"):
-        flash("Admin access required", "warning")
-        return redirect(url_for("admin_login"))
-
-    try:
-        flash("Activate feature disabled - is_active column doesn't exist", "warning")
-        # Commenting out since is_active column doesn't exist
-        # conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
-        # cur = conn.cursor()
-        # cur.execute("UPDATE users SET is_active = TRUE WHERE id = %s", (user_id,))
-        # conn.commit()
-        # cur.close()
-        # conn.close()
-        # flash(f"User {user_id} activated successfully", "success")
-    except Exception as e:
-        print(f"Error activating user: {e}")
-        flash(f"Error: {str(e)}", "danger")
-    
+    # Perform deactivation
+    success = set_user_disabled(user_id, True)
+    conn.close()
+    if success:
+        flash(f"User {user_id} has been disabled (premium revoked).", "success")
+    else:
+        flash("Failed to disable user", "danger")
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/logout")
 def admin_logout():
-    """Admin logout"""
     session.pop("admin", None)
     flash("Logged out from admin", "info")
     return redirect(url_for("home"))
@@ -271,13 +231,10 @@ def profile():
     expiry = sub_details.get("subscription_expiry")
     if sub_details.get("subscription") and sub_details["subscription"] != "free" and expiry:
         try:
-            if isinstance(expiry, str):
-                expiry_date = datetime.fromisoformat(expiry).date()
-            elif isinstance(expiry, datetime):
+            if isinstance(expiry, datetime):
                 expiry_date = expiry.date()
             else:
                 expiry_date = None
-
             if expiry_date:
                 today = datetime.utcnow().date()
                 days_left = (expiry_date - today).days
@@ -372,8 +329,7 @@ def create_order():
         return jsonify({"error": "Invalid plan"}), 400
 
     try:
-        # Fix Razorpay receipt length (max 40 chars)
-        receipt_str = f"{uuid.uuid4().hex[:30]}"  # truncated 30 chars
+        receipt_str = f"{uuid.uuid4().hex[:30]}"
         order = razorpay_client.order.create({
             "amount": amount_map[plan],
             "currency": "INR",
@@ -405,7 +361,6 @@ def payment_success():
     plan = request.form.get("plan", "basic")
 
     try:
-        # Verify payment signature
         params_dict = {
             'razorpay_order_id': order_id,
             'razorpay_payment_id': payment_id,
@@ -413,7 +368,7 @@ def payment_success():
         }
         razorpay_client.utility.verify_payment_signature(params_dict)
 
-        # Activate subscription (2 arguments: email + plan)
+        # Activate subscription – this also sets is_disabled=False
         success = activate_subscription(session["email"], plan)
         if success:
             _apply_session_subscription_from_db(session["email"])
@@ -425,7 +380,6 @@ def payment_success():
         flash("Payment verification failed", "danger")
         return redirect(url_for("profile"))
 
-    # Redirect to home/profile instead of pricing
     return redirect(url_for("home"))
 
 
@@ -450,7 +404,7 @@ def webhook():
             email = notes.get('email')
             plan = notes.get('plan', 'basic')
             if email:
-                activate_subscription(email, plan)
+                activate_subscription(email, plan)   # sets is_disabled=False
                 print(f"Webhook: Subscription activated for {email}, plan: {plan}")
 
         return jsonify({"status": "success"}), 200
@@ -467,8 +421,7 @@ def home():
 
 @app.route("/pricing")
 def pricing():
-    # Only show pricing if user not subscribed
-    if "email" in session and has_active_subscription(session["email"]):
+    if "email" in session and is_subscription_active(session["email"]):
         return redirect(url_for("home"))
     return render_template("pricing.html", razorpay_key_id=RAZORPAY_KEY_ID)
 
@@ -494,7 +447,7 @@ def _require_login():
 def esic_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
-    if not has_active_subscription(session["email"]):
+    if not is_subscription_active(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
     return render_template("esic-highlight.html")
@@ -504,7 +457,7 @@ def esic_highlight_page():
 def pf_highlight_page():
     if not _require_login():
         return redirect(url_for("login"))
-    if not has_active_subscription(session["email"]):
+    if not is_subscription_active(session["email"]):
         flash("This feature is for paid users only", "danger")
         return redirect(url_for("pricing"))
     return render_template("pf-highlight.html")
@@ -594,7 +547,7 @@ from esic_highlight import highlight_esic
 
 @app.route("/process", methods=["POST"])
 def process():
-    if "email" not in session or not has_active_subscription(session["email"]):
+    if "email" not in session or not is_subscription_active(session["email"]):
         return jsonify({"error": "Subscription required"}), 403
 
     try:
