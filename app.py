@@ -61,6 +61,10 @@ def has_active_subscription(email: str) -> bool:
             print("get_subscription_details error (ignored):", e)
 
         if details:
+            user = get_user_by_email(email)
+            if user and user.get("is_disabled", False):
+                return False
+
             # ✅ REMOVED: is_active check - column doesn't exist in database
             # if not details.get("is_active", True):
             #     print(f"User {email} is deactivated, denying access")
