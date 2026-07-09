@@ -335,7 +335,7 @@
                 </div>
                 <div class="stat-card">
                     <h3>Active Users</h3>
-                    <div class="number">{{ users|selectattr('is_active', 'equalto', true)|list|length }}</div>
+                    <div class="number">{{ users|length }}</div>
                 </div>
                 <div class="stat-card">
                     <h3>Paid Users</h3>
@@ -343,7 +343,7 @@
                 </div>
                 <div class="stat-card">
                     <h3>Inactive Users</h3>
-                    <div class="number">{{ users|selectattr('is_active', 'equalto', false)|list|length }}</div>
+                    <div class="number">0</div>
                 </div>
             </div>
             
@@ -403,14 +403,14 @@
                             </td>
                             <td>{{ user.device_limit or 1 }}</td>
                             <td>
-                                {% if user.is_active %}
+                                {% if not user.is_disabled %}
                                     <span class="status-badge status-active">✅ Active</span>
                                 {% else %}
                                     <span class="status-badge status-inactive">❌ Inactive</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if user.is_active %}
+                                {% if not user.is_disabled %}
                                     <a href="{{ url_for('deactivate_user', user_id=user.id) }}" 
                                        class="action-btn btn-deactivate"
                                        onclick="return confirm('Are you sure you want to deactivate user {{ user.email }}?')">
