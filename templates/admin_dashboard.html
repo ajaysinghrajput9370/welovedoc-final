@@ -410,21 +410,20 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if not user.is_disabled %}
-                                    <a href="{{ url_for('deactivate_user', user_id=user.id) }}" 
-                                       class="action-btn btn-deactivate"
-                                       onclick="return confirm('Are you sure you want to deactivate user {{ user.email }}?')">
-                                        🔒 Deactivate
-                                    </a>
-                                {% else %}
-                                    <a href="{{ url_for('activate_user', user_id=user.id) }}" 
-                                       class="action-btn btn-activate"
-                                       onclick="return confirm('Are you sure you want to activate user {{ user.email }}?')">
-                                        🔓 Activate
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
+    {% if user.subscription|lower == "free" %}
+        <span style="color:gray;">--</span>
+
+    {% elif not user.is_disabled %}
+        <a href="{{ url_for('deactivate_user', user_id=user.id) }}"
+           class="action-btn btn-deactivate"
+           onclick="return confirm('Disable premium for {{ user.email }}?')">
+            🔒 Disable Premium
+        </a>
+
+    {% else %}
+        <span style="color:red;font-weight:bold;">Premium Disabled</span>
+    {% endif %}
+</td>                        </tr>
                         {% else %}
                         <tr>
                             <td colspan="8" class="no-data">📭 No users found</td>
