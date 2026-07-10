@@ -53,7 +53,7 @@
             padding: 0 20px;
         }
 
-        /* ---------- HEADER (matches main site) ---------- */
+        /* ---------- HEADER ---------- */
         header {
             background: #FFFFFF;
             padding: 10px 0;
@@ -292,37 +292,17 @@
             padding: 20px 24px;
         }
 
-        /* ---------- UPLOAD AREA ---------- */
-        .upload-area {
-            border: 2px dashed #E2E8F0;
-            border-radius: 20px;
-            padding: 32px 20px;
-            text-align: center;
-            transition: all 0.3s;
-            background: #F8FAFC;
-            cursor: pointer;
-            margin-bottom: 16px;
+        /* ---------- CLEAN UPLOAD SECTION (like PF Highlighter) ---------- */
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
         }
-        .upload-area:hover {
-            border-color: #1565C0;
-            background: #EEF5FF;
-        }
-        .upload-area.drag-over {
-            border-color: #1565C0;
-            background: #EEF5FF;
-            box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.08);
-        }
-        .upload-icon {
-            font-size: 44px;
-            color: #94A3B8;
-            margin-bottom: 8px;
-            transition: all 0.3s;
-        }
-        .upload-area:hover .upload-icon {
-            color: #1565C0;
-        }
-        .upload-title {
-            font-size: 16px;
+
+        .upload-label {
+            font-size: 15px;
             font-weight: 600;
             color: #0F172A;
             margin-bottom: 2px;
@@ -330,28 +310,37 @@
         .upload-sub {
             font-size: 14px;
             color: #94A3B8;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .btn-upload {
+        /* Tall, clean button like PF Highlighter */
+        .btn-clean {
             background: #1565C0;
             color: white;
             border: none;
-            padding: 12px 28px;
-            border-radius: 30px;
+            padding: 18px 28px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 16px;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
             transition: all 0.3s;
             cursor: pointer;
             box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+            min-height: 64px;
+            min-width: 240px;
+            width: 100%;
+            max-width: 360px;
         }
-        .btn-upload:hover {
+        .btn-clean:hover {
             background: #1E88E5;
-            transform: scale(1.03);
+            transform: scale(1.02);
             box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+        }
+        .btn-clean i {
+            font-size: 18px;
         }
 
         /* ---------- FILE LIST ---------- */
@@ -359,10 +348,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin: 16px 0 10px;
         }
         .file-list-header h3 {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: #0F172A;
             margin: 0;
@@ -372,24 +361,30 @@
             color: #94A3B8;
         }
 
+        .file-list {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
         .file-item {
             display: flex;
             align-items: center;
             background: white;
             padding: 10px 16px;
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid #E2E8F0;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             gap: 12px;
             animation: slideUp 0.3s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .file-item .file-icon {
-            font-size: 20px;
+            font-size: 18px;
             color: #E53935;
         }
         .file-item .file-order {
@@ -448,19 +443,26 @@
 
         .empty-state {
             text-align: center;
-            padding: 24px;
+            padding: 20px;
             color: #94A3B8;
+            max-width: 480px;
+            margin: 0 auto;
         }
         .empty-state i {
-            font-size: 40px;
-            margin-bottom: 8px;
+            font-size: 36px;
+            margin-bottom: 6px;
             color: #E2E8F0;
+        }
+        .empty-state p {
+            font-size: 14px;
+            margin: 0;
         }
 
         /* ---------- PROGRESS ---------- */
         .progress-container {
             display: none;
-            margin: 12px 0 8px;
+            margin: 12px auto 8px;
+            max-width: 480px;
         }
         .progress-track {
             width: 100%;
@@ -538,6 +540,8 @@
             border-radius: 20px;
             overflow: hidden;
             animation: slideUp 0.5s ease;
+            max-width: 560px;
+            margin: 0 auto;
         }
         .result-card .result-header {
             background: linear-gradient(135deg, #16A34A, #15803D);
@@ -627,11 +631,13 @@
             .hero h1 { font-size: 24px; }
             .hero { padding: 24px 0 20px; }
             .card-body { padding: 16px; }
-            .upload-area { padding: 24px 16px; }
+            .btn-clean { min-width: 100%; max-width: 100%; padding: 16px 20px; min-height: 56px; font-size: 15px; }
+            .file-list { max-width: 100%; }
             .action-buttons { flex-direction: column; align-items: center; }
             .btn-action { width: 100%; justify-content: center; }
             .file-item { flex-wrap: wrap; gap: 6px; }
             .file-item .file-actions { margin-left: auto; }
+            .result-card { max-width: 100%; }
         }
         @media (max-width: 480px) {
             .header-content { flex-direction: column; align-items: stretch; gap: 4px; }
@@ -641,6 +647,7 @@
             nav ul li a { padding: 4px 10px; font-size: 12px; }
             .login-btn, .signup-btn { padding: 6px 14px; font-size: 12px; }
             .hero h1 { font-size: 20px; }
+            .btn-clean { min-height: 52px; font-size: 14px; padding: 14px 16px; }
             .file-item { flex-direction: column; align-items: stretch; gap: 4px; }
             .file-item .file-actions { justify-content: flex-end; }
         }
@@ -648,7 +655,7 @@
 </head>
 <body>
 
-    <!-- ===== HEADER (matches main site) ===== -->
+    <!-- ===== HEADER ===== -->
     <header>
         <div class="container header-content">
             <div class="logo-wrapper">
@@ -668,18 +675,6 @@
                         <li><a href="/esic-highlight">ESIC Highlight</a></li>
                         <li><a href="/merge-pdf">Merge PDF</a></li>
                         <li><a href="/compress-pdf">Compress PDF</a></li>
-                        <li class="dropdown">
-                            <a href="#">Convert <i class="fas fa-caret-down"></i></a>
-                            <div class="dropdown-content">
-                                <a href="/jpg-to-pdf"><i class="far fa-image"></i> JPG to PDF</a>
-                                <a href="/word-to-pdf"><i class="far fa-file-word"></i> WORD to PDF</a>
-                                <a href="/pdf-to-word"><i class="far fa-file-alt"></i> PDF to WORD</a>
-                                <a href="/excel-to-pdf"><i class="far fa-file-excel"></i> EXCEL to PDF</a>
-                                <a href="/pdf-to-excel"><i class="fas fa-table"></i> PDF to EXCEL</a>
-                                <a href="/pdf-to-jpg"><i class="fas fa-file-image"></i> PDF to JPG</a>
-                            </div>
-                        </li>
-                        <li><a href="/all-tools">All Tools</a></li>
                         <li><a href="/about">About</a></li>
                         <li><a href="/pricing">Pricing</a></li>
                     </ul>
@@ -712,23 +707,16 @@
         <div class="card">
             <div class="card-body">
 
-                <!-- Upload Area -->
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon"><i class="fas fa-file-pdf"></i></div>
-                    <div class="upload-title">Select PDF files to merge</div>
-                    <div class="upload-sub">Drag & drop files here or click to browse</div>
-                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-folder-open"></i> Select PDF Files
+                <!-- ===== CLEAN UPLOAD SECTION (like PF Highlighter) ===== -->
+                <div class="upload-section">
+                    <div class="upload-label">PDF Files</div>
+                    <div class="upload-sub">Select your PDF documents</div>
+                    <button class="btn-clean" id="pdfBtn">
+                        <i class="fas fa-file-pdf"></i> Select PDF Files
                     </button>
-                    <input type="file" id="fileInput" style="display:none;" accept=".pdf" multiple />
-                </div>
 
-                <!-- Progress -->
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-track">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">Processing...</div>
+                    <!-- Hidden file input -->
+                    <input type="file" id="fileInput" style="display:none;" accept=".pdf" multiple />
                 </div>
 
                 <!-- File List -->
@@ -737,12 +725,20 @@
                         <h3>Selected Files</h3>
                         <span id="fileCount">0 files</span>
                     </div>
-                    <div id="fileListContainer">
+                    <div class="file-list" id="fileListContainer">
                         <div class="empty-state">
                             <i class="fas fa-folder-open"></i>
                             <p>No files selected yet</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-track">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Processing...</div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -795,7 +791,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // DOM Elements
-            const uploadArea = document.getElementById('uploadArea');
+            const pdfBtn = document.getElementById('pdfBtn');
             const fileInput = document.getElementById('fileInput');
             const fileListContainer = document.getElementById('fileListContainer');
             const fileCount = document.getElementById('fileCount');
@@ -809,36 +805,16 @@
 
             let uploadedFiles = [];
 
+            // Button click to select files
+            pdfBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
             // File input change
             fileInput.addEventListener('change', function(e) {
                 const files = e.target.files;
                 processFiles(files);
                 fileInput.value = '';
-            });
-
-            // Drag & drop
-            uploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('drag-over');
-            });
-            uploadArea.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-            });
-            uploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    processFiles(files);
-                }
-            });
-
-            // Click to upload
-            uploadArea.addEventListener('click', function(e) {
-                // Prevent if clicking on the button (button handles its own click)
-                if (e.target.closest('.btn-upload')) return;
-                fileInput.click();
             });
 
             // Process files
