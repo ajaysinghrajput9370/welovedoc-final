@@ -422,20 +422,14 @@ def home():
 @app.route("/pricing")
 def pricing():
     active_subscription = False
-    expiry_date = None
 
     if "email" in session:
         active_subscription = is_subscription_active(session["email"])
 
-        if active_subscription:
-            user = get_user(session["email"])   # ya tumhara jo function user details laata hai
-            expiry_date = user.get("subscription_expiry")
-
     return render_template(
         "pricing.html",
         razorpay_key_id=RAZORPAY_KEY_ID,
-        active_subscription=active_subscription,
-        expiry_date=expiry_date
+        active_subscription=active_subscription
     )
 
 
