@@ -1,937 +1,1045 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
-  <title>We ❤️ Doc · Fresh Cards</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6318534178146198" crossorigin="anonymous"></script>
-  <!-- Bootstrap 5 (grid only) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Font Awesome 6 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
+    <title>We ❤️ Doc · Clean Blue</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6318534178146198" crossorigin="anonymous"></script>
+    <!-- Bootstrap 5 (grid only) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
 
-  <!-- Favicon -->
-  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
-  <link rel="manifest" href="/static/site.webmanifest" />
+    <!-- Favicon -->
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
+    <link rel="manifest" href="/static/site.webmanifest" />
 
-  <!-- JSON-LD -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "url": "https://welovedoc.online",
-      "logo": "https://welovedoc.online/static/web-app-manifest-512x512.png"
-    }
-  </script>
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "url": "https://welovedoc.online",
+            "logo": "https://welovedoc.online/static/web-app-manifest-512x512.png"
+        }
+    </script>
 
-  <style>
-    /* ============================================================
-       NEW DESIGN: Fresh & Vibrant – Orange / Teal / Coral
-       Cards with gradient top bar, big icons, lifted shadows
-       ============================================================ */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <style>
+        /* ============================================================
+           COLOR THEME:
+           Header:       #FFFFFF
+           Background:   #F8FAFC
+           Primary Btn:  #1565C0
+           Btn Hover:    #1E88E5
+           Heading:      #0F172A
+           Text:         #475569
+           Border:       #E2E8F0
+           Hero Bg:      #EEF5FF
+           Success:      #16A34A
+           Heart:        #E53935
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Inter', 'Segoe UI', sans-serif;
-      background: #F4F7FC;
-      /* soft light blue-grey */
-      color: #1E293B;
-      line-height: 1.6;
-    }
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: #475569;
+            line-height: 1.6;
+            padding-top: 70px;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+        .container {
+            width: 100%;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-    /* ---------- HEADER (fresh gradient) ---------- */
-    header {
-      background: linear-gradient(135deg, #0F172A, #1E293B);
-      padding: 10px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-      border-bottom: 2px solid #F97316;
-    }
+        /* ---------- HEADER (White) ---------- */
+        header {
+            background: #FFFFFF;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #E2E8F0;
+        }
 
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
 
-    .logo {
-      height: 42px;
-      display: flex;
-      align-items: center;
-    }
-    .logo img {
-      height: 100%;
-      width: auto;
-      display: block;
-      filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.3));
-    }
-    .logo-text {
-      font-weight: 800;
-      font-size: 26px;
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .logo-text .heart {
-      color: #F97316;
-      margin: 0 2px;
-    }
+        .logo {
+            height: 38px;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 100%;
+            width: auto;
+            display: block;
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 22px;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            letter-spacing: -0.3px;
+        }
+        .logo-text .heart {
+            color: #E53935;
+            margin: 0 2px;
+        }
 
-    /* Navigation */
-    nav ul {
-      display: flex;
-      list-style: none;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 2px;
-    }
-    nav ul li a {
-      color: rgba(255, 255, 255, 0.75);
-      text-decoration: none;
-      font-weight: 500;
-      padding: 6px 16px;
-      border-radius: 40px;
-      transition: all 0.25s;
-      display: block;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-    nav ul li a:hover {
-      background: rgba(249, 115, 22, 0.15);
-      color: #F97316;
-      transform: translateY(-2px);
-    }
+        /* Navigation */
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        nav ul li a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: all 0.25s;
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        nav ul li a:hover {
+            background: #EEF5FF;
+            color: #1565C0;
+        }
 
-    /* Auth Buttons */
-    .auth-buttons {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    .login-btn,
-    .signup-btn {
-      padding: 8px 24px;
-      border-radius: 40px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s;
-      font-size: 14px;
-      border: none;
-      font-family: 'Inter', sans-serif;
-    }
-    .login-btn {
-      background: rgba(255, 255, 255, 0.06);
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .login-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: scale(1.04);
-    }
-    .signup-btn {
-      background: #F97316;
-      color: #FFFFFF;
-      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
-    }
-    .signup-btn:hover {
-      background: #EA580C;
-      transform: scale(1.04);
-      box-shadow: 0 8px 28px rgba(249, 115, 22, 0.5);
-    }
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .login-btn,
+        .signup-btn {
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .login-btn {
+            background: transparent;
+            color: #1565C0;
+            border: 1.5px solid #1565C0;
+        }
+        .login-btn:hover {
+            background: #1565C0;
+            color: #FFFFFF;
+            transform: scale(1.03);
+        }
+        .signup-btn {
+            background: #1565C0;
+            color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+        }
+        .signup-btn:hover {
+            background: #1E88E5;
+            transform: scale(1.03);
+            box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+        }
 
-    /* ---------- DROPDOWN ---------- */
-    .dropdown {
-      position: relative;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background: #FFFFFF;
-      min-width: 300px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-      border-radius: 24px;
-      padding: 18px 14px;
-      z-index: 50;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      border: 1px solid #E2E8F0;
-    }
-    .dropdown:hover .dropdown-content {
-      display: grid;
-    }
-    .dropdown-content a {
-      color: #1E293B !important;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      border-radius: 16px;
-      transition: all 0.2s;
-      font-weight: 500;
-      font-size: 14px;
-      background: transparent !important;
-    }
-    .dropdown-content a i {
-      margin-right: 12px;
-      color: #F97316;
-      width: 20px;
-      text-align: center;
-      font-size: 16px;
-    }
-    .dropdown-content a:hover {
-      background: #FFF7ED !important;
-      color: #EA580C !important;
-      transform: translateX(5px);
-    }
+        /* ---------- DROPDOWN ---------- */
+        .dropdown {
+            position: relative;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: #FFFFFF;
+            min-width: 280px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            padding: 14px 12px;
+            z-index: 100;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            border: 1px solid #E2E8F0;
+        }
+        .dropdown:hover .dropdown-content {
+            display: grid;
+        }
+        .dropdown-content a {
+            color: #475569 !important;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 13px;
+            background: transparent !important;
+        }
+        .dropdown-content a i {
+            margin-right: 12px;
+            color: #1565C0;
+            width: 18px;
+            text-align: center;
+            font-size: 15px;
+        }
+        .dropdown-content a:hover {
+            background: #EEF5FF !important;
+            color: #1565C0 !important;
+            transform: translateX(4px);
+        }
 
-    /* ---------- MOVING BANNER (orange) ---------- */
-    .moving-banner {
-      background: #F97316;
-      color: #FFFFFF;
-      padding: 10px 0;
-      overflow: hidden;
-      font-weight: 600;
-      font-size: 15px;
-      border-bottom: 2px solid #EA580C;
-    }
-    .banner-content {
-      display: flex;
-      animation: moveBanner 24s linear infinite;
-      white-space: nowrap;
-    }
-    @keyframes moveBanner {
-      0% {
-        transform: translateX(100%);
-      }
-      100% {
-        transform: translateX(-100%);
-      }
-    }
-    .banner-content span {
-      padding: 0 30px;
-    }
+        /* ---------- MOVING BANNER ---------- */
+        .moving-banner {
+            background: #1565C0;
+            color: #FFFFFF;
+            padding: 8px 0;
+            overflow: hidden;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .banner-content {
+            display: flex;
+            animation: moveBanner 24s linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes moveBanner {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+        .banner-content span {
+            padding: 0 24px;
+        }
 
-    /* ---------- HERO ---------- */
-    .hero {
-      text-align: center;
-      padding: 70px 20px 50px;
-      background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
-      position: relative;
-    }
-    .hero h1 {
-      font-size: 52px;
-      font-weight: 800;
-      color: #0F172A;
-      margin-bottom: 6px;
-    }
-    .hero h1 .heart {
-      color: #F97316;
-    }
-    .hero .tagline {
-      font-size: 22px;
-      font-weight: 600;
-      color: #F97316;
-      margin: 8px 0 18px;
-      letter-spacing: -0.2px;
-      background: rgba(249, 115, 22, 0.06);
-      display: inline-block;
-      padding: 4px 28px;
-      border-radius: 60px;
-    }
-    .hero p {
-      font-size: 18px;
-      color: #475569;
-      max-width: 700px;
-      margin: 0 auto;
-    }
+        /* ---------- HERO (EEF5FF) ---------- */
+        .hero {
+            text-align: center;
+            padding: 50px 20px 40px;
+            background: #EEF5FF;
+            position: relative;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #1565C0, transparent);
+            opacity: 0.3;
+        }
+        .hero h1 {
+            font-size: 44px;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 4px;
+        }
+        .hero h1 .heart {
+            color: #E53935;
+        }
+        .hero .tagline {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1565C0;
+            margin: 6px 0 12px;
+            letter-spacing: -0.2px;
+            background: rgba(21, 101, 192, 0.06);
+            display: inline-block;
+            padding: 2px 22px;
+            border-radius: 40px;
+        }
+        .hero p {
+            font-size: 17px;
+            color: #475569;
+            max-width: 620px;
+            margin: 0 auto;
+        }
 
-    /* ---------- DIVIDER (orange-teal) ---------- */
-    .colorful-divider {
-      height: 4px;
-      background: linear-gradient(90deg, #F97316, #0EA5E9, #F97316);
-      margin: 30px 0 20px;
-      border-radius: 4px;
-      opacity: 0.7;
-    }
+        /* ---------- DIVIDER ---------- */
+        .colorful-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #1565C0, transparent);
+            margin: 20px 0 16px;
+            border-radius: 2px;
+            opacity: 0.4;
+        }
 
-    /* ---------- SECTION TITLE ---------- */
-    .section-title-main {
-      text-align: center;
-      margin: 30px 0 40px;
-      font-size: 34px;
-      font-weight: 700;
-      color: #0F172A;
-      position: relative;
-    }
-    .section-title-main:after {
-      content: '';
-      display: block;
-      width: 70px;
-      height: 4px;
-      background: linear-gradient(90deg, #F97316, #0EA5E9);
-      margin: 14px auto 0;
-      border-radius: 4px;
-    }
+        /* ---------- SECTION TITLE ---------- */
+        .section-title-main {
+            text-align: center;
+            margin: 24px 0 32px;
+            font-size: 30px;
+            font-weight: 700;
+            color: #0F172A;
+            position: relative;
+        }
+        .section-title-main:after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: #1565C0;
+            margin: 10px auto 0;
+            border-radius: 4px;
+        }
 
-    /* ============================================================
-       NEW CARD DESIGN – vibrant, with gradient top bar,
-       big icon circle, and a lift effect.
-       ============================================================ */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 30px;
-      padding: 10px 0 40px;
-    }
+        /* ============================================================
+           CARDS – clean, border, subtle shadow
+           ============================================================ */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 22px;
+            padding: 6px 0 30px;
+        }
 
-    .card {
-      background: #FFFFFF;
-      border-radius: 24px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      display: flex;
-      flex-direction: column;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.15, 0.85, 0.3, 1.05);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      padding: 20px 16px 18px;
-      border: 1px solid #F1F5F9;
-    }
-    /* Gradient top bar */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: linear-gradient(90deg, #F97316, #0EA5E9);
-      transition: height 0.3s;
-    }
-    .card:hover::before {
-      height: 8px;
-    }
+        .card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.15, 0.85, 0.3, 1.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 18px 14px 16px;
+            border: 1px solid #E2E8F0;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #1565C0, #1E88E5);
+            transition: height 0.3s;
+        }
+        .card:hover::before {
+            height: 5px;
+        }
 
-    .card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(249, 115, 22, 0.15);
-      border-color: #FED7AA;
-    }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(21, 101, 192, 0.08);
+            border-color: #1565C0;
+        }
 
-    .card-icon {
-      padding: 12px 0 10px;
-      position: relative;
-      z-index: 1;
-    }
-    .card-icon i {
-      font-size: 38px;
-      color: #FFFFFF;
-      background: linear-gradient(135deg, #F97316, #EA580C);
-      padding: 16px;
-      border-radius: 60px;
-      width: 76px;
-      height: 76px;
-      line-height: 44px;
-      text-align: center;
-      display: inline-block;
-      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.25);
-      transition: all 0.3s;
-    }
-    .card:hover .card-icon i {
-      transform: scale(1.1) rotate(-2deg);
-      box-shadow: 0 12px 28px rgba(249, 115, 22, 0.35);
-    }
+        .card-icon {
+            padding: 8px 0 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .card-icon i {
+            font-size: 32px;
+            color: #1565C0;
+            background: #EEF5FF;
+            padding: 14px;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            line-height: 36px;
+            text-align: center;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .card:hover .card-icon i {
+            transform: scale(1.08);
+            background: #1565C0;
+            color: #FFFFFF;
+        }
 
-    /* Different icon colors for variants */
-    .esic-card .card-icon i {
-      background: linear-gradient(135deg, #0EA5E9, #06B6D4);
-      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.25);
-    }
-    .esic-card:hover .card-icon i {
-      box-shadow: 0 12px 28px rgba(14, 165, 233, 0.35);
-    }
-    .pf-card .card-icon i {
-      background: linear-gradient(135deg, #8B5CF6, #6D28D9);
-      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
-    }
-    .pf-card:hover .card-icon i {
-      box-shadow: 0 12px 28px rgba(139, 92, 246, 0.35);
-    }
-    .purple-card .card-icon i {
-      background: linear-gradient(135deg, #EC4899, #DB2777);
-      box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
-    }
-    .purple-card:hover .card-icon i {
-      box-shadow: 0 12px 28px rgba(236, 72, 153, 0.35);
-    }
+        /* Icon variants – different accent colors */
+        .esic-card .card-icon i {
+            color: #1565C0;
+            background: #EEF5FF;
+        }
+        .esic-card:hover .card-icon i {
+            background: #1565C0;
+            color: #FFFFFF;
+        }
+        .pf-card .card-icon i {
+            color: #16A34A;
+            background: #ECFDF5;
+        }
+        .pf-card:hover .card-icon i {
+            background: #16A34A;
+            color: #FFFFFF;
+        }
+        .purple-card .card-icon i {
+            color: #7C3AED;
+            background: #F5F3FF;
+        }
+        .purple-card:hover .card-icon i {
+            background: #7C3AED;
+            color: #FFFFFF;
+        }
 
-    .card-title {
-      padding: 12px 8px 4px;
-      font-size: 18px;
-      font-weight: 700;
-      color: #0F172A;
-      position: relative;
-      z-index: 1;
-    }
-    .card-description {
-      padding: 4px 12px 12px;
-      font-size: 14px;
-      font-weight: 400;
-      color: #64748B;
-      line-height: 1.6;
-      position: relative;
-      z-index: 1;
-    }
+        .card-title {
+            padding: 8px 4px 2px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0F172A;
+            position: relative;
+            z-index: 1;
+        }
+        .card-description {
+            padding: 2px 8px 6px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #475569;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
 
-    /* Popular badge – orange */
-    .popular-badge {
-      position: absolute;
-      top: -6px;
-      right: -28px;
-      background: #F97316;
-      color: #FFFFFF;
-      padding: 4px 40px;
-      transform: rotate(45deg);
-      font-size: 11px;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
-      z-index: 2;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
+        /* Popular badge – blue */
+        .popular-badge {
+            position: absolute;
+            top: -4px;
+            right: -24px;
+            background: #1565C0;
+            color: #FFFFFF;
+            padding: 3px 36px;
+            transform: rotate(45deg);
+            font-size: 10px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+            z-index: 2;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
 
-    /* ---------- WHY CHOOSE (fresh) ---------- */
-    .why-choose {
-      background: #FFFFFF;
-      padding: 50px 0 60px;
-      border-top: 1px solid #F1F5F9;
-      border-bottom: 1px solid #F1F5F9;
-    }
-    .benefits {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 30px;
-      margin-top: 30px;
-    }
-    .benefit {
-      background: #F8FAFC;
-      padding: 30px 20px;
-      border-radius: 24px;
-      text-align: center;
-      transition: all 0.3s;
-      border: 1px solid #F1F5F9;
-    }
-    .benefit:hover {
-      transform: translateY(-4px);
-      border-color: #FED7AA;
-      box-shadow: 0 12px 28px rgba(249, 115, 22, 0.06);
-    }
-    .benefit i {
-      font-size: 38px;
-      color: #F97316;
-      margin-bottom: 16px;
-      background: #FFF7ED;
-      padding: 16px;
-      border-radius: 60px;
-      display: inline-block;
-    }
-    .benefit h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: #0F172A;
-      margin-bottom: 10px;
-    }
-    .benefit p {
-      color: #64748B;
-      font-size: 15px;
-    }
+        /* ---------- WHY CHOOSE ---------- */
+        .why-choose {
+            background: #FFFFFF;
+            padding: 32px 0 40px;
+            border-top: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 22px;
+            margin-top: 20px;
+        }
+        .benefit {
+            background: #F8FAFC;
+            padding: 22px 16px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid #E2E8F0;
+        }
+        .benefit:hover {
+            transform: translateY(-4px);
+            border-color: #1565C0;
+            box-shadow: 0 8px 24px rgba(21, 101, 192, 0.06);
+        }
+        .benefit i {
+            font-size: 34px;
+            color: #1565C0;
+            margin-bottom: 12px;
+            background: #EEF5FF;
+            padding: 14px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .benefit h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 6px;
+        }
+        .benefit p {
+            color: #475569;
+            font-size: 14px;
+        }
 
-    /* ---------- FOOTER (dark) ---------- */
-    footer {
-      background: #0F172A;
-      color: #FFFFFF;
-      padding: 50px 0 20px;
-      border-top: 2px solid #F97316;
-    }
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 30px;
-      margin-bottom: 40px;
-    }
-    .footer-section h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 18px;
-      position: relative;
-      padding-bottom: 10px;
-      color: #F97316;
-    }
-    .footer-section h3:after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 40px;
-      height: 3px;
-      background: #F97316;
-      border-radius: 4px;
-    }
-    .footer-links {
-      list-style: none;
-      padding: 0;
-    }
-    .footer-links li {
-      margin-bottom: 10px;
-    }
-    .footer-links a {
-      color: rgba(255, 255, 255, 0.6);
-      text-decoration: none;
-      transition: color 0.3s;
-      display: block;
-      padding: 3px 0;
-      font-size: 14px;
-    }
-    .footer-links a:hover {
-      color: #F97316;
-    }
-    .footer-bottom {
-      text-align: center;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.4);
-    }
+        /* ---------- FOOTER (white + blue accents) ---------- */
+        footer {
+            background: #FFFFFF;
+            color: #475569;
+            padding: 32px 0 16px;
+            border-top: 1px solid #E2E8F0;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .footer-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 14px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        .footer-section h3:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: #1565C0;
+            border-radius: 2px;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-links li {
+            margin-bottom: 6px;
+        }
+        .footer-links a {
+            color: #475569;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+            padding: 2px 0;
+            font-size: 13px;
+        }
+        .footer-links a:hover {
+            color: #1565C0;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 16px;
+            border-top: 1px solid #E2E8F0;
+            font-size: 13px;
+            color: #94A3B8;
+        }
 
-    /* ---------- RESPONSIVE ---------- */
-    @media (max-width: 1024px) {
-      nav ul li a {
-        padding: 4px 12px;
-        font-size: 13px;
-      }
-      .auth-buttons .login-btn,
-      .auth-buttons .signup-btn {
-        padding: 6px 16px;
-        font-size: 12px;
-      }
-    }
-    @media (max-width: 900px) {
-      .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .logo-section {
-        width: 100%;
-        justify-content: space-between;
-        margin-bottom: 8px;
-      }
-      .auth-buttons {
-        width: 100%;
-        justify-content: flex-end;
-      }
-    }
-    @media (max-width: 768px) {
-      nav ul {
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-      }
-      nav ul li {
-        margin: 2px;
-      }
-      .dropdown-content {
-        grid-template-columns: 1fr;
-        min-width: 200px;
-      }
-      .features {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 20px;
-      }
-      .hero h1 {
-        font-size: 36px;
-      }
-      .hero .tagline {
-        font-size: 18px;
-        padding: 2px 18px;
-      }
-      .popular-badge {
-        right: -24px;
-        padding: 3px 30px;
-        font-size: 10px;
-      }
-      .logo-text {
-        font-size: 22px;
-      }
-    }
-    @media (max-width: 480px) {
-      .hero {
-        padding: 40px 16px;
-      }
-      .hero h1 {
-        font-size: 30px;
-      }
-      .hero .tagline {
-        font-size: 16px;
-      }
-      .section-title-main {
-        font-size: 26px;
-      }
-      .logo-section {
-        flex-direction: column;
-        gap: 6px;
-      }
-      .auth-buttons {
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .popular-badge {
-        right: -20px;
-        padding: 3px 24px;
-        font-size: 9px;
-      }
-      .card-title {
-        font-size: 16px;
-      }
-      .card-description {
-        font-size: 13px;
-        padding: 4px 10px 12px;
-      }
-    }
-  </style>
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 1024px) {
+            nav ul li a {
+                padding: 4px 10px;
+                font-size: 13px;
+            }
+            .auth-buttons .login-btn,
+            .auth-buttons .signup-btn {
+                padding: 6px 16px;
+                font-size: 13px;
+            }
+            .logo-text {
+                font-size: 20px;
+            }
+            .logo {
+                height: 34px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 100px;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .logo-section {
+                width: 100%;
+                justify-content: space-between;
+                margin-bottom: 2px;
+            }
+            .auth-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+            nav ul li {
+                margin: 1px;
+            }
+            .dropdown-content {
+                grid-template-columns: 1fr;
+                min-width: 180px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .features {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 16px;
+            }
+            .hero h1 {
+                font-size: 34px;
+            }
+            .hero .tagline {
+                font-size: 17px;
+                padding: 2px 16px;
+            }
+            .popular-badge {
+                right: -20px;
+                padding: 3px 28px;
+                font-size: 9px;
+            }
+            .logo-text {
+                font-size: 18px;
+            }
+            .card {
+                padding: 14px 10px 12px;
+            }
+            .card-icon i {
+                width: 56px;
+                height: 56px;
+                font-size: 28px;
+                line-height: 28px;
+                padding: 12px;
+            }
+            .card-title {
+                font-size: 15px;
+            }
+            .card-description {
+                font-size: 12px;
+                padding: 2px 4px 6px;
+            }
+            .section-title-main {
+                font-size: 24px;
+                margin: 18px 0 22px;
+            }
+            .benefits {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-top: 120px;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+            }
+            .logo-section {
+                justify-content: center;
+            }
+            .auth-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            nav ul li a {
+                padding: 3px 8px;
+                font-size: 11px;
+            }
+            .login-btn,
+            .signup-btn {
+                padding: 5px 14px;
+                font-size: 12px;
+            }
+            .logo-text {
+                font-size: 16px;
+            }
+            .logo {
+                height: 28px;
+            }
+            .hero h1 {
+                font-size: 28px;
+            }
+            .hero .tagline {
+                font-size: 15px;
+            }
+            .hero p {
+                font-size: 14px;
+            }
+            .features {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            .card {
+                padding: 12px 8px 10px;
+            }
+            .card-icon i {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+                line-height: 24px;
+                padding: 10px;
+            }
+            .card-title {
+                font-size: 14px;
+            }
+            .card-description {
+                font-size: 11px;
+                padding: 2px 4px 6px;
+            }
+            .popular-badge {
+                right: -16px;
+                padding: 2px 20px;
+                font-size: 8px;
+            }
+            .section-title-main {
+                font-size: 20px;
+            }
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header>
-    <div class="container header-content">
-      <div class="logo-section">
-        <div class="logo">
-          <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
-          onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
-          <span class="logo-text" style="display: none;">
-            We <span class="heart">❤️</span> Doc
-          </span>
-        </div>
-        <nav>
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/pf-highlight">PF Highlight</a></li>
-            <li><a href="/esic-highlight">ESIC Highlight</a></li>
-            <li><a href="/merge-pdf">Merge PDF</a></li>
-            <li><a href="/compress-pdf">Compress PDF</a></li>
-            <li class="dropdown">
-              <a href="#">Convert <i class="fas fa-caret-down"></i></a>
-              <div class="dropdown-content">
-                <a href="/jpg-to-pdf"><i class="far fa-image"></i> JPG to PDF</a>
-                <a href="/word-to-pdf"><i class="far fa-file-word"></i> WORD to PDF</a>
-                <a href="/pdf-to-word"><i class="far fa-file-alt"></i> PDF to WORD</a>
-                <a href="/excel-to-pdf"><i class="far fa-file-excel"></i> EXCEL to PDF</a>
-                <a href="/pdf-to-excel"><i class="fas fa-table"></i> PDF to EXCEL</a>
-                <a href="/pdf-to-jpg"><i class="fas fa-file-image"></i> PDF to JPG</a>
-              </div>
-            </li>
-            <li><a href="/all-tools">All Tools</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-          </ul>
-        </nav>
-      </div>
+    <!-- ===== HEADER (White) ===== -->
+    <header>
+        <div class="container header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
+                    onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
+                    <span class="logo-text" style="display: none;">
+                        We <span class="heart">❤️</span> Doc
+                    </span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pf-highlight">PF Highlight</a></li>
+                        <li><a href="/esic-highlight">ESIC Highlight</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <li class="dropdown">
+                            <a href="#">Convert <i class="fas fa-caret-down"></i></a>
+                            <div class="dropdown-content">
+                                <a href="/jpg-to-pdf"><i class="far fa-image"></i> JPG to PDF</a>
+                                <a href="/word-to-pdf"><i class="far fa-file-word"></i> WORD to PDF</a>
+                                <a href="/pdf-to-word"><i class="far fa-file-alt"></i> PDF to WORD</a>
+                                <a href="/excel-to-pdf"><i class="far fa-file-excel"></i> EXCEL to PDF</a>
+                                <a href="/pdf-to-excel"><i class="fas fa-table"></i> PDF to EXCEL</a>
+                                <a href="/pdf-to-jpg"><i class="fas fa-file-image"></i> PDF to JPG</a>
+                            </div>
+                        </li>
+                        <li><a href="/all-tools">All Tools</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
+                </nav>
+            </div>
 
-      <!-- Auth Buttons -->
-      <div class="auth-buttons">
-        {% if session.get('user_name') %}
-        <a href="/profile" class="login-btn" style="margin-right: 6px;">
-          👋 Welcome, <strong>{{ session['user_name'] }}</strong>
-        </a>
-        <a href="{{ url_for('logout') }}" class="login-btn">Logout</a>
-        {% else %}
-        <a href="{{ url_for('login') }}" class="login-btn">Login</a>
-        <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
-        {% endif %}
-      </div>
+            <!-- Auth Buttons -->
+            <div class="auth-buttons">
+                {% if session.get('user_name') %}
+                <a href="/profile" class="login-btn" style="margin-right: 4px;">
+                    👋 <strong>{{ session['user_name'] }}</strong>
+                </a>
+                <a href="{{ url_for('logout') }}" class="login-btn">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+                <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MOVING BANNER ===== -->
+    <div class="moving-banner">
+        <div class="banner-content">
+            <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
+            <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
+            <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
+        </div>
     </div>
-  </header>
 
-  <!-- ===== MOVING BANNER ===== -->
-  <div class="moving-banner">
-    <div class="banner-content">
-      <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
-      <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
-      <span>✨ Earn ₹500 Paytm Cash on successful referral! New tools coming: Unlimited PDF Merge, PDF to Excel, PDF to Word, and Compliance tools ✨</span>
-    </div>
-  </div>
-
-  <!-- ===== HERO ===== -->
-  <section class="hero">
-    <div class="container">
-      <h1>We <span class="heart">❤️</span> Doc</h1>
-      <div class="tagline">✨ Fresh · Bold · Document Tools ✨</div>
-      <p>100% browser‑based · secure · lightning‑fast · zero installation</p>
-    </div>
-  </section>
-
-  <!-- ===== DIVIDER ===== -->
-  <div class="colorful-divider"></div>
-
-  <!-- ===== FEATURES ===== -->
-  <section class="features-container">
-    <div class="container">
-      <h2 class="section-title-main">🔥 All Tools · New Look</h2>
-      <div class="features">
-
-        <!-- ESIC -->
-        <div class="card esic-card" onclick="location.href='/esic-highlight'">
-          <div class="popular-badge">⭐ Top</div>
-          <div class="card-icon"><i class="fas fa-highlighter"></i></div>
-          <div class="card-title">ESIC Highlighter</div>
-          <div class="card-description">Highlight ESIC numbers in PDFs using Excel data for compliance</div>
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container">
+            <h1>We <span class="heart">❤️</span> Doc</h1>
+            <div class="tagline">✦ Clean · Professional · Document Tools ✦</div>
+            <p>100% browser‑based · secure · lightning‑fast · zero installation</p>
         </div>
+    </section>
 
-        <!-- PF -->
-        <div class="card pf-card" onclick="location.href='/pf-highlight'">
-          <div class="popular-badge">⭐ Top</div>
-          <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-          <div class="card-title">PF Highlighter</div>
-          <div class="card-description">Highlight PF numbers in PDFs using Excel data</div>
+    <!-- ===== DIVIDER ===== -->
+    <div class="colorful-divider"></div>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="features-container">
+        <div class="container">
+            <h2 class="section-title-main">✦ All Tools</h2>
+            <div class="features">
+
+                <!-- ESIC -->
+                <div class="card esic-card" onclick="location.href='/esic-highlight'">
+                    <div class="popular-badge">⭐ Top</div>
+                    <div class="card-icon"><i class="fas fa-highlighter"></i></div>
+                    <div class="card-title">ESIC Highlighter</div>
+                    <div class="card-description">Highlight ESIC numbers in PDFs using Excel data for compliance</div>
+                </div>
+
+                <!-- PF -->
+                <div class="card pf-card" onclick="location.href='/pf-highlight'">
+                    <div class="popular-badge">⭐ Top</div>
+                    <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="card-title">PF Highlighter</div>
+                    <div class="card-description">Highlight PF numbers in PDFs using Excel data</div>
+                </div>
+
+                <!-- Auto Stamp -->
+                <div class="card purple-card" onclick="location.href='/stamp'">
+                    <div class="card-icon"><i class="fas fa-stamp"></i></div>
+                    <div class="card-title">Auto Stamp</div>
+                    <div class="card-description">Add digital stamps and watermarks to documents</div>
+                </div>
+
+                <!-- Merge PDF -->
+                <div class="card esic-card" onclick="location.href='/merge-pdf'">
+                    <div class="card-icon"><i class="fas fa-object-group"></i></div>
+                    <div class="card-title">Merge PDF</div>
+                    <div class="card-description">Combine multiple PDFs into one document quickly</div>
+                </div>
+
+                <!-- Split PDF -->
+                <div class="card purple-card" onclick="location.href='/split-pdf'">
+                    <div class="card-icon"><i class="fas fa-cut"></i></div>
+                    <div class="card-title">Split PDF</div>
+                    <div class="card-description">Separate one PDF into multiple files with precision</div>
+                </div>
+
+                <!-- Compress PDF -->
+                <div class="card pf-card" onclick="location.href='/compress-pdf'">
+                    <div class="card-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+                    <div class="card-title">Compress PDF</div>
+                    <div class="card-description">Reduce file size without sacrificing quality</div>
+                </div>
+
+                <!-- JPG to PDF -->
+                <div class="card esic-card" onclick="location.href='/jpg-to-pdf'">
+                    <div class="card-icon"><i class="far fa-image"></i></div>
+                    <div class="card-title">JPG to PDF</div>
+                    <div class="card-description">Convert images to PDF documents in seconds</div>
+                </div>
+
+                <!-- WORD to PDF -->
+                <div class="card purple-card" onclick="location.href='/word-to-pdf'">
+                    <div class="card-icon"><i class="far fa-file-word"></i></div>
+                    <div class="card-title">WORD to PDF</div>
+                    <div class="card-description">Convert Word documents to PDF format</div>
+                </div>
+
+                <!-- PDF to WORD -->
+                <div class="card pf-card" onclick="location.href='/pdf-to-word'">
+                    <div class="card-icon"><i class="far fa-file-alt"></i></div>
+                    <div class="card-title">PDF to WORD</div>
+                    <div class="card-description">Extract content from PDF to editable Word document</div>
+                </div>
+
+                <!-- EXCEL to PDF -->
+                <div class="card esic-card" onclick="location.href='/excel-to-pdf'">
+                    <div class="card-icon"><i class="far fa-file-excel"></i></div>
+                    <div class="card-title">EXCEL to PDF</div>
+                    <div class="card-description">Convert Excel spreadsheets to PDF format</div>
+                </div>
+
+                <!-- PDF to EXCEL -->
+                <div class="card purple-card" onclick="location.href='/pdf-to-excel'">
+                    <div class="card-icon"><i class="fas fa-table"></i></div>
+                    <div class="card-title">PDF to EXCEL</div>
+                    <div class="card-description">Extract tables from PDF to Excel spreadsheets</div>
+                </div>
+
+                <!-- PDF to JPG -->
+                <div class="card pf-card" onclick="location.href='/pdf-to-jpg'">
+                    <div class="card-icon"><i class="fas fa-file-image"></i></div>
+                    <div class="card-title">PDF to JPG</div>
+                    <div class="card-description">Convert PDF pages to image files</div>
+                </div>
+
+                <!-- Rotate PDF -->
+                <div class="card esic-card" onclick="location.href='/rotate-pdf'">
+                    <div class="card-icon"><i class="fas fa-redo"></i></div>
+                    <div class="card-title">Rotate PDF</div>
+                    <div class="card-description">Adjust page orientation in your PDF documents</div>
+                </div>
+
+                <!-- Extract Pages -->
+                <div class="card purple-card" onclick="location.href='/extract-pages'">
+                    <div class="card-icon"><i class="fas fa-copy"></i></div>
+                    <div class="card-title">Extract Pages</div>
+                    <div class="card-description">Select and extract specific pages from PDF</div>
+                </div>
+
+                <!-- Protect PDF -->
+                <div class="card pf-card" onclick="location.href='/protect-pdf'">
+                    <div class="card-icon"><i class="fas fa-lock"></i></div>
+                    <div class="card-title">Protect PDF</div>
+                    <div class="card-description">Add password protection to your sensitive PDFs</div>
+                </div>
+
+            </div>
         </div>
+    </section>
 
-        <!-- Auto Stamp -->
-        <div class="card purple-card" onclick="location.href='/stamp'">
-          <div class="card-icon"><i class="fas fa-stamp"></i></div>
-          <div class="card-title">Auto Stamp</div>
-          <div class="card-description">Add digital stamps and watermarks to documents</div>
+    <!-- ===== DIVIDER ===== -->
+    <div class="colorful-divider"></div>
+
+    <!-- ===== WHY CHOOSE ===== -->
+    <section class="why-choose">
+        <div class="container">
+            <h2 class="section-title-main">💡 Why We ❤️ Doc?</h2>
+            <div class="benefits">
+                <div class="benefit">
+                    <i class="fas fa-lock"></i>
+                    <h3>Safe & Secure</h3>
+                    <p>All processing happens in your browser – your files never leave your device.</p>
+                </div>
+                <div class="benefit">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Blazing Fast</h3>
+                    <p>Modern JavaScript engines process your files instantly with no server delays.</p>
+                </div>
+                <div class="benefit">
+                    <i class="fas fa-user-check"></i>
+                    <h3>Effortless</h3>
+                    <p>Intuitive interface – no technical skills required. Just upload and go.</p>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <!-- Merge PDF -->
-        <div class="card esic-card" onclick="location.href='/merge-pdf'">
-          <div class="card-icon"><i class="fas fa-object-group"></i></div>
-          <div class="card-title">Merge PDF</div>
-          <div class="card-description">Combine multiple PDFs into one document quickly</div>
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>We ❤️ Doc</h3>
+                    <ul class="footer-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                        <li><a href="/business-solutions">Business Solutions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Tools</h3>
+                    <ul class="footer-links">
+                        <li><a href="/esic-highlight">ESIC Highlighter</a></li>
+                        <li><a href="/pf-highlight">PF Highlighter</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/split-pdf">Split PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <li><a href="/all-tools">All Tools</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Help &amp; Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="/faq">FAQ</a></li>
+                        <li><a href="/contact">Contact Support</a></li>
+                        <li><a href="/privacy-policy">Privacy Policy</a></li>
+                        <li><a href="/terms-of-service">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 We ❤️ Doc · All rights reserved.</p>
+            </div>
         </div>
+    </footer>
 
-        <!-- Split PDF -->
-        <div class="card purple-card" onclick="location.href='/split-pdf'">
-          <div class="card-icon"><i class="fas fa-cut"></i></div>
-          <div class="card-title">Split PDF</div>
-          <div class="card-description">Separate one PDF into multiple files with precision</div>
-        </div>
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js">
+    </script>
 
-        <!-- Compress PDF -->
-        <div class="card pf-card" onclick="location.href='/compress-pdf'">
-          <div class="card-icon"><i class="fas fa-compress-arrows-alt"></i></div>
-          <div class="card-title">Compress PDF</div>
-          <div class="card-description">Reduce file size without sacrificing quality</div>
-        </div>
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzLYd6aywxQT5H-U08ytb6jYMupBTQ1_A",
+            authDomain: "welovedoc-359cd.firebaseapp.com",
+            projectId: "welovedoc-359cd",
+            storageBucket: "welovedoc-359cd.firebasestorage.app",
+            messagingSenderId: "55009882725",
+            appId: "1:55009882725:web:b1b02c289d3099121c8c8c",
+            measurementId: "G-YB2C3HTYHD"
+        };
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
 
-        <!-- JPG to PDF -->
-        <div class="card esic-card" onclick="location.href='/jpg-to-pdf'">
-          <div class="card-icon"><i class="far fa-image"></i></div>
-          <div class="card-title">JPG to PDF</div>
-          <div class="card-description">Convert images to PDF documents in seconds</div>
-        </div>
+        // Card click tracking
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function() {
+                const toolName = this.querySelector('.card-title')?.textContent || 'Unknown';
+                firebase.analytics().logEvent('tool_clicked', { tool_name: toolName });
+            });
+        });
 
-        <!-- WORD to PDF -->
-        <div class="card purple-card" onclick="location.href='/word-to-pdf'">
-          <div class="card-icon"><i class="far fa-file-word"></i></div>
-          <div class="card-title">WORD to PDF</div>
-          <div class="card-description">Convert Word documents to PDF format</div>
-        </div>
-
-        <!-- PDF to WORD -->
-        <div class="card pf-card" onclick="location.href='/pdf-to-word'">
-          <div class="card-icon"><i class="far fa-file-alt"></i></div>
-          <div class="card-title">PDF to WORD</div>
-          <div class="card-description">Extract content from PDF to editable Word document</div>
-        </div>
-
-        <!-- EXCEL to PDF -->
-        <div class="card esic-card" onclick="location.href='/excel-to-pdf'">
-          <div class="card-icon"><i class="far fa-file-excel"></i></div>
-          <div class="card-title">EXCEL to PDF</div>
-          <div class="card-description">Convert Excel spreadsheets to PDF format</div>
-        </div>
-
-        <!-- PDF to EXCEL -->
-        <div class="card purple-card" onclick="location.href='/pdf-to-excel'">
-          <div class="card-icon"><i class="fas fa-table"></i></div>
-          <div class="card-title">PDF to EXCEL</div>
-          <div class="card-description">Extract tables from PDF to Excel spreadsheets</div>
-        </div>
-
-        <!-- PDF to JPG -->
-        <div class="card pf-card" onclick="location.href='/pdf-to-jpg'">
-          <div class="card-icon"><i class="fas fa-file-image"></i></div>
-          <div class="card-title">PDF to JPG</div>
-          <div class="card-description">Convert PDF pages to image files</div>
-        </div>
-
-        <!-- Rotate PDF -->
-        <div class="card esic-card" onclick="location.href='/rotate-pdf'">
-          <div class="card-icon"><i class="fas fa-redo"></i></div>
-          <div class="card-title">Rotate PDF</div>
-          <div class="card-description">Adjust page orientation in your PDF documents</div>
-        </div>
-
-        <!-- Extract Pages -->
-        <div class="card purple-card" onclick="location.href='/extract-pages'">
-          <div class="card-icon"><i class="fas fa-copy"></i></div>
-          <div class="card-title">Extract Pages</div>
-          <div class="card-description">Select and extract specific pages from PDF</div>
-        </div>
-
-        <!-- Protect PDF -->
-        <div class="card pf-card" onclick="location.href='/protect-pdf'">
-          <div class="card-icon"><i class="fas fa-lock"></i></div>
-          <div class="card-title">Protect PDF</div>
-          <div class="card-description">Add password protection to your sensitive PDFs</div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== DIVIDER ===== -->
-  <div class="colorful-divider"></div>
-
-  <!-- ===== WHY CHOOSE ===== -->
-  <section class="why-choose">
-    <div class="container">
-      <h2 class="section-title-main">💡 Why We ❤️ Doc?</h2>
-      <div class="benefits">
-        <div class="benefit">
-          <i class="fas fa-lock"></i>
-          <h3>Safe & Secure</h3>
-          <p>All processing happens in your browser – your files never leave your device.</p>
-        </div>
-        <div class="benefit">
-          <i class="fas fa-bolt"></i>
-          <h3>Blazing Fast</h3>
-          <p>Modern JavaScript engines process your files instantly with no server delays.</p>
-        </div>
-        <div class="benefit">
-          <i class="fas fa-user-check"></i>
-          <h3>Effortless</h3>
-          <p>Intuitive interface – no technical skills required. Just upload and go.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>We ❤️ Doc</h3>
-          <ul class="footer-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About Us</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-            <li><a href="/business-solutions">Business Solutions</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>Tools</h3>
-          <ul class="footer-links">
-            <li><a href="/esic-highlight">ESIC Highlighter</a></li>
-            <li><a href="/pf-highlight">PF Highlighter</a></li>
-            <li><a href="/merge-pdf">Merge PDF</a></li>
-            <li><a href="/split-pdf">Split PDF</a></li>
-            <li><a href="/compress-pdf">Compress PDF</a></li>
-            <li><a href="/all-tools">All Tools</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>Help &amp; Support</h3>
-          <ul class="footer-links">
-            <li><a href="/faq">FAQ</a></li>
-            <li><a href="/contact">Contact Support</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li><a href="/terms-of-service">Terms of Service</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 We ❤️ Doc · Fresh Cards · All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ===== FIREBASE ===== -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js">
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js">
-  </script>
-
-  <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzLYd6aywxQT5H-U08ytb6jYMupBTQ1_A",
-      authDomain: "welovedoc-359cd.firebaseapp.com",
-      projectId: "welovedoc-359cd",
-      storageBucket: "welovedoc-359cd.firebasestorage.app",
-      messagingSenderId: "55009882725",
-      appId: "1:55009882725:web:b1b02c289d3099121c8c8c",
-      measurementId: "G-YB2C3HTYHD"
-    };
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-
-    // Card click tracking
-    document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', function() {
-        const toolName = this.querySelector('.card-title')?.textContent || 'Unknown';
-        firebase.analytics().logEvent('tool_clicked', { tool_name: toolName });
-      });
-    });
-
-    // Logo fallback
-    window.addEventListener('load', function() {
-      const img = document.querySelector('.logo img');
-      const text = document.querySelector('.logo-text');
-      if (img && img.naturalWidth === 0) {
-        img.style.display = 'none';
-        if (text) text.style.display = 'flex';
-      }
-    });
-  </script>
+        // Logo fallback
+        window.addEventListener('load', function() {
+            const img = document.querySelector('.logo img');
+            const text = document.querySelector('.logo-text');
+            if (img && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (text) text.style.display = 'flex';
+            }
+        });
+    </script>
 
 </body>
 </html>
