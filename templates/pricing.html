@@ -653,13 +653,11 @@
 
             <!-- ===== SUBSCRIPTION STATUS BANNER ===== -->
             {% if active_subscription %}
-            <div class="subscription-status">
-                ✅ <strong>Your subscription is active.</strong><br>
-                {% if expiry_date %}
-                <span class="expiry">📅 Valid till: {{ expiry_date }}</span>
-                {% endif %}
-            </div>
-            {% endif %}
+<div class="subscription-status">
+    ✅ <strong>Your subscription is active.</strong><br>
+    You already have an active subscription.
+</div>
+{% endif %}
 
             <div class="pricing-cards">
 
