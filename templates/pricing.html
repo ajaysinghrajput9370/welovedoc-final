@@ -1,182 +1,684 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pricing - We ❤️ Doc</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
+  <title>Pricing · We ❤️ Doc</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
-<body style="font-family:Arial, sans-serif; background:#f9fbfd; margin:0; padding:0;">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
 
-<!-- Pricing Section -->
-<section id="pricing" style="padding:50px 0;">
-  <div class="container" style="text-align:center;">
-    <h2 style="margin-bottom:40px; color:#222; font-weight:900; font-size:32px;">
-      💎 Choose Your Subscription Plan
-    </h2>
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
+  <link rel="manifest" href="/static/site.webmanifest" />
 
-    <div class="pricing-cards" style="display:flex; justify-content:center; flex-wrap:wrap; gap:25px;">
-
-      <!-- Basic Plan -->
-      <div class="card pricing-card basic" style="background:linear-gradient(135deg,#e0f7fa,#80deea); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#00796b; margin-bottom:20px;">Basic</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 4</p>
-          <p><strong>Duration:</strong> 1 Month</p>
-          <p><strong>Price:</strong> ₹3000</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#004d40;">
-            <li>✔️ Unlimited PF & ESIC Highlight</li>
-            <li>✔️ Upload & Process Large Files</li>
-            <li>✔️ Instant Highlight within Seconds</li>
-            <li>✔️ Find Not-Match Data in Excel</li>
-            <li>✔️ Easy Your Compliance Work</li>
-          </ul>
-          <button onclick="payNow('basic', 2999)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#00796b; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-      <!-- Standard Plan -->
-      <div class="card pricing-card standard" style="background:linear-gradient(135deg,#fff3e0,#ffcc80); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transform:scale(1.05); transition:transform 0.3s; position:relative;">
-        <div style="position:absolute; top:-10px; right:-40px; background:#ef6c00; color:white; padding:5px 40px; transform:rotate(45deg); font-size:12px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-          Most Popular
-        </div>
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#ef6c00; margin-bottom:20px;">Standard ⭐</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 6</p>
-          <p><strong>Duration:</strong> 1 Month</p>
-          <p><strong>Price:</strong> ₹3499</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#bf360c;">
-            <li>✔️ Unlimited PF & ESIC Highlight</li>
-            <li>✔️ Upload & Process Large Files</li>
-            <li>✔️ Lightning Fast Highlight within Seconds</li>
-            <li>✔️ Advanced Not-Match Excel Finder</li>
-            <li>✔️ Smart Compliance Made Easy</li>
-            <li>✔️ Priority Email Support</li>
-          </ul>
-          <button onclick="payNow('standard', 3499)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#ef6c00; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-      <!-- Premium Plan -->
-      <div class="card pricing-card premium" style="background:linear-gradient(135deg,#e1bee7,#ba68c8); border-radius:15px; padding:25px; width:300px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s;">
-        <div class="card-header" style="font-size:22px; font-weight:700; color:#6a1b9a; margin-bottom:20px;">Premium</div>
-        <div class="card-body" style="color:#333; font-size:16px;">
-          <p><strong>Devices:</strong> 6</p>
-          <p><strong>Duration:</strong> 2 Months</p>
-          <p><strong>Price:</strong> ₹5999</p>
-          <hr style="margin:15px 0;">
-          <ul style="text-align:left; list-style:none; padding:0; font-size:15px; color:#4a148c;">
-            <li>✔️ All Standard Features</li>
-            <li>✔️ 2X Longer Subscription Period</li>
-            <li>✔️ Process Extra-Large Files Seamlessly</li>
-            <li>✔️ Advanced Data Accuracy Checks</li>
-            <li>✔️ VIP Compliance Support</li>
-            <li>✔️ Early Access to New Tools</li>
-          </ul>
-          <button onclick="payNow('premium', 5999)" 
-                  class="btn subscribe-btn" 
-                  style="margin-top:20px; background:#6a1b9a; color:white; padding:14px 35px; font-size:18px; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- Hover Effects -->
-<style>
-  .pricing-card:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 12px 25px rgba(0,0,0,0.2);}
-  .subscribe-btn:hover { opacity: 0.9; transform: scale(1.05);}
-</style>
-
-<!-- Razorpay Script -->
-<script>
-function payNow(plan, price) {
-  // Check if user is logged in
-  {% if not session.get('email') %}
-    alert("Please login first to subscribe");
-    window.location.href = "/login";
-    return;
-  {% endif %}
-
-  fetch("/create_order", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({plan: plan})
-  })
-  .then(res => res.json())
-  .then(order => {
-    if (order.error) {
-      alert(order.error);
-      return;
+  <style>
+    /* ============================================================
+       PRICING PAGE – MATCHES MAIN SITE & TOOL PAGES
+       ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
-    console.log("Order created:", order);
-    
-    var options = {
-      "key": "{{ razorpay_key_id }}",
-      "amount": order.amount,
-      "currency": "INR",
-      "name": "We ❤️ Doc",
-      "description": plan + " Subscription - ₹" + (order.amount/100),
-      "order_id": order.id,
-      "handler": function (response){
-        console.log("Payment successful:", response);
-        
-        // DIRECT form submission instead of creating form dynamically
-        var formData = new FormData();
-        formData.append('razorpay_payment_id', response.razorpay_payment_id);
-        formData.append('razorpay_order_id', response.razorpay_order_id);
-        formData.append('razorpay_signature', response.razorpay_signature);
-        formData.append('plan', plan);
-        
-        fetch('/payment_success', {
-          method: 'POST',
-          body: formData
-        })
-        .then(res => {
-          console.log("Redirecting to profile...");
-          window.location.href = '/profile';
-        })
-        .catch(err => {
-          console.error("Error:", err);
-          alert("Payment successful but redirect failed. Please contact support.");
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #F8FAFC;
+      color: #475569;
+      line-height: 1.6;
+      padding-top: 70px;
+      background-image: radial-gradient(circle at 10% 20%, rgba(21, 101, 192, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 80%, rgba(21, 101, 192, 0.03) 0%, transparent 50%);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ---------- HEADER (copied from tool pages) ---------- */
+    header {
+      background: #FFFFFF;
+      padding: 10px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      height: 38px;
+      display: flex;
+      align-items: center;
+    }
+    .logo img {
+      height: 100%;
+      width: auto;
+      display: block;
+    }
+    .logo-text {
+      font-weight: 800;
+      font-size: 22px;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      letter-spacing: -0.3px;
+    }
+    .logo-text .heart {
+      color: #E53935;
+      margin: 0 2px;
+    }
+
+    .nav-wrapper {
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-wrapper::-webkit-scrollbar { display: none; }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a {
+      color: #475569;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 30px;
+      transition: all 0.25s;
+      display: block;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    nav ul li a:hover {
+      background: #EEF5FF;
+      color: #1565C0;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .login-btn, .signup-btn {
+      padding: 8px 22px;
+      border-radius: 30px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      font-size: 14px;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .login-btn {
+      background: transparent;
+      color: #1565C0;
+      border: 1.5px solid #1565C0;
+    }
+    .login-btn:hover {
+      background: #1565C0;
+      color: #FFFFFF;
+      transform: scale(1.03);
+    }
+    .signup-btn {
+      background: #1565C0;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+    }
+    .signup-btn:hover {
+      background: #1E88E5;
+      transform: scale(1.03);
+      box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+    }
+
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: #FFFFFF;
+      min-width: 280px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      border-radius: 20px;
+      padding: 14px 12px;
+      z-index: 100;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      border: 1px solid #E2E8F0;
+    }
+    .dropdown:hover .dropdown-content { display: grid; }
+    .dropdown-content a {
+      color: #475569 !important;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      border-radius: 14px;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 13px;
+      background: transparent !important;
+    }
+    .dropdown-content a i {
+      margin-right: 12px;
+      color: #1565C0;
+      width: 18px;
+      text-align: center;
+      font-size: 15px;
+    }
+    .dropdown-content a:hover {
+      background: #EEF5FF !important;
+      color: #1565C0 !important;
+      transform: translateX(4px);
+    }
+
+    /* ---------- HERO SECTION ---------- */
+    .hero-pricing {
+      background: linear-gradient(135deg, #EEF5FF 0%, #D6E4FF 100%);
+      padding: 32px 0 28px;
+      text-align: center;
+      border-radius: 0 0 28px 28px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-pricing::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -15%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(21, 101, 192, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-pricing::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -15%;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(21, 101, 192, 0.04) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-pricing h1 {
+      font-size: 32px;
+      font-weight: 900;
+      color: #0F172A;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-pricing h1 .highlight {
+      background: linear-gradient(135deg, #1565C0, #1E88E5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-pricing p {
+      font-size: 16px;
+      color: #475569;
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---------- PRICING CARDS ---------- */
+    .pricing-cards {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin-top: 12px;
+    }
+
+    .pricing-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      padding: 28px 24px 24px;
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      border: 1px solid #E2E8F0;
+      transition: all 0.3s cubic-bezier(0.15, 0.85, 0.3, 1.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba(21, 101, 192, 0.08);
+      border-color: #1565C0;
+    }
+
+    .pricing-card .card-header {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0F172A;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .pricing-card .card-header .sub-icon {
+      font-size: 20px;
+      margin-right: 6px;
+    }
+
+    .pricing-card .price {
+      font-size: 32px;
+      font-weight: 900;
+      color: #1565C0;
+      margin: 8px 0 4px;
+    }
+    .pricing-card .price span {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94A3B8;
+    }
+
+    .pricing-card .duration {
+      font-size: 14px;
+      color: #94A3B8;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .pricing-card .features {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 20px;
+      text-align: left;
+      flex: 1;
+    }
+    .pricing-card .features li {
+      padding: 5px 0;
+      font-size: 14px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pricing-card .features li i {
+      color: #16A34A;
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .pricing-card .btn-subscribe {
+      background: #1565C0;
+      color: white;
+      border: none;
+      padding: 14px 0;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 16px;
+      width: 100%;
+      transition: all 0.3s;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .pricing-card .btn-subscribe:hover {
+      background: #1E88E5;
+      transform: scale(1.02);
+      box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+    }
+
+    /* Standard card (most popular) – blue accent */
+    .pricing-card.standard {
+      border-color: #1565C0;
+      box-shadow: 0 8px 32px rgba(21, 101, 192, 0.08);
+      transform: scale(1.04);
+    }
+    .pricing-card.standard:hover {
+      transform: scale(1.06) translateY(-8px);
+    }
+    .pricing-card.standard .card-header {
+      color: #1565C0;
+    }
+    .pricing-card.standard .price {
+      color: #1565C0;
+    }
+
+    .most-popular-badge {
+      position: absolute;
+      top: -8px;
+      right: 20px;
+      background: #1565C0;
+      color: white;
+      padding: 4px 18px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(21, 101, 192, 0.25);
+    }
+
+    /* Basic card – teal accent (keeps variety) */
+    .pricing-card.basic .card-header {
+      color: #0F172A;
+    }
+    .pricing-card.basic .price {
+      color: #1565C0;
+    }
+    .pricing-card.basic .btn-subscribe {
+      background: #1565C0;
+    }
+    .pricing-card.basic .btn-subscribe:hover {
+      background: #1E88E5;
+    }
+
+    /* Premium card – purple accent (keeps variety) */
+    .pricing-card.premium .card-header {
+      color: #0F172A;
+    }
+    .pricing-card.premium .price {
+      color: #1565C0;
+    }
+    .pricing-card.premium .btn-subscribe {
+      background: #1565C0;
+    }
+    .pricing-card.premium .btn-subscribe:hover {
+      background: #1E88E5;
+    }
+
+    /* Footer */
+    footer {
+      background: #FFFFFF;
+      padding: 20px 0 12px;
+      border-top: 1px solid #E2E8F0;
+      margin-top: 40px;
+    }
+    .footer-bottom {
+      text-align: center;
+      font-size: 12px;
+      color: #94A3B8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { padding-top: 100px; }
+      .header-content { flex-wrap: wrap; gap: 6px; }
+      .logo-wrapper { flex: 0 0 auto; }
+      .nav-wrapper { flex: 1 1 100%; order: 3; justify-content: center; }
+      .auth-buttons { flex: 0 0 auto; margin-left: auto; }
+      nav ul { flex-wrap: wrap; justify-content: center; }
+      .hero-pricing h1 { font-size: 26px; }
+      .pricing-cards { gap: 20px; }
+      .pricing-card { width: 100%; max-width: 340px; }
+      .pricing-card.standard { transform: scale(1); }
+      .pricing-card.standard:hover { transform: translateY(-8px) scale(1.02); }
+      .most-popular-badge { right: 10px; top: -6px; font-size: 11px; padding: 3px 14px; }
+    }
+    @media (max-width: 480px) {
+      .header-content { flex-direction: column; align-items: stretch; gap: 4px; }
+      .logo-wrapper { justify-content: center; }
+      .auth-buttons { justify-content: center; flex-wrap: wrap; margin-left: 0; }
+      .nav-wrapper { order: 2; }
+      nav ul li a { padding: 4px 10px; font-size: 12px; }
+      .login-btn, .signup-btn { padding: 6px 14px; font-size: 12px; }
+      .hero-pricing h1 { font-size: 22px; }
+      .pricing-card { padding: 20px 16px; }
+      .pricing-card .price { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER (same as tool pages) ===== -->
+  <header>
+    <div class="container header-content">
+      <div class="logo-wrapper">
+        <div class="logo">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
+          onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
+          <span class="logo-text" style="display: none;">
+            We <span class="heart">❤️</span> Doc
+          </span>
+        </div>
+      </div>
+      <div class="nav-wrapper">
+        <nav>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/pf-highlight">PF Highlight</a></li>
+            <li><a href="/esic-highlight">ESIC Highlight</a></li>
+            <li><a href="/merge-pdf">Merge PDF</a></li>
+            <li><a href="/compress-pdf">Compress PDF</a></li>
+            <li class="dropdown">
+              <a href="#">Convert <i class="fas fa-caret-down"></i></a>
+              <div class="dropdown-content">
+                <a href="/jpg-to-pdf"><i class="far fa-image"></i> JPG to PDF</a>
+                <a href="/word-to-pdf"><i class="far fa-file-word"></i> WORD to PDF</a>
+                <a href="/pdf-to-word"><i class="far fa-file-alt"></i> PDF to WORD</a>
+                <a href="/excel-to-pdf"><i class="far fa-file-excel"></i> EXCEL to PDF</a>
+                <a href="/pdf-to-excel"><i class="fas fa-table"></i> PDF to EXCEL</a>
+                <a href="/pdf-to-jpg"><i class="fas fa-file-image"></i> PDF to JPG</a>
+              </div>
+            </li>
+            <li><a href="/all-tools">All Tools</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="auth-buttons">
+        {% if session.get('user_name') %}
+        <a href="/profile" class="login-btn" style="margin-right:4px;">
+          👋 <strong>{{ session['user_name'] }}</strong>
+        </a>
+        <a href="{{ url_for('logout') }}" class="login-btn">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+        <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero-pricing">
+    <div class="container">
+      <h1>💎 Choose Your <span class="highlight">Subscription</span> Plan</h1>
+      <p>Select the perfect plan for your document compliance needs.</p>
+    </div>
+  </section>
+
+  <!-- ===== PRICING CARDS ===== -->
+  <section id="pricing" style="padding:0 0 40px;">
+    <div class="container">
+      <div class="pricing-cards">
+
+        <!-- Basic Plan -->
+        <div class="pricing-card basic">
+          <div class="card-header">
+            <span class="sub-icon">🟢</span> Basic
+          </div>
+          <div class="price">₹3,000 <span>/ month</span></div>
+          <div class="duration">1 Month · 4 Devices</div>
+          <ul class="features">
+            <li><i class="fas fa-check-circle"></i> Unlimited PF & ESIC Highlight</li>
+            <li><i class="fas fa-check-circle"></i> Upload & Process Large Files</li>
+            <li><i class="fas fa-check-circle"></i> Instant Highlight within Seconds</li>
+            <li><i class="fas fa-check-circle"></i> Find Not-Match Data in Excel</li>
+            <li><i class="fas fa-check-circle"></i> Easy Your Compliance Work</li>
+          </ul>
+          <button onclick="payNow('basic', 2999)" class="btn-subscribe">
+            Subscribe <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Standard Plan (Most Popular) -->
+        <div class="pricing-card standard">
+          <div class="most-popular-badge">⭐ Most Popular</div>
+          <div class="card-header">
+            <span class="sub-icon">⭐</span> Standard
+          </div>
+          <div class="price">₹3,499 <span>/ month</span></div>
+          <div class="duration">1 Month · 6 Devices</div>
+          <ul class="features">
+            <li><i class="fas fa-check-circle"></i> Unlimited PF & ESIC Highlight</li>
+            <li><i class="fas fa-check-circle"></i> Upload & Process Large Files</li>
+            <li><i class="fas fa-check-circle"></i> Lightning Fast Highlight within Seconds</li>
+            <li><i class="fas fa-check-circle"></i> Advanced Not-Match Excel Finder</li>
+            <li><i class="fas fa-check-circle"></i> Smart Compliance Made Easy</li>
+            <li><i class="fas fa-check-circle"></i> Priority Email Support</li>
+          </ul>
+          <button onclick="payNow('standard', 3499)" class="btn-subscribe">
+            Subscribe <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Premium Plan -->
+        <div class="pricing-card premium">
+          <div class="card-header">
+            <span class="sub-icon">💎</span> Premium
+          </div>
+          <div class="price">₹5,999 <span>/ 2 months</span></div>
+          <div class="duration">2 Months · 6 Devices</div>
+          <ul class="features">
+            <li><i class="fas fa-check-circle"></i> All Standard Features</li>
+            <li><i class="fas fa-check-circle"></i> 2X Longer Subscription Period</li>
+            <li><i class="fas fa-check-circle"></i> Process Extra-Large Files Seamlessly</li>
+            <li><i class="fas fa-check-circle"></i> Advanced Data Accuracy Checks</li>
+            <li><i class="fas fa-check-circle"></i> VIP Compliance Support</li>
+            <li><i class="fas fa-check-circle"></i> Early Access to New Tools</li>
+          </ul>
+          <button onclick="payNow('premium', 5999)" class="btn-subscribe">
+            Subscribe <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 We ❤️ Doc · All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== RAZORPAY SCRIPT (unchanged functionality) ===== -->
+  <script>
+    function payNow(plan, price) {
+      {% if not session.get('email') %}
+        alert("Please login first to subscribe");
+        window.location.href = "/login";
+        return;
+      {% endif %}
+
+      fetch("/create_order", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({plan: plan})
+      })
+      .then(res => res.json())
+      .then(order => {
+        if (order.error) {
+          alert(order.error);
+          return;
+        }
+
+        var options = {
+          "key": "{{ razorpay_key_id }}",
+          "amount": order.amount,
+          "currency": "INR",
+          "name": "We ❤️ Doc",
+          "description": plan + " Subscription - ₹" + (order.amount/100),
+          "order_id": order.id,
+          "handler": function (response){
+            var formData = new FormData();
+            formData.append('razorpay_payment_id', response.razorpay_payment_id);
+            formData.append('razorpay_order_id', response.razorpay_order_id);
+            formData.append('razorpay_signature', response.razorpay_signature);
+            formData.append('plan', plan);
+
+            fetch('/payment_success', {
+              method: 'POST',
+              body: formData
+            })
+            .then(res => {
+              window.location.href = '/profile';
+            })
+            .catch(err => {
+              console.error("Error:", err);
+              alert("Payment successful but redirect failed. Please contact support.");
+            });
+          },
+          "prefill": {
+            "name": "{{ session.get('user_name', 'Customer') }}",
+            "email": "{{ session.get('email', '') }}"
+          },
+          "theme": {
+            "color": "#1565C0"
+          }
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+
+        rzp1.on('payment.failed', function (response){
+          console.error("Payment failed:", response.error);
+          alert("Payment failed: " + response.error.description);
         });
-      },
-      "prefill": {
-        "name": "{{ session.get('user_name', 'Customer') }}",
-        "email": "{{ session.get('email', '') }}"
-      },
-      "theme": {
-        "color": "#00796b"
-      }
-    };
-    
-    var rzp1 = new Razorpay(options);
-    rzp1.open();
-    
-    rzp1.on('payment.failed', function (response){
-      console.error("Payment failed:", response.error);
-      alert("Payment failed: " + response.error.description);
-    });
-  })
-  .catch(error => {
-    console.error("Error creating order:", error);
-    alert("Error creating payment order. Please try again.");
-  });
-}
-</script>
+      })
+      .catch(error => {
+        console.error("Error creating order:", error);
+        alert("Error creating payment order. Please try again.");
+      });
+    }
+  </script>
 
 </body>
 </html>
