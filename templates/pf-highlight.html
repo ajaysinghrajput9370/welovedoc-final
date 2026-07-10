@@ -918,67 +918,67 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
-            // Process button
+            // ******************* FIXED PROCESS BUTTON *******************
             processBtn.addEventListener('click', function() {
                 if (!pdfFile || !excelFile) {
                     alert('Please select both a PDF and an Excel file.');
                     return;
                 }
 
+                // Build FormData
                 const formData = new FormData();
                 formData.append('pdf_file', pdfFile);
                 formData.append('excel_file', excelFile);
-                formData.append('mode', 'pf');
+                formData.append('mode', 'pf');   // mode can be 'pf' or 'esic'
 
+                // Show spinner & disable button
                 spinner.classList.remove('d-none');
                 btnText.textContent = 'Processing...';
                 processBtn.disabled = true;
 
-                // Simulate API call for demo
-                setTimeout(() => {
-                    spinner.classList.add('d-none');
-                    btnText.textContent = 'Process PF Highlighting';
-                    processBtn.disabled = false;
-                    resultSection.style.display = 'block';
-                    pdfDownload.href = '#';
-                    excelDownload.href = '#';
-                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 1800);
-
-                // Real fetch (commented for demo)
-                /*
+                // Make the actual API call
                 fetch('/process', {
                     method: 'POST',
                     body: formData
                 })
                 .then(res => {
-                    if (!res.ok) throw new Error('Server error');
+                    if (!res.ok) throw new Error('Server responded with status ' + res.status);
                     return res.json();
                 })
                 .then(data => {
+                    // Hide spinner & restore button
                     spinner.classList.add('d-none');
                     btnText.textContent = 'Process PF Highlighting';
                     processBtn.disabled = false;
+
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    // Show result section
                     resultSection.style.display = 'block';
-                    if (data.pdf_url) {
-                        pdfDownload.href = data.pdf_url;
-                        pdfDownload.download = 'pf_highlighted_output.pdf';
-                    }
-                    if (data.excel_url) {
-                        excelDownload.href = data.excel_url;
-                        excelDownload.download = 'pf_data_not_found.xlsx';
-                    }
+
+                    // Set download links (assuming data contains pdf_url and excel_url)
+                    pdfDownload.href = data.pdf_url || '#';
+                    excelDownload.href = data.excel_url || '#';
+
+                    // Optionally set download filename attributes
+                    pdfDownload.download = 'pf_highlighted_output.pdf';
+                    excelDownload.download = 'pf_data_not_found.xlsx';
+
+                    // Smooth scroll to result
                     resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 })
                 .catch(err => {
-                    console.error(err);
+                    console.error('Error:', err);
                     spinner.classList.add('d-none');
                     btnText.textContent = 'Process PF Highlighting';
                     processBtn.disabled = false;
-                    alert('Error processing files. Please try again.');
+                    alert('Processing failed. Please try again.\n' + err.message);
                 });
-                */
             });
+            // **********************************************************
         });
     </script>
 </body>
