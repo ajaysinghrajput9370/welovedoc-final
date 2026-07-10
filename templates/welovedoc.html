@@ -82,15 +82,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
+            gap: 16px;
         }
 
-        .logo-section {
+        /* ---- LEFT: Logo (fixed) ---- */
+        .logo-wrapper {
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -117,13 +117,28 @@
             margin: 0 2px;
         }
 
-        /* Navigation */
+        /* ---- CENTER: Navigation (centered) ---- */
+        .nav-wrapper {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
         nav ul {
             display: flex;
             list-style: none;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 2px;
+            margin: 0;
+            padding: 0;
         }
         nav ul li a {
             color: #475569;
@@ -141,11 +156,12 @@
             color: #1565C0;
         }
 
-        /* Auth Buttons */
+        /* ---- RIGHT: Auth Buttons (fixed) ---- */
         .auth-buttons {
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-shrink: 0;
         }
         .login-btn,
         .signup-btn {
@@ -157,6 +173,7 @@
             font-size: 14px;
             border: none;
             font-family: 'Inter', sans-serif;
+            white-space: nowrap;
         }
         .login-btn {
             background: transparent;
@@ -559,7 +576,9 @@
             color: #94A3B8;
         }
 
-        /* ---------- RESPONSIVE ---------- */
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 1024px) {
             nav ul li a {
                 padding: 4px 10px;
@@ -576,6 +595,9 @@
             .logo {
                 height: 34px;
             }
+            .header-content {
+                gap: 10px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -583,18 +605,20 @@
                 padding-top: 100px;
             }
             .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
+                flex-wrap: wrap;
+                gap: 6px;
             }
-            .logo-section {
-                width: 100%;
-                justify-content: space-between;
-                margin-bottom: 2px;
+            .logo-wrapper {
+                flex: 0 0 auto;
+            }
+            .nav-wrapper {
+                flex: 1 1 100%;
+                order: 3;
+                justify-content: center;
             }
             .auth-buttons {
-                width: 100%;
-                justify-content: flex-end;
+                flex: 0 0 auto;
+                margin-left: auto;
             }
             nav ul {
                 flex-wrap: wrap;
@@ -668,13 +692,17 @@
                 align-items: stretch;
                 gap: 4px;
             }
-            .logo-section {
+            .logo-wrapper {
                 justify-content: center;
             }
             .auth-buttons {
                 justify-content: center;
                 flex-wrap: wrap;
                 gap: 6px;
+                margin-left: 0;
+            }
+            .nav-wrapper {
+                order: 2;
             }
             nav ul {
                 flex-wrap: wrap;
@@ -745,7 +773,9 @@
     <!-- ===== HEADER (White) ===== -->
     <header>
         <div class="container header-content">
-            <div class="logo-section">
+
+            <!-- LEFT: Logo -->
+            <div class="logo-wrapper">
                 <div class="logo">
                     <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
                     onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
@@ -753,6 +783,10 @@
                         We <span class="heart">❤️</span> Doc
                     </span>
                 </div>
+            </div>
+
+            <!-- CENTER: Navigation -->
+            <div class="nav-wrapper">
                 <nav>
                     <ul>
                         <li><a href="/">Home</a></li>
@@ -778,7 +812,7 @@
                 </nav>
             </div>
 
-            <!-- Auth Buttons -->
+            <!-- RIGHT: Auth Buttons -->
             <div class="auth-buttons">
                 {% if session.get('user_name') %}
                 <a href="/profile" class="login-btn" style="margin-right: 4px;">
@@ -790,6 +824,7 @@
                 <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
                 {% endif %}
             </div>
+
         </div>
     </header>
 
