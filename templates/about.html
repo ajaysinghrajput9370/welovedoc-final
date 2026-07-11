@@ -1,97 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - We ❤️ Doc</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    header {
-      background-color: #e63946;
-      color: white;
-      text-align: center;
-      padding: 20px;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #e63946;
-    }
-    p {
-      line-height: 1.6;
-      font-size: 16px;
-    }
-    ul {
-      margin-top: 10px;
-      padding-left: 20px;
-    }
-    .tagline {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-    }
-    footer {
-      margin-top: 40px;
-      text-align: center;
-      padding: 15px;
-      background-color: #333;
-      color: white;
-      font-size: 14px;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
+    <title>About Us · We ❤️ Doc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+
+    <style>
+        /* ============================================================
+           COLOR THEME – matches PF Highlighter & all tools
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: #475569;
+            line-height: 1.6;
+            padding-top: 70px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(21, 101, 192, 0.03) 0%, transparent 50%),
+                              radial-gradient(circle at 90% 80%, rgba(21, 101, 192, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ---------- HEADER (same as all tools, no Convert, no All Tools) ---------- */
+        header {
+            background: #FFFFFF;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            height: 38px;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 100%;
+            width: auto;
+            display: block;
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 22px;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            letter-spacing: -0.3px;
+        }
+        .logo-text .heart {
+            color: #E53935;
+            margin: 0 2px;
+        }
+
+        .nav-wrapper {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav-wrapper::-webkit-scrollbar { display: none; }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 2px;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: all 0.25s;
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        nav ul li a:hover {
+            background: #EEF5FF;
+            color: #1565C0;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .login-btn, .signup-btn {
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        .login-btn {
+            background: transparent;
+            color: #1565C0;
+            border: 1.5px solid #1565C0;
+        }
+        .login-btn:hover {
+            background: #1565C0;
+            color: #FFFFFF;
+            transform: scale(1.03);
+        }
+        .signup-btn {
+            background: #1565C0;
+            color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+        }
+        .signup-btn:hover {
+            background: #1E88E5;
+            transform: scale(1.03);
+            box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            background: linear-gradient(135deg, #EEF5FF 0%, #D6E4FF 100%);
+            padding: 28px 0 24px;
+            text-align: center;
+            border-radius: 0 0 28px 28px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -15%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(21, 101, 192, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -15%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(21, 101, 192, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0F172A;
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #1565C0, #1E88E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 15px;
+            color: #475569;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ---------- CARD ---------- */
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .card-body {
+            padding: 28px 32px;
+        }
+
+        /* ---------- ABOUT CONTENT ---------- */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+
+        .about-section h5 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .about-section h5 i {
+            color: #1565C0;
+            font-size: 18px;
+        }
+        .about-section p {
+            font-size: 15px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .about-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .about-section ul li {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .about-section ul li:last-child {
+            border-bottom: none;
+        }
+        .about-section ul li i {
+            color: #16A34A;
+            font-size: 14px;
+            width: 18px;
+        }
+
+        .tagline-box {
+            background: #EEF5FF;
+            border-radius: 16px;
+            padding: 20px 24px;
+            text-align: center;
+            margin-top: 24px;
+            border: 1px solid rgba(21, 101, 192, 0.1);
+        }
+        .tagline-box h4 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0F172A;
+        }
+        .tagline-box h4 .heart {
+            color: #E53935;
+        }
+        .tagline-box h4 .highlight {
+            color: #1565C0;
+        }
+        .tagline-box p {
+            font-size: 14px;
+            color: #475569;
+            margin: 0;
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: #FFFFFF;
+            padding: 20px 0 12px;
+            border-top: 1px solid #E2E8F0;
+            margin-top: 40px;
+        }
+        .footer-bottom {
+            text-align: center;
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            body { padding-top: 100px; }
+            .header-content { flex-wrap: wrap; gap: 6px; }
+            .logo-wrapper { flex: 0 0 auto; }
+            .nav-wrapper { flex: 1 1 100%; order: 3; justify-content: center; }
+            .auth-buttons { flex: 0 0 auto; margin-left: auto; }
+            nav ul { flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 24px; }
+            .hero { padding: 24px 0 20px; }
+            .card-body { padding: 20px; }
+            .about-grid { grid-template-columns: 1fr; }
+            .tagline-box h4 { font-size: 18px; }
+        }
+        @media (max-width: 480px) {
+            .header-content { flex-direction: column; align-items: stretch; gap: 4px; }
+            .logo-wrapper { justify-content: center; }
+            .auth-buttons { justify-content: center; flex-wrap: wrap; margin-left: 0; }
+            .nav-wrapper { order: 2; }
+            nav ul li a { padding: 4px 10px; font-size: 12px; }
+            .login-btn, .signup-btn { padding: 6px 14px; font-size: 12px; }
+            .hero h1 { font-size: 20px; }
+            .card-body { padding: 16px; }
+            .tagline-box { padding: 16px; }
+            .tagline-box h4 { font-size: 16px; }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    About We ❤️ Doc
-  </header>
-  <div class="container">
-    <h2>Who We Are</h2>
-    <p>
-      At <strong>WeLoveDoc</strong>, our mission is simple: 
-      <strong>make working with documents easier, faster, and smarter</strong>.
-    </p>
 
-    <h2>What We Do</h2>
-    <p>We started with one powerful tool — <strong>PDF Highlighter for UAN & ESIC compliance</strong> — and are expanding into a complete suite of document solutions, including:</p>
-    <ul>
-      <li>PDF Merge</li>
-      <li>PDF to Excel</li>
-      <li>PDF to Word</li>
-      <li>Unlimited Compliance Utilities (Form-11, Employment Card, Workmen Tools, and more…)</li>
-    </ul>
+    <!-- ===== HEADER (same as all tools) ===== -->
+    <header>
+        <div class="container header-content">
+            <div class="logo-wrapper">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
+                    onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
+                    <span class="logo-text" style="display: none;">
+                        We <span class="heart">❤️</span> Doc
+                    </span>
+                </div>
+            </div>
+            <div class="nav-wrapper">
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pf-highlight">PF Highlight</a></li>
+                        <li><a href="/esic-highlight">ESIC Highlight</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <!-- Convert removed -->
+                        <!-- All Tools removed -->
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="auth-buttons">
+                {% if session.get('user_name') %}
+                <a href="/profile" class="login-btn" style="margin-right:4px;">
+                    👋 <strong>{{ session['user_name'] }}</strong>
+                </a>
+                <a href="{{ url_for('logout') }}" class="login-btn">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+                <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
 
-    <h2>Why Choose Us</h2>
-    <ul>
-      <li><strong>Fast & Easy to Use</strong> – no complicated steps</li>
-      <li><strong>Affordable</strong> – starting at just ₹49/month</li>
-      <li><strong>Secure</strong> – your data stays yours</li>
-      <li><strong>Rewarding</strong> – earn extra subscription days by inviting friends</li>
-    </ul>
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container">
+            <h1>About <span class="highlight">We ❤️ Doc</span></h1>
+            <p>Learn more about our mission, our tools, and why we're the right choice for your document needs.</p>
+        </div>
+    </section>
 
-    <div class="tagline">
-      👉 We ❤️ Doc – Highlight your life
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+
+                <!-- About Grid -->
+                <div class="about-grid">
+
+                    <!-- Left Column -->
+                    <div>
+                        <div class="about-section">
+                            <h5><i class="fas fa-heart" style="color:#E53935;"></i> Who We Are</h5>
+                            <p>
+                                At <strong>We ❤️ Doc</strong>, our mission is simple: 
+                                <strong>make working with documents easier, faster, and smarter</strong>.
+                            </p>
+                            <p>
+                                We believe that document management shouldn't be a headache. That's why we've built 
+                                a suite of tools that are powerful yet intuitive, helping you get your work done 
+                                in seconds — not hours.
+                            </p>
+                        </div>
+
+                        <div class="about-section" style="margin-top:20px;">
+                            <h5><i class="fas fa-bullseye"></i> Our Vision</h5>
+                            <p>
+                                To become the most trusted document tool platform for professionals, businesses, 
+                                and individuals worldwide — delivering speed, accuracy, and peace of mind with 
+                                every document processed.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <div class="about-section">
+                            <h5><i class="fas fa-tools"></i> What We Offer</h5>
+                            <p>
+                                We started with one powerful tool — <strong>PDF Highlighter for UAN &amp; ESIC compliance</strong> 
+                                — and are expanding into a complete suite of document solutions:
+                            </p>
+                            <ul>
+                                <li><i class="fas fa-check-circle"></i> PDF Merge</li>
+                                <li><i class="fas fa-check-circle"></i> PDF to Excel</li>
+                                <li><i class="fas fa-check-circle"></i> PDF to Word</li>
+                                <li><i class="fas fa-check-circle"></i> Unlimited Compliance Utilities</li>
+                                <li><i class="fas fa-check-circle"></i> Form-11, Employment Card &amp; More</li>
+                            </ul>
+                        </div>
+
+                        <div class="about-section" style="margin-top:20px;">
+                            <h5><i class="fas fa-star"></i> Why Choose Us</h5>
+                            <ul>
+                                <li><i class="fas fa-check-circle"></i> <strong>Fast &amp; Easy</strong> – no complicated steps</li>
+                                <li><i class="fas fa-check-circle"></i> <strong>Affordable</strong> – starting at just ₹49/month</li>
+                                <li><i class="fas fa-check-circle"></i> <strong>Secure</strong> – your data stays yours</li>
+                                <li><i class="fas fa-check-circle"></i> <strong>Rewarding</strong> – earn extra subscription days by inviting friends</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tagline Box -->
+                <div class="tagline-box">
+                    <h4>
+                        <span class="heart">❤️</span> We <span class="heart">❤️</span> Doc – 
+                        <span class="highlight">Highlight your life</span>
+                    </h4>
+                    <p>Making document management simple, secure, and stress-free.</p>
+                </div>
+
+                <!-- Footer credit -->
+                <p style="font-size:12px; color:#94A3B8; margin-top:20px; text-align:center;">
+                    © 2026 We ❤️ Doc · All rights reserved.
+                </p>
+
+            </div>
+        </div>
     </div>
-  </div>
 
-  <footer>
-    © 2025 WeLoveDoc (A&S). All rights reserved.
-  </footer>
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 We ❤️ Doc · All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
