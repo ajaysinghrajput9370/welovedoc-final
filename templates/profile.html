@@ -1,132 +1,577 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Profile - We ❤️ Doc</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-  <style>
-    body {
-      background: linear-gradient(120deg, #f6d365, #fda085);
-      font-family: 'Arial', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .profile-card {
-      max-width: 500px;
-      width: 90%;
-      background: #fff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      text-align: center;
-      position: relative;
-    }
-    .profile-header h2 {
-      font-weight: bold;
-      background: linear-gradient(90deg, #ff6a00, #ee0979);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
-    }
-    .profile-details {
-      text-align: left;
-      margin: 20px 0;
-    }
-    .profile-details p {
-      margin: 10px 0;
-      padding: 8px 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    .subscription-info {
-      background: linear-gradient(90deg, #4facfe, #00f2fe);
-      color: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 20px 0;
-    }
-    .days-left {
-      font-size: 18px;
-      font-weight: bold;
-      color: #ffc107;
-      margin-top: 10px;
-    }
-    .btn-upgrade {
-      background: linear-gradient(90deg, #ff6a00, #ee0979);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-    .btn-upgrade:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(255,106,0,0.4);
-    }
-    .btn-logout {
-      background: #6c757d;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-    .btn-home {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-top: 15px;
-      display: inline-block;
-      text-decoration: none;
-    }
-    .btn-home:hover {
-      background: #218838;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
+    <title>My Profile · We ❤️ Doc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+
+    <style>
+        /* ============================================================
+           COLOR THEME – matches PF Highlighter
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: #475569;
+            line-height: 1.6;
+            padding-top: 70px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(21, 101, 192, 0.03) 0%, transparent 50%),
+                              radial-gradient(circle at 90% 80%, rgba(21, 101, 192, 0.03) 0%, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ---------- HEADER (same as PF, no Convert, no All Tools) ---------- */
+        header {
+            background: #FFFFFF;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            height: 38px;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 100%;
+            width: auto;
+            display: block;
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 22px;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            letter-spacing: -0.3px;
+        }
+        .logo-text .heart {
+            color: #E53935;
+            margin: 0 2px;
+        }
+
+        .nav-wrapper {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav-wrapper::-webkit-scrollbar { display: none; }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 2px;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: all 0.25s;
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        nav ul li a:hover {
+            background: #EEF5FF;
+            color: #1565C0;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .login-btn, .signup-btn {
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        .login-btn {
+            background: transparent;
+            color: #1565C0;
+            border: 1.5px solid #1565C0;
+        }
+        .login-btn:hover {
+            background: #1565C0;
+            color: #FFFFFF;
+            transform: scale(1.03);
+        }
+        .signup-btn {
+            background: #1565C0;
+            color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+        }
+        .signup-btn:hover {
+            background: #1E88E5;
+            transform: scale(1.03);
+            box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            background: linear-gradient(135deg, #EEF5FF 0%, #D6E4FF 100%);
+            padding: 24px 0 20px;
+            text-align: center;
+            border-radius: 0 0 28px 28px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -15%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(21, 101, 192, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -15%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(21, 101, 192, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 26px;
+            font-weight: 900;
+            color: #0F172A;
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #1565C0, #1E88E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 14px;
+            color: #475569;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ---------- CARD ---------- */
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 16px;
+            overflow: hidden;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card-body {
+            padding: 24px 28px;
+        }
+
+        /* ---------- PROFILE CONTENT ---------- */
+        .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1565C0, #1E88E5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 12px;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0F172A;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .profile-email {
+            font-size: 14px;
+            color: #94A3B8;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #F1F5F9;
+            font-size: 14px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-row .label {
+            color: #94A3B8;
+            font-weight: 500;
+        }
+        .detail-row .value {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        /* ---------- SUBSCRIPTION BOX ---------- */
+        .subscription-box {
+            background: linear-gradient(135deg, #EEF5FF, #DBEAFE);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin: 12px 0 16px;
+            border: 1px solid rgba(21, 101, 192, 0.1);
+        }
+        .subscription-box .plan-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1565C0;
+        }
+        .subscription-box .plan-status {
+            font-size: 13px;
+            color: #475569;
+        }
+        .subscription-box .days-left {
+            font-size: 14px;
+            font-weight: 700;
+            color: #16A34A;
+        }
+        .subscription-box .days-left.expired {
+            color: #DC2626;
+        }
+
+        /* ---------- BUTTONS ---------- */
+        .btn-upgrade {
+            background: linear-gradient(135deg, #1565C0, #1E88E5);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+        }
+        .btn-upgrade:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #1565C0;
+            border: 2px solid #1565C0;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-outline:hover {
+            background: #1565C0;
+            color: white;
+            transform: scale(1.03);
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: #DC2626;
+            border: 2px solid #DC2626;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-danger-outline:hover {
+            background: #DC2626;
+            color: white;
+            transform: scale(1.03);
+        }
+
+        .btn-group-profile {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: #FFFFFF;
+            padding: 16px 0 10px;
+            border-top: 1px solid #E2E8F0;
+            margin-top: auto;
+        }
+        .footer-bottom {
+            text-align: center;
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            body { padding-top: 100px; }
+            .header-content { flex-wrap: wrap; gap: 6px; }
+            .logo-wrapper { flex: 0 0 auto; }
+            .nav-wrapper { flex: 1 1 100%; order: 3; justify-content: center; }
+            .auth-buttons { flex: 0 0 auto; margin-left: auto; }
+            nav ul { flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 22px; }
+            .hero { padding: 20px 0 16px; }
+            .card-body { padding: 20px; }
+            .avatar { width: 60px; height: 60px; font-size: 26px; }
+            .btn-group-profile { flex-direction: column; align-items: center; }
+            .btn-upgrade, .btn-outline, .btn-danger-outline { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .header-content { flex-direction: column; align-items: stretch; gap: 4px; }
+            .logo-wrapper { justify-content: center; }
+            .auth-buttons { justify-content: center; flex-wrap: wrap; margin-left: 0; }
+            .nav-wrapper { order: 2; }
+            nav ul li a { padding: 4px 10px; font-size: 12px; }
+            .login-btn, .signup-btn { padding: 6px 14px; font-size: 12px; }
+            .hero h1 { font-size: 20px; }
+            .card { max-width: 100%; }
+            .card-body { padding: 16px; }
+            .detail-row { font-size: 13px; }
+            .subscription-box { padding: 14px 16px; }
+            .subscription-box .plan-name { font-size: 16px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="profile-card">
-    <div class="profile-header">
-      <h2>👤 My Profile</h2>
+
+    <!-- ===== HEADER (same as PF, no Convert, no All Tools) ===== -->
+    <header>
+        <div class="container header-content">
+            <div class="logo-wrapper">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="We Love Doc Logo"
+                    onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';" />
+                    <span class="logo-text" style="display: none;">
+                        We <span class="heart">❤️</span> Doc
+                    </span>
+                </div>
+            </div>
+            <div class="nav-wrapper">
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/pf-highlight">PF Highlight</a></li>
+                        <li><a href="/esic-highlight">ESIC Highlight</a></li>
+                        <li><a href="/merge-pdf">Merge PDF</a></li>
+                        <li><a href="/compress-pdf">Compress PDF</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="auth-buttons">
+                {% if session.get('user_name') %}
+                <a href="/profile" class="login-btn" style="margin-right:4px;">
+                    👋 <strong>{{ session['user_name'] }}</strong>
+                </a>
+                <a href="{{ url_for('logout') }}" class="login-btn">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+                <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container">
+            <h1>My <span class="highlight">Profile</span></h1>
+            <p>Manage your account and subscription details</p>
+        </div>
+    </section>
+
+    <!-- ===== PROFILE CARD ===== -->
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+
+                <!-- Avatar -->
+                <div class="avatar">
+                    {{ user.name[0]|upper }}
+                </div>
+
+                <!-- Name & Email -->
+                <div class="profile-name">{{ user.name }}</div>
+                <div class="profile-email">{{ user.email }}</div>
+
+                <!-- Details -->
+                <div class="detail-row">
+                    <span class="label">Account Type</span>
+                    <span class="value">{{ subscription.subscription|default('free', true)|title }}</span>
+                </div>
+                {% if subscription.subscription and subscription.subscription != 'free' %}
+                <div class="detail-row">
+                    <span class="label">Expiry Date</span>
+                    <span class="value">{{ subscription.subscription_expiry|default('N/A', true) }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row" style="border-bottom: none;">
+                    <span class="label">Member Since</span>
+                    <span class="value">{{ user.created_at|default('2024', true) }}</span>
+                </div>
+
+                <!-- Subscription Box -->
+                <div class="subscription-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                        <div>
+                            <div class="plan-name">
+                                {% if subscription.subscription and subscription.subscription != 'free' %}
+                                    ⭐ {{ subscription.subscription|title }} Plan
+                                {% else %}
+                                    🆓 Free Plan
+                                {% endif %}
+                            </div>
+                            <div class="plan-status">
+                                {% if subscription.subscription and subscription.subscription != 'free' %}
+                                    Active subscription
+                                {% else %}
+                                    Upgrade to unlock all features
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if subscription.subscription and subscription.subscription != 'free' and days_left is not none %}
+                            <div class="days-left {% if days_left < 0 %}expired{% endif %}">
+                                {% if days_left < 0 %}
+                                    ⏰ Expired
+                                {% else %}
+                                    ⏳ {{ days_left }} days left
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="btn-group-profile">
+                    {% if subscription.subscription == 'free' %}
+                        <a href="/pricing" class="btn-upgrade">
+                            <i class="fas fa-crown"></i> Upgrade Plan
+                        </a>
+                    {% else %}
+                        <a href="/pricing" class="btn-upgrade">
+                            <i class="fas fa-sync"></i> Renew / Change
+                        </a>
+                    {% endif %}
+                    <a href="/" class="btn-outline">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-danger-outline">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+
+            </div>
+        </div>
     </div>
-    
-    <div class="profile-details">
-      <p><strong>Name:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-    </div>
-    
-    <div class="subscription-info">
-      <h4>📋 Subscription Details</h4>
-      <p><strong>Current Plan:</strong> {{ subscription.subscription|default('free', true)|title }}</p>
-      {% if subscription.subscription and subscription.subscription != 'free' %}
-        <p><strong>Expiry Date:</strong> {{ subscription.subscription_expiry|default('N/A', true) }}</p>
-        {% if days_left is not none %}
-          <p class="days-left">⏳ Days Left: {{ days_left }}</p>
-        {% endif %}
-      {% else %}
-        <p><strong>Status:</strong> Free Plan</p>
-      {% endif %}
-    </div>
-    
-    {% if subscription.subscription == 'free' %}
-      <a href="/pricing" class="btn btn-upgrade">💎 Upgrade Plan</a>
-    {% else %}
-      <a href="/pricing" class="btn btn-upgrade">🔁 Renew/Change Plan</a>
-    {% endif %}
-    
-    <br>
-    <a href="/" class="btn-home">🏠 Back to Home</a>
-    <br>
-    <a href="/logout" class="btn btn-logout">🚪 Logout</a>
-  </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 We ❤️ Doc · All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
