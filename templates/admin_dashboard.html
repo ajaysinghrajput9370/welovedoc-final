@@ -1,360 +1,525 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - WeLoveDoc</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-6318534178146198" />
+    <title>Admin Dashboard · We ❤️ Doc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/web-app-manifest-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/web-app-manifest-512x512.png" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+
     <style>
+        /* ============================================================
+           ADMIN DASHBOARD – matches brand colors
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: #475569;
+            line-height: 1.6;
             padding: 20px;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 10% 20%, rgba(21, 101, 192, 0.03) 0%, transparent 50%),
+                              radial-gradient(circle at 90% 80%, rgba(21, 101, 192, 0.03) 0%, transparent 50%);
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
         }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+
+        /* ---------- HEADER ---------- */
+        .admin-header {
+            background: #FFFFFF;
+            padding: 16px 24px;
+            border-radius: 20px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid #E2E8F0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
+
+        .admin-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        
-        .header p {
-            opacity: 0.9;
+
+        .admin-header .brand .logo-icon {
+            font-size: 28px;
+            color: #1565C0;
         }
-        
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
+
+        .admin-header .brand h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        .admin-header .brand h1 span {
+            color: #1565C0;
+        }
+
+        .admin-header .brand p {
+            font-size: 14px;
+            color: #94A3B8;
+            margin: 0;
+        }
+
+        .admin-header .logout-btn {
+            background: transparent;
+            color: #1565C0;
+            border: 1.5px solid #1565C0;
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
-        
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
+
+        .admin-header .logout-btn:hover {
+            background: #1565C0;
+            color: white;
+            transform: scale(1.03);
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
         }
-        
-        .content {
-            padding: 30px;
+
+        /* ---------- CARD ---------- */
+        .card-dashboard {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 24px;
+            margin-bottom: 24px;
         }
-        
-        .stats {
+
+        /* ---------- STATS ---------- */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
-        
+
         .stat-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: #FFFFFF;
+            border-radius: 16px;
             padding: 20px;
-            border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s;
         }
-        
-        .stat-card h3 {
-            color: #4a5568;
-            font-size: 1.1em;
-            margin-bottom: 10px;
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: #1565C0;
+            box-shadow: 0 8px 24px rgba(21, 101, 192, 0.06);
         }
-        
+
+        .stat-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
         .stat-card .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #667eea;
+            font-size: 32px;
+            font-weight: 900;
+            color: #0F172A;
         }
-        
-        .table-container {
+
+        .stat-card .number .highlight {
+            color: #1565C0;
+        }
+
+        /* ---------- SEARCH ---------- */
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #E2E8F0;
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            background: white;
+            color: #0F172A;
+            min-width: 200px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #1565C0;
+            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.08);
+        }
+
+        .search-box button {
+            padding: 12px 28px;
+            background: #1565C0;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25);
+            white-space: nowrap;
+        }
+
+        .search-box button:hover {
+            background: #1E88E5;
+            transform: scale(1.02);
+            box-shadow: 0 8px 28px rgba(21, 101, 192, 0.35);
+        }
+
+        /* ---------- TABLE ---------- */
+        .table-responsive {
             overflow-x: auto;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            background: white;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            font-size: 14px;
         }
-        
+
+        thead {
+            background: #F8FAFC;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
         th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            padding: 15px;
+            padding: 14px 18px;
             text-align: left;
-            font-size: 0.95em;
+            font-weight: 700;
+            color: #0F172A;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        
+
         td {
-            padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #4a5568;
+            padding: 14px 18px;
+            border-bottom: 1px solid #F1F5F9;
+            color: #475569;
+            vertical-align: middle;
         }
-        
-        tr:hover {
-            background: #f7fafc;
+
+        tr:last-child td {
+            border-bottom: none;
         }
-        
+
+        tr:hover td {
+            background: #F8FAFC;
+        }
+
         .plan-badge {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        
+
         .plan-free {
-            background: #cbd5e0;
-            color: #2d3748;
+            background: #F1F5F9;
+            color: #475569;
         }
-        
+
         .plan-basic {
-            background: #9ae6b4;
-            color: #22543d;
+            background: #DBEAFE;
+            color: #1565C0;
         }
-        
+
         .plan-standard {
-            background: #faf089;
-            color: #744210;
+            background: #FEF3C7;
+            color: #92400E;
         }
-        
+
         .plan-premium {
-            background: #fbb6ce;
-            color: #702459;
+            background: #E9D5FF;
+            color: #5B21B6;
         }
-        
+
         .status-badge {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.85em;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
             font-weight: 600;
         }
-        
+
         .status-active {
-            background: #9ae6b4;
-            color: #22543d;
+            background: #DCFCE7;
+            color: #16A34A;
         }
-        
+
         .status-inactive {
-            background: #fed7d7;
-            color: #742a2a;
+            background: #FEE2E2;
+            color: #DC2626;
         }
-        
-        .action-btn {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: all 0.3s;
-            margin: 2px;
-            border: none;
-            cursor: pointer;
+
+        .expiry-date {
+            font-size: 13px;
+            color: #94A3B8;
         }
-        
-        .btn-deactivate {
-            background: #f56565;
-            color: white;
-        }
-        
-        .btn-deactivate:hover {
-            background: #c53030;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
-        }
-        
-        .btn-activate {
-            background: #48bb78;
-            color: white;
-        }
-        
-        .btn-activate:hover {
-            background: #2f855a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
-        }
-        
-        .flash-messages {
-            margin-bottom: 20px;
-        }
-        
-        .flash-message {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            animation: slideIn 0.5s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .flash-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border-left: 5px solid #48bb78;
-        }
-        
-        .flash-danger {
-            background: #fed7d7;
-            color: #742a2a;
-            border-left: 5px solid #f56565;
-        }
-        
-        .flash-warning {
-            background: #feebc8;
-            color: #744210;
-            border-left: 5px solid #ed8936;
-        }
-        
-        .flash-info {
-            background: #bee3f8;
-            color: #2c5282;
-            border-left: 5px solid #4299e1;
-        }
-        
-        .search-box {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .search-box input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .search-box button {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
+
+        .expiry-date.expired {
+            color: #DC2626;
             font-weight: 600;
+        }
+
+        .action-btn {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 13px;
+            border: none;
             cursor: pointer;
             transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        
-        .search-box button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+
+        .btn-deactivate {
+            background: #FEE2E2;
+            color: #DC2626;
         }
-        
+
+        .btn-deactivate:hover {
+            background: #FCA5A5;
+            color: #991B1B;
+            transform: scale(1.02);
+        }
+
+        .btn-activate {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .btn-activate:hover {
+            background: #86EFAC;
+            color: #15803D;
+            transform: scale(1.02);
+        }
+
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #a0aec0;
-            font-size: 1.2em;
+            color: #94A3B8;
+            font-size: 16px;
         }
-        
-        .expiry-date {
-            font-size: 0.9em;
-            color: #718096;
+
+        .no-data i {
+            font-size: 40px;
+            color: #E2E8F0;
+            margin-bottom: 12px;
+            display: block;
         }
-        
-        .expired {
-            color: #f56565;
-            font-weight: 600;
+
+        /* ---------- FLASH MESSAGES ---------- */
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 14px 20px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            animation: slideIn 0.4s ease;
+            border-left: 4px solid;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .flash-success {
+            background: #F0FDF4;
+            color: #16A34A;
+            border-left-color: #16A34A;
+        }
+
+        .flash-danger {
+            background: #FEF2F2;
+            color: #DC2626;
+            border-left-color: #DC2626;
+        }
+
+        .flash-warning {
+            background: #FFFBEB;
+            color: #D97706;
+            border-left-color: #D97706;
+        }
+
+        .flash-info {
+            background: #EFF6FF;
+            color: #2563EB;
+            border-left-color: #2563EB;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 20px;
+            }
+
+            .admin-header .brand h1 {
+                font-size: 20px;
+            }
+
+            .admin-header .logout-btn {
+                align-self: stretch;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-responsive {
+                border-radius: 12px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .action-btn {
+                padding: 4px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header .brand {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <div>
-                <h1>👑 Admin Dashboard</h1>
-                <p>Welcome back! Manage all users from here.</p>
-            </div>
-            <a href="{{ url_for('admin_logout') }}" class="logout-btn">🚪 Logout</a>
-        </div>
-        
-        <div class="content">
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for category, message in messages %}
-                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
-                        {% endfor %}
+        <!-- ===== HEADER ===== -->
+        <div class="admin-header">
+            <div class="brand">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-shield-alt logo-icon"></i>
+                        <h1>Admin <span>Dashboard</span></h1>
                     </div>
-                {% endif %}
-            {% endwith %}
-            
-            <!-- Statistics -->
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>Total Users</h3>
-                    <div class="number">{{ users|length }}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Active Users</h3>
-                    <div class="number">{{ users|length }}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Paid Users</h3>
-                    <div class="number">{{ users|selectattr('subscription', 'ne', 'free')|list|length }}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Inactive Users</h3>
-                    <div class="number">0</div>
+                    <p>Manage users and subscriptions with ease</p>
                 </div>
             </div>
-            
-            <!-- Search Box -->
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Search by email or name..." onkeyup="searchTable()">
-                <button onclick="searchTable()">Search</button>
+            <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+
+        <!-- ===== FLASH MESSAGES ===== -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- ===== STATS ===== -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Users</h4>
+                <div class="number">{{ users|length }}</div>
             </div>
-            
-            <!-- Users Table -->
-            <div class="table-container">
+            <div class="stat-card">
+                <h4>Active Users</h4>
+                <div class="number">{{ users|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h4>Paid Users</h4>
+                <div class="number">{{ users|selectattr('subscription', 'ne', 'free')|list|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h4>Inactive Users</h4>
+                <div class="number">0</div>
+            </div>
+        </div>
+
+        <!-- ===== SEARCH ===== -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Search by email or name..." onkeyup="searchTable()">
+            <button onclick="searchTable()">Search</button>
+        </div>
+
+        <!-- ===== TABLE ===== -->
+        <div class="card-dashboard" style="padding:0; overflow:hidden;">
+            <div class="table-responsive">
                 <table id="usersTable">
                     <thead>
                         <tr>
@@ -410,23 +575,25 @@
                                 {% endif %}
                             </td>
                             <td>
-    {% if user.subscription|lower == "free" %}
-        <span style="color:gray;">--</span>
-
-    {% elif not user.is_disabled %}
-        <a href="{{ url_for('deactivate_user', user_id=user.id) }}"
-           class="action-btn btn-deactivate"
-           onclick="return confirm('Disable premium for {{ user.email }}?')">
-            🔒 Disable Premium
-        </a>
-
-    {% else %}
-        <span style="color:red;font-weight:bold;">Premium Disabled</span>
-    {% endif %}
-</td>                        </tr>
+                                {% if user.subscription|lower == "free" %}
+                                    <span style="color:#94A3B8; font-size:13px;">—</span>
+                                {% elif not user.is_disabled %}
+                                    <a href="{{ url_for('deactivate_user', user_id=user.id) }}"
+                                       class="action-btn btn-deactivate"
+                                       onclick="return confirm('Disable premium for {{ user.email }}?')">
+                                        🔒 Disable
+                                    </a>
+                                {% else %}
+                                    <span style="color:#DC2626; font-weight:600; font-size:13px;">Disabled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% else %}
                         <tr>
-                            <td colspan="8" class="no-data">📭 No users found</td>
+                            <td colspan="8" class="no-data">
+                                <i class="fas fa-users"></i>
+                                No users found
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -434,21 +601,22 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- ===== SCRIPTS ===== -->
     <script>
         function searchTable() {
             let input = document.getElementById("searchInput");
             let filter = input.value.toLowerCase();
             let table = document.getElementById("usersTable");
             let tr = table.getElementsByTagName("tr");
-            
+
             for (let i = 1; i < tr.length; i++) {
                 let tdName = tr[i].getElementsByTagName("td")[1];
                 let tdEmail = tr[i].getElementsByTagName("td")[2];
                 if (tdName || tdEmail) {
                     let nameValue = tdName.textContent || tdName.innerText;
                     let emailValue = tdEmail.textContent || tdEmail.innerText;
-                    if (nameValue.toLowerCase().indexOf(filter) > -1 || 
+                    if (nameValue.toLowerCase().indexOf(filter) > -1 ||
                         emailValue.toLowerCase().indexOf(filter) > -1) {
                         tr[i].style.display = "";
                     } else {
@@ -457,7 +625,7 @@
                 }
             }
         }
-        
+
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
             let flashMessages = document.querySelectorAll('.flash-message');
@@ -470,5 +638,6 @@
             });
         }, 5000);
     </script>
+
 </body>
 </html>
